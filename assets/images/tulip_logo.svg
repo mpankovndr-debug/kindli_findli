@@ -1,0 +1,61 @@
+<svg width="68" height="68" viewBox="0 0 68 68" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Earthy mint/sage green for left petal -->
+    <linearGradient id="earthMintGrad" x1="20" y1="20" x2="32" y2="52" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#A8BCB5" />
+      <stop offset="50%" stop-color="#8FA89F" />
+      <stop offset="100%" stop-color="#7A9488" />
+    </linearGradient>
+
+    <!-- Earthy lavender/muted purple for center petal -->
+    <linearGradient id="earthLavenderGrad" x1="26" y1="18" x2="42" y2="50" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ADA5BE" />
+      <stop offset="50%" stop-color="#9A91AB" />
+      <stop offset="100%" stop-color="#877E98" />
+    </linearGradient>
+
+    <!-- Earthy beige/tan for right petal -->
+    <linearGradient id="earthBeigeGrad" x1="36" y1="20" x2="48" y2="52" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#D4C5A8" />
+      <stop offset="50%" stop-color="#BFB195" />
+      <stop offset="100%" stop-color="#AA9D82" />
+    </linearGradient>
+  </defs>
+
+  <!-- Left petal - earthy mint/sage -->
+  <path
+    d="M 34 52 Q 22 48 18 36 Q 16 28 18 22 Q 20 16 26 18 Q 30 20 32 26 Q 33 32 34 40 L 34 52 Z"
+    fill="url(#earthMintGrad)"
+    opacity="0.92"
+  />
+
+  <!-- Center back petal - earthy lavender -->
+  <path
+    d="M 34 52 Q 30 44 30 34 Q 30 24 32 18 Q 34 12 38 14 Q 42 16 42 24 Q 42 34 38 44 L 34 52 Z"
+    fill="url(#earthLavenderGrad)"
+    opacity="0.95"
+  />
+
+  <!-- Right petal - earthy beige/tan -->
+  <path
+    d="M 34 52 Q 46 48 50 36 Q 52 28 50 22 Q 48 16 42 18 Q 38 20 36 26 Q 35 32 34 40 L 34 52 Z"
+    fill="url(#earthBeigeGrad)"
+    opacity="0.90"
+  />
+
+  <!-- Subtle highlights on petals -->
+  <path
+    d="M 32 26 Q 28 24 26 26 Q 24 30 25 36"
+    stroke="rgba(255, 255, 255, 0.3)"
+    stroke-width="1.5"
+    fill="none"
+    opacity="0.5"
+  />
+  <path
+    d="M 36 26 Q 40 24 42 26 Q 44 30 43 36"
+    stroke="rgba(255, 255, 255, 0.3)"
+    stroke-width="1.5"
+    fill="none"
+    opacity="0.5"
+  />
+</svg>

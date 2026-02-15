@@ -1,0 +1,23 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Stage 6: Full magnificent tree - 100 completions -->
+  <!-- Trunk -->
+  <path d="M24 46 L24 20" stroke="#8B7563" stroke-width="4.5" stroke-linecap="round"/>
+  <!-- Main branches -->
+  <path d="M24 28 L12 18" stroke="#8B7563" stroke-width="3" stroke-linecap="round"/>
+  <path d="M24 28 L36 18" stroke="#8B7563" stroke-width="3" stroke-linecap="round"/>
+  <path d="M24 24 L16 14" stroke="#8B7563" stroke-width="2" stroke-linecap="round"/>
+  <path d="M24 24 L32 14" stroke="#8B7563" stroke-width="2" stroke-linecap="round"/>
+  <path d="M24 22 L24 12" stroke="#8B7563" stroke-width="2" stroke-linecap="round"/>
+  <!-- Magnificent full canopy -->
+  <ellipse cx="10" cy="16" rx="7" ry="6" fill="#A8B09A"/>
+  <ellipse cx="38" cy="16" rx="7" ry="6" fill="#A8B09A"/>
+  <ellipse cx="24" cy="10" rx="12" ry="8" fill="#A8B09A"/>
+  <ellipse cx="14" cy="12" rx="6" ry="5" fill="#B8C4AB"/>
+  <ellipse cx="34" cy="12" rx="6" ry="5" fill="#B8C4AB"/>
+  <ellipse cx="24" cy="6" rx="9" ry="5" fill="#B8C4AB"/>
+  <ellipse cx="18" cy="8" rx="5" ry="4" fill="#C8D4BB"/>
+  <ellipse cx="30" cy="8" rx="5" ry="4" fill="#C8D4BB"/>
+  <ellipse cx="24" cy="4" rx="6" ry="3" fill="#C8D4BB"/>
+  <!-- Subtle highlight -->
+  <ellipse cx="24" cy="8" rx="4" ry="2" fill="#D8E4CB" opacity="0.6"/>
+</svg>
