@@ -174,21 +174,28 @@ class _ProgressScreenState extends State<ProgressScreen> {
                       final stats = snapshot.data!;
                       final todayIndex = now.weekday - 1; // 0=Mon, 6=Sun
 
-                      return ListView(
-                        padding: EdgeInsets.fromLTRB(24, MediaQuery.of(context).padding.top + 16, 24, 140),
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // 1. Header
-                          const Text(
-                            'Your week',
-                            style: TextStyle(
-                              fontFamily: 'Sora',
-                              fontSize: 32,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF3C342A),
+                          // 1. Header (fixed)
+                          Padding(
+                            padding: EdgeInsets.fromLTRB(24, MediaQuery.of(context).padding.top + 24, 24, 20),
+                            child: const Text(
+                              'Your week',
+                              style: TextStyle(
+                                fontFamily: 'Sora',
+                                fontSize: 32,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF3C342A),
+                              ),
                             ),
                           ),
-                          const SizedBox(height: 20),
 
+                          // Scrollable content
+                          Expanded(
+                            child: ListView(
+                              padding: const EdgeInsets.fromLTRB(24, 0, 24, 140),
+                              children: [
                           // 2. Main Unified Card
                           _buildMainCard(stats, todayIndex),
                           const SizedBox(height: 24),
@@ -221,6 +228,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
                               final milestone = milestoneSnap.data!;
                               return _buildRecentMilestone(milestone);
                             },
+                          ),
+                              ],
+                            ),
                           ),
                         ],
                       );

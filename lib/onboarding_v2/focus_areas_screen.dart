@@ -219,68 +219,78 @@ class FocusAreasScreen extends StatelessWidget {
 
           // Content
           SafeArea(
-            child: Column(
+            bottom: false,
+            child: Stack(
               children: [
-                // Header
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(28, 40, 28, 16),
-                  child: const Center(
-                    child: Text(
-                      'Focus areas',
-                      style: TextStyle(
-                        fontFamily: 'Sora',
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF8B7563),
-                        letterSpacing: 0.3,
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Main content (scrollable)
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(28, 0, 28, 144),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          hasName
-                              ? 'What matters to you right now, $userName?'
-                              : 'What matters to you right now?',
-                          style: const TextStyle(
-                            fontFamily: 'Sora',
-                            fontSize: 26,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF3C342A),
-                            height: 1.3,
-                            letterSpacing: -0.3,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          'Choose up to two areas ($selectedCount/$maxSelections)',
-                          style: const TextStyle(
-                            fontFamily: 'Sora',
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500,
-                            color: Color(0xFF7A6B5F),
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        const Text(
-                          'You can change this later.',
+                // Scrollable content
+                Column(
+                  children: [
+                    // Header
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(28, 40, 28, 16),
+                      child: const Center(
+                        child: Text(
+                          'Focus areas',
                           style: TextStyle(
                             fontFamily: 'Sora',
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Color(0xFF9B8A7A),
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF8B7563),
+                            letterSpacing: 0.3,
                           ),
                         ),
-                        const SizedBox(height: 32),
-                        // Cards list
-                        Column(
+                      ),
+                    ),
+
+                    // Title + subtitle (fixed)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(28, 0, 28, 0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            hasName
+                                ? 'What matters to you right now, $userName?'
+                                : 'What matters to you right now?',
+                            style: const TextStyle(
+                              fontFamily: 'Sora',
+                              fontSize: 26,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF3C342A),
+                              height: 1.3,
+                              letterSpacing: -0.3,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            'Choose up to two areas ($selectedCount/$maxSelections)',
+                            style: const TextStyle(
+                              fontFamily: 'Sora',
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFF7A6B5F),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          const Text(
+                            'You can change this later.',
+                            style: TextStyle(
+                              fontFamily: 'Sora',
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFF9B8A7A),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+
+                    // Cards (scrollable)
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.fromLTRB(28, 0, 28, 160),
+                        child: Column(
                           children: areas.map((area) {
                             final selected = state.isSelected(area);
                             return Padding(
@@ -294,54 +304,68 @@ class FocusAreasScreen extends StatelessWidget {
                             );
                           }).toList(),
                         ),
-                      ],
+                      ),
+                    ),
+                  ],
+                ),
+
+                // Gradient overlay (behind button)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  height: 140,
+                  child: IgnorePointer(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            const Color(0xFFD5CCB8).withOpacity(0.0),
+                            const Color(0xFFD5CCB8).withOpacity(0.92),
+                            const Color(0xFFD5CCB8).withOpacity(0.98),
+                          ],
+                          stops: const [0.0, 0.6, 1.0],
+                        ),
+                      ),
                     ),
                   ),
                 ),
 
-                // Fixed button container
+                // Continue button (on top)
                 if (canContinue)
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          const Color(0xFFD5CCB8).withOpacity(0),
-                          const Color(0xFFD5CCB8),
+                  Positioned(
+                    left: 28,
+                    right: 28,
+                    bottom: 32,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF3C342A).withOpacity(0.25),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
                         ],
-                        stops: const [0.0, 0.5],
                       ),
-                    ),
-                    padding: const EdgeInsets.fromLTRB(28, 20, 28, 32),
-                    child: SizedBox(
-                      width: double.infinity,
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(20),
                         child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+                          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                           child: Container(
+                            width: double.infinity,
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                                 colors: [
-                                  const Color(0xFF8B7563).withOpacity(0.9),
-                                  const Color(0xFF7A6B5F).withOpacity(0.85),
+                                  const Color(0xFF8B7563).withOpacity(0.92),
+                                  const Color(0xFF7A6B5F).withOpacity(0.88),
                                 ],
                               ),
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: const Color(0xFF8B7563).withOpacity(0.4),
-                                width: 1,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color(0xFF3C342A).withOpacity(0.25),
-                                  blurRadius: 24,
-                                  offset: const Offset(0, 6),
-                                ),
-                              ],
                             ),
                             child: CupertinoButton(
                               onPressed: () => _handleContinue(context),

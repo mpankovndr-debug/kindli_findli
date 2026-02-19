@@ -632,10 +632,10 @@ class _MainTabsState extends State<MainTabs> {
           // Screen content (no CupertinoTabScaffold)
           IndexedStack(
             index: _currentIndex,
-            children: const [
-              HabitsScreen(),
+            children: [
+              const HabitsScreen(),
               ProgressScreen(),
-              ProfileScreen(),
+              const ProfileScreen(),
             ],
           ),
 
@@ -1219,7 +1219,7 @@ class _HabitsScreenState extends State<HabitsScreen> {
             children: [
               // Header with date
               Padding(
-                padding: EdgeInsets.fromLTRB(24, MediaQuery.of(context).padding.top + 32, 24, 32),
+                padding: EdgeInsets.fromLTRB(24, MediaQuery.of(context).padding.top + 24, 24, 32),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -1353,7 +1353,7 @@ class _HabitsScreenState extends State<HabitsScreen> {
                 Expanded(
                   child: ListView(
                     padding: EdgeInsets.fromLTRB(
-                      24, pinned.isNotEmpty ? 24 : 16, 24, 24,
+                      24, pinned.isNotEmpty ? 24 : 16, 24, 140,
                     ),
                     children: [
                       // Today's Suggestions section
@@ -3041,49 +3041,180 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
 
   void _showDeleteConfirmation() {
     final onboardingState = context.read<OnboardingState>();
-    showStyledPopup(
+    
+    showCupertinoModalPopup(
       context: context,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text(
-            'Delete habit?',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Sora',
-              fontSize: 22,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF3C342A),
-              letterSpacing: -0.3,
+      barrierColor: Colors.black.withOpacity(0.5),
+      filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+      builder: (context) => Center(
+        child: Container(
+          margin: const EdgeInsets.all(24),
+          constraints: const BoxConstraints(maxWidth: 384),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(32),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF32281E).withOpacity(0.4),
+                blurRadius: 70,
+                offset: const Offset(0, 25),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(32),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: const Alignment(-0.3, -0.5),
+                    end: const Alignment(0.3, 0.5),
+                    colors: [
+                      const Color(0xFFF5ECE0).withOpacity(0.96),
+                      const Color(0xFFEDE4D8).withOpacity(0.93),
+                      const Color(0xFFE6DDD1).withOpacity(0.95),
+                    ],
+                    stops: const [0.0, 0.5, 1.0],
+                  ),
+                  borderRadius: BorderRadius.circular(32),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.5),
+                    width: 1.5,
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Title
+                      const Text(
+                        'Delete habit?',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: 'Sora',
+                          fontSize: 27,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF3C342A),
+                          letterSpacing: -0.4,
+                          height: 1.25,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Description
+                      Text(
+                        '"${widget.habitTitle}" will be removed and any progress lost.',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontFamily: 'Sora',
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF6B5D52),
+                          height: 1.45,
+                        ),
+                      ),
+
+                      const SizedBox(height: 36),
+
+                      // Delete button (muted red)
+                      Container(
+                        width: double.infinity,
+                        margin: const EdgeInsets.only(bottom: 14),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              const Color(0xFFC4605A).withOpacity(0.92),
+                              const Color(0xFFB5524D).withOpacity(0.88),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFFB5524D).withOpacity(0.3),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: CupertinoButton(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          onPressed: () async {
+                            Navigator.pop(context);
+                            await onboardingState.removeCustomHabit(widget.habitTitle);
+                          },
+                          child: const Text(
+                            'Delete',
+                            style: TextStyle(
+                              fontFamily: 'Sora',
+                              fontSize: 17,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Cancel button (secondary glassmorphism)
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF645541).withOpacity(0.12),
+                                blurRadius: 16,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      Colors.white.withOpacity(0.5),
+                                      const Color(0xFFF8F5F2).withOpacity(0.35),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.4),
+                                    width: 1.5,
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Cancel',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontFamily: 'Sora',
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF3C342A),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
-          const SizedBox(height: 12),
-          Text(
-            '"${widget.habitTitle}" will be removed and any progress lost.',
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontFamily: 'DM Sans',
-              fontSize: 16,
-              fontWeight: FontWeight.w400,
-              color: Color(0xFF8A8078),
-              height: 1.5,
-            ),
-          ),
-          const SizedBox(height: 28),
-          styledPrimaryButton(
-            label: 'Delete',
-            color: const Color(0xFFD84315),
-            onPressed: () async {
-              Navigator.pop(context);
-              await onboardingState.removeCustomHabit(widget.habitTitle);
-            },
-          ),
-          const SizedBox(height: 14),
-          styledSecondaryButton(
-            label: 'Cancel',
-            onPressed: () => Navigator.pop(context),
-          ),
-        ],
+        ),
       ),
     );
   }

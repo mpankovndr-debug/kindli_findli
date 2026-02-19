@@ -9,7 +9,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.example.gently</string>
+	<string>com.kindliapp.ios</string>
 	<key>PROJECT_ID</key>
 	<string>kindli-e94da</string>
 	<key>STORAGE_BUCKET</key>

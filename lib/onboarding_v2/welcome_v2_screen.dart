@@ -184,7 +184,9 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
                           child: BackdropFilter(
                             filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
                             child: Container(
-                              padding: const EdgeInsets.all(40),
+                              width: 160,
+                              height: 160,
+                              padding: EdgeInsets.zero,
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
                                   begin: Alignment.topLeft,
@@ -213,10 +215,12 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
                                   ),
                                 ],
                               ),
-                              child: SvgPicture.asset(
-                                'assets/images/tulip_logo.svg',
-                                width: 68,
-                                height: 68,
+                              child: Center(
+                                child: Image.asset(
+                                  'assets/images/kindli_icon_transparent.png',
+                                  width: 100,
+                                  height: 100,
+                                ),
                               ),
                             ),
                           ),

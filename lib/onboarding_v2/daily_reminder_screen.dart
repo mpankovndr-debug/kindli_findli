@@ -88,183 +88,202 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
 
           // Content
           SafeArea(
-            child: Column(
+            bottom: false,
+            child: Stack(
               children: [
-                // Header with back button
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(28, 64, 28, 24),
-                  child: Row(
-                    children: [
-                      // Back button
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                          child: Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  const Color(0xFFFFFFFF).withOpacity(0.35),
-                                  const Color(0xFFFFFFFF).withOpacity(0.2),
-                                ],
-                              ),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: const Color(0xFFFFFFFF).withOpacity(0.3),
-                                width: 1,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color(0xFF3C342A).withOpacity(0.08),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: CupertinoButton(
-                              padding: EdgeInsets.zero,
-                              onPressed: () => Navigator.pop(context),
-                              child: const Icon(
-                                CupertinoIcons.back,
-                                size: 20,
-                                color: Color(0xFF8B7563),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      Expanded(
-                        child: const Center(
-                          child: Padding(
-                            padding: EdgeInsets.only(right: 40),
+                // Column with Header + Expanded ScrollView
+                Column(
+                  children: [
+                    // Header with back button and label
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(28, 40, 28, 16),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          // Label (centered)
+                          const Center(
                             child: Text(
                               'Reminder',
                               style: TextStyle(
                                 fontFamily: 'Sora',
-                                fontSize: 15,
+                                fontSize: 18,
                                 fontWeight: FontWeight.w600,
                                 color: Color(0xFF8B7563),
                                 letterSpacing: 0.3,
                               ),
                             ),
                           ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
 
-                // Main content
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(28, 32, 28, 144),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Want a gentle daily reminder?',
-                          style: TextStyle(
-                            fontFamily: 'Sora',
-                            fontSize: 26,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF3C342A),
-                            height: 1.3,
-                            letterSpacing: -0.3,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        const Text(
-                          'Just once a day. No pressure.',
-                          style: TextStyle(
-                            fontFamily: 'Sora',
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500,
-                            color: Color(0xFF7A6B5F),
-                          ),
-                        ),
-                        const SizedBox(height: 36),
-
-                        // Toggle card
-                        _buildToggleCard(state),
-
-                        // Helper message when OFF
-                        if (!state.dailyReminderEnabled)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 4, bottom: 20),
-                            child: Center(
-                              child: Text(
-                                'Switch this on to pick the time for your daily reminder.',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontFamily: 'Sora',
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: Color(0xFF9B8A7A),
-                                  height: 1.5,
+                          // Back button (left aligned)
+                          Positioned(
+                            left: 0,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              child: BackdropFilter(
+                                filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                                child: Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: [
+                                        const Color(0xFFFFFFFF).withOpacity(0.35),
+                                        const Color(0xFFFFFFFF).withOpacity(0.2),
+                                      ],
+                                    ),
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                      color: const Color(0xFFFFFFFF).withOpacity(0.3),
+                                      width: 1,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0xFF3C342A).withOpacity(0.08),
+                                        blurRadius: 10,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: CupertinoButton(
+                                    padding: EdgeInsets.zero,
+                                    onPressed: () => Navigator.pop(context),
+                                    child: const Icon(
+                                      CupertinoIcons.back,
+                                      size: 20,
+                                      color: Color(0xFF8B7563),
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                      ],
+                        ],
+                      ),
+                    ),
+
+                    // Main content
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.fromLTRB(28, 32, 28, 200),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Want a gentle daily reminder?',
+                              style: TextStyle(
+                                fontFamily: 'Sora',
+                                fontSize: 26,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF3C342A),
+                                height: 1.3,
+                                letterSpacing: -0.3,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            const Text(
+                              'Just once a day. No pressure.',
+                              style: TextStyle(
+                                fontFamily: 'Sora',
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xFF7A6B5F),
+                              ),
+                            ),
+                            const SizedBox(height: 36),
+
+                            // Toggle card
+                            _buildToggleCard(state),
+
+                            // Helper message when OFF
+                            if (!state.dailyReminderEnabled)
+                              const Padding(
+                                padding: EdgeInsets.only(top: 4, bottom: 20),
+                                child: Center(
+                                  child: Text(
+                                    'Switch this on to pick the time for your daily reminder.',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontFamily: 'Sora',
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                      color: Color(0xFF9B8A7A),
+                                      height: 1.5,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                // Gradient overlay
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  height: 180,
+                  child: IgnorePointer(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            const Color(0xFFD0C6B8).withOpacity(0.0),
+                            const Color(0xFFD0C6B8).withOpacity(0.92),
+                            const Color(0xFFD0C6B8).withOpacity(0.98),
+                          ],
+                          stops: const [0.0, 0.5, 1.0],
+                        ),
+                      ),
                     ),
                   ),
                 ),
 
-                // Fixed button container
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        const Color(0xFFD0C6B8).withOpacity(0),
-                        const Color(0xFFD0C6B8),
-                      ],
-                      stops: const [0.0, 0.6],
-                    ),
-                  ),
-                  padding: const EdgeInsets.fromLTRB(28, 48, 28, 48),
+                // Buttons
+                Positioned(
+                  left: 28,
+                  right: 28,
+                  bottom: 48,
                   child: Column(
                     children: [
-                      // Main button
-                      SizedBox(
+                      // Start button
+                      Container(
                         width: double.infinity,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF3C342A).withOpacity(0.3),
+                              blurRadius: 24,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(20),
                           child: BackdropFilter(
-                            filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                             child: Container(
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                   colors: [
-                                    const Color(0xFF8B7563).withOpacity(0.9),
-                                    const Color(0xFF7A6B5F).withOpacity(0.85),
+                                    const Color(0xFF8B7563).withOpacity(0.92),
+                                    const Color(0xFF7A6B5F).withOpacity(0.88),
                                   ],
                                 ),
                                 borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: const Color(0xFF8B7563).withOpacity(0.4),
-                                  width: 1,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: const Color(0xFF3C342A).withOpacity(0.25),
-                                    blurRadius: 24,
-                                    offset: const Offset(0, 6),
-                                  ),
-                                ],
                               ),
                               child: CupertinoButton(
                                 onPressed: _handleContinue,
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                borderRadius: BorderRadius.circular(20),
+                                padding: const EdgeInsets.symmetric(vertical: 18),
                                 child: Text(
                                   hasName ? 'Let\'s go, $userName' : 'Start',
                                   style: const TextStyle(
@@ -503,42 +522,158 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                               ),
                               decoration: const BoxDecoration(),
                               onTap: () async {
-                                final time = await showCupertinoModalPopup<String>(
+                                DateTime tempTime = _parseTime(_timeController.text);
+
+                                await showCupertinoModalPopup(
                                   context: context,
+                                  barrierColor: Colors.black.withOpacity(0.5),
+                                  filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
                                   builder: (context) => Container(
-                                    height: 250,
-                                    color: const Color(0xFFF8F5F2),
-                                    child: Column(
-                                      children: [
-                                        SizedBox(
-                                          height: 44,
-                                          child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.end,
+                                    margin: EdgeInsets.only(
+                                      bottom: MediaQuery.of(context).viewInsets.bottom,
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+                                      child: BackdropFilter(
+                                        filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+                                        child: Container(
+                                          height: 340,
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(
+                                              begin: Alignment.topCenter,
+                                              end: Alignment.bottomCenter,
+                                              colors: [
+                                                const Color(0xFFF5ECE0).withOpacity(0.98),
+                                                const Color(0xFFEDE4D8).withOpacity(0.96),
+                                                const Color(0xFFE6DDD1).withOpacity(0.98),
+                                              ],
+                                              stops: const [0.0, 0.5, 1.0],
+                                            ),
+                                            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+                                            border: Border.all(
+                                              color: Colors.white.withOpacity(0.6),
+                                              width: 1.5,
+                                            ),
+                                          ),
+                                          child: Column(
                                             children: [
-                                              CupertinoButton(
-                                                child: const Text('Done'),
-                                                onPressed: () {
-                                                  Navigator.pop(context, _timeController.text);
-                                                },
+                                              // Handle bar
+                                              Container(
+                                                margin: const EdgeInsets.only(top: 12),
+                                                width: 36,
+                                                height: 4,
+                                                decoration: BoxDecoration(
+                                                  color: const Color(0xFF8B7563).withOpacity(0.2),
+                                                  borderRadius: BorderRadius.circular(2),
+                                                ),
                                               ),
+                                              
+                                              // Header with Done button
+                                              Padding(
+                                                padding: const EdgeInsets.fromLTRB(24, 16, 16, 12),
+                                                child: Row(
+                                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                  children: [
+                                                    const Text(
+                                                      'Set reminder time',
+                                                      style: TextStyle(
+                                                        fontFamily: 'Sora',
+                                                        fontSize: 18,
+                                                        fontWeight: FontWeight.w600,
+                                                        color: Color(0xFF3C342A),
+                                                      ),
+                                                    ),
+                                                    GestureDetector(
+                                                      onTap: () {
+                                                        HapticFeedback.lightImpact();
+                                                        setState(() {
+                                                          _timeController.text =
+                                                              '${tempTime.hour.toString().padLeft(2, '0')}:${tempTime.minute.toString().padLeft(2, '0')}';
+                                                          context.read<OnboardingState>().setReminderTime(_timeController.text);
+                                                        });
+                                                        Navigator.pop(context);
+                                                      },
+                                                      child: Container(
+                                                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                                        decoration: BoxDecoration(
+                                                          gradient: LinearGradient(
+                                                            begin: Alignment.topLeft,
+                                                            end: Alignment.bottomRight,
+                                                            colors: [
+                                                              const Color(0xFF8B7563).withOpacity(0.92),
+                                                              const Color(0xFF7A6B5F).withOpacity(0.88),
+                                                            ],
+                                                          ),
+                                                          borderRadius: BorderRadius.circular(14),
+                                                          boxShadow: [
+                                                            BoxShadow(
+                                                              color: const Color(0xFF3C342A).withOpacity(0.2),
+                                                              blurRadius: 8,
+                                                              offset: const Offset(0, 3),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        child: const Text(
+                                                          'Done',
+                                                          style: TextStyle(
+                                                            fontFamily: 'Sora',
+                                                            fontSize: 15,
+                                                            fontWeight: FontWeight.w600,
+                                                            color: Colors.white,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+
+                                              // Subtle divider
+                                              Container(
+                                                height: 1,
+                                                margin: const EdgeInsets.symmetric(horizontal: 24),
+                                                decoration: BoxDecoration(
+                                                  gradient: LinearGradient(
+                                                    colors: [
+                                                      const Color(0xFF8B7563).withOpacity(0.0),
+                                                      const Color(0xFF8B7563).withOpacity(0.15),
+                                                      const Color(0xFF8B7563).withOpacity(0.0),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+
+                                              // Time picker with custom styling
+                                              Expanded(
+                                                child: CupertinoTheme(
+                                                  data: const CupertinoThemeData(
+                                                    textTheme: CupertinoTextThemeData(
+                                                      dateTimePickerTextStyle: TextStyle(
+                                                        fontFamily: 'Sora',
+                                                        fontSize: 22,
+                                                        fontWeight: FontWeight.w500,
+                                                        color: Color(0xFF3C342A),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  child: CupertinoDatePicker(
+                                                    mode: CupertinoDatePickerMode.time,
+                                                    use24hFormat: true,
+                                                    initialDateTime: tempTime,
+                                                    backgroundColor: Colors.transparent,
+                                                    onDateTimeChanged: (DateTime newTime) {
+                                                      tempTime = newTime;
+                                                    },
+                                                  ),
+                                                ),
+                                              ),
+                                              
+                                              // Bottom safe area padding
+                                              SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
                                             ],
                                           ),
                                         ),
-                                        Expanded(
-                                          child: CupertinoDatePicker(
-                                            mode: CupertinoDatePickerMode.time,
-                                            use24hFormat: true,
-                                            initialDateTime: _parseTime(_timeController.text),
-                                            onDateTimeChanged: (DateTime newTime) {
-                                              setState(() {
-                                                _timeController.text =
-                                                    '${newTime.hour.toString().padLeft(2, '0')}:${newTime.minute.toString().padLeft(2, '0')}';
-                                                context.read<OnboardingState>().setReminderTime(_timeController.text);
-                                              });
-                                            },
-                                          ),
-                                        ),
-                                      ],
+                                      ),
                                     ),
                                   ),
                                 );

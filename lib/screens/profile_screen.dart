@@ -769,28 +769,57 @@ class _ProfileScreenState extends State<ProfileScreen> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
-          styledPrimaryButton(
-            label: 'Delete',
-            color: const Color(0xFFD84315),
-            onPressed: () async {
-              Navigator.pop(context);
-              final prefs = await SharedPreferences.getInstance();
-              await prefs.clear();
+          Container(
+            width: double.infinity,
+            margin: const EdgeInsets.only(bottom: 14),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  const Color(0xFFC4605A).withOpacity(0.92),
+                  const Color(0xFFB5524D).withOpacity(0.88),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFB5524D).withOpacity(0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: CupertinoButton(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              onPressed: () async {
+                Navigator.pop(context);
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.clear();
 
-              if (mounted) {
-                await context.read<OnboardingState>().reset();
-                userNameNotifier.value = null;
+                if (mounted) {
+                  await context.read<OnboardingState>().reset();
+                  userNameNotifier.value = null;
 
-                Navigator.pushReplacement(
-                  context,
-                  CupertinoPageRoute(
-                    builder: (_) => const WelcomeV2Screen(),
-                  ),
-                );
-              }
-            },
+                  Navigator.pushReplacement(
+                    context,
+                    CupertinoPageRoute(
+                      builder: (_) => const WelcomeV2Screen(),
+                    ),
+                  );
+                }
+              },
+              child: const Text(
+                'Delete',
+                style: TextStyle(
+                  fontFamily: 'Sora',
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ),
           ),
-          const SizedBox(height: 14),
           styledSecondaryButton(
             label: 'Cancel',
             onPressed: () => Navigator.pop(context),
@@ -812,22 +841,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: SafeArea(
             top: false,
             bottom: false,
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(24, 64, 24, 96),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header
-                const Text(
-                  'Profile',
-                  style: TextStyle(
-                    fontFamily: 'Sora',
-                    fontSize: 32,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF3C342A),
+                // Header (fixed)
+                Padding(
+                  padding: EdgeInsets.fromLTRB(24, MediaQuery.of(context).padding.top + 24, 24, 20),
+                  child: const Text(
+                    'Profile',
+                    style: TextStyle(
+                      fontFamily: 'Sora',
+                      fontSize: 32,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF3C342A),
+                    ),
                   ),
                 ),
 
-                const SizedBox(height: 8),
-
+                // Scrollable content
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 140),
+                    children: [
                 // Profile Info Card (Main Card with 4 sections)
                 _GlassCard(
                   child: Column(
@@ -1468,6 +1503,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                   ],
+                ),
+                    ],
+                  ),
                 ),
               ],
             ),
