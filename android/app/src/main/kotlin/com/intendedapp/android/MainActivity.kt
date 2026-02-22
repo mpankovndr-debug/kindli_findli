@@ -1,4 +1,4 @@
-package com.example.gently
+package com.intendedapp.android
 
 import io.flutter.embedding.android.FlutterActivity
 

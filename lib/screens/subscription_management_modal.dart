@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// Modal for managing active Kindli Beyond subscription
+/// Modal for managing active Intended+ subscription
 /// Shows subscription details and opens App Store for management
 class SubscriptionManagementModal extends StatelessWidget {
   final String plan;
@@ -82,7 +82,7 @@ class SubscriptionManagementModal extends StatelessWidget {
                       Column(
                         children: [
                           const Text(
-                            'Kindli Beyond',
+                            'Intended+',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontFamily: 'Sora',
@@ -187,7 +187,7 @@ class SubscriptionManagementModal extends StatelessWidget {
 
                       // Thank you message
                       const Text(
-                        'Thank you for supporting Kindli.\nYour subscription helps us keep\nbuilding a kinder way to grow.',
+                        'Thank you for supporting Intended.\nYour subscription helps us keep\nbuilding a kinder way to grow.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontFamily: 'DM Sans',

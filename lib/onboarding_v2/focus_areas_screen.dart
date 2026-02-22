@@ -59,10 +59,9 @@ class FocusAreasScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(28),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF3C342A).withOpacity(0.2),
-                blurRadius: 60,
-                spreadRadius: 8,
-                offset: const Offset(0, 16),
+                color: const Color(0xFF3C342A).withOpacity(0.15),
+                blurRadius: 24,
+                offset: const Offset(0, 8),
               ),
             ],
           ),
@@ -77,8 +76,8 @@ class FocusAreasScreen extends StatelessWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      const Color(0xFFFFFFFF).withOpacity(0.55),
-                      const Color(0xFFF8F5F2).withOpacity(0.4),
+                      const Color(0xFFFFFFFF).withOpacity(0.88),
+                      const Color(0xFFF8F5F2).withOpacity(0.82),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(28),
@@ -314,7 +313,7 @@ class FocusAreasScreen extends StatelessWidget {
                   left: 0,
                   right: 0,
                   bottom: 0,
-                  height: 140,
+                  height: 180,
                   child: IgnorePointer(
                     child: Container(
                       decoration: BoxDecoration(
@@ -338,15 +337,16 @@ class FocusAreasScreen extends StatelessWidget {
                   Positioned(
                     left: 28,
                     right: 28,
-                    bottom: 32,
+                    bottom: 95,
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF3C342A).withOpacity(0.25),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
+                            color: const Color(0xFF3C342A).withOpacity(0.35),
+                            blurRadius: 24,
+                            spreadRadius: 2,
+                            offset: const Offset(0, 6),
                           ),
                         ],
                       ),

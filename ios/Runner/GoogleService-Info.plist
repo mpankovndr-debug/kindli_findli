@@ -2,18 +2,22 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CLIENT_ID</key>
+	<string>651637918599-jmv3i3jmsum2kecu5jo4l5sfnoekmmps.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.651637918599-jmv3i3jmsum2kecu5jo4l5sfnoekmmps</string>
 	<key>API_KEY</key>
-	<string>AIzaSyDjC9b7Tj6R3zHxZuXa6Vn7o7EqCRmBmJk</string>
+	<string>AIzaSyAkKaENf59Ezc3Ir72rUrob1d0jLI7p9XQ</string>
 	<key>GCM_SENDER_ID</key>
-	<string>229181063815</string>
+	<string>651637918599</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>com.kindliapp.ios</string>
 	<key>PROJECT_ID</key>
-	<string>kindli-e94da</string>
+	<string>intended-e613f</string>
 	<key>STORAGE_BUCKET</key>
-	<string>kindli-e94da.firebasestorage.app</string>
+	<string>intended-e613f.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -25,6 +29,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:229181063815:ios:25cb870dcd77aa1b362e22</string>
+	<string>1:651637918599:ios:945aa264a4f7cb11222122</string>
 </dict>
 </plist>

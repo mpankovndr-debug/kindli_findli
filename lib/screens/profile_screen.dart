@@ -16,8 +16,11 @@ import '../utils/text_styles.dart';
 import '../utils/responsive_utils.dart';
 import 'paywall_screen.dart';
 import 'subscription_management_modal.dart';
-import 'milestone_history_screen.dart';
-import '../utils/milestone_tracker.dart';
+import '../services/auth_service.dart';
+import '../services/moments_service.dart';
+import '../services/notification_scheduler.dart';
+import '../services/notification_preferences_service.dart';
+import 'moments_collection_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -30,12 +33,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final controller = TextEditingController();
   bool _isEditing = false;
 
+  // Notification prefs state
+  bool _dailyEnabled = false;
+  int _notifHour = 9;
+  int _notifMinute = 0;
+  bool _weeklyEnabled = true;
+  bool _notifPermissionDenied = false;
+  bool _notifPrefsLoaded = false;
+
   @override
   void initState() {
     super.initState();
     controller.addListener(() {
       setState(() {});
     });
+    _loadNotificationPrefs();
+  }
+
+  Future<void> _loadNotificationPrefs() async {
+    final enabled = await NotificationPreferencesService.isEnabled();
+    final hour = await NotificationPreferencesService.getHour();
+    final minute = await NotificationPreferencesService.getMinute();
+    final weeklyEnabled = await NotificationPreferencesService.isWeeklyEnabled();
+    if (mounted) {
+      setState(() {
+        _dailyEnabled = enabled;
+        _notifHour = hour;
+        _notifMinute = minute;
+        _weeklyEnabled = weeklyEnabled;
+        _notifPrefsLoaded = true;
+      });
+    }
+  }
+
+  String _formatTime(int hour, int minute) {
+    final period = hour >= 12 ? 'PM' : 'AM';
+    final displayHour = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
+    return '$displayHour:${minute.toString().padLeft(2, '0')} $period';
   }
 
   @override
@@ -104,7 +138,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final Uri emailUri = Uri(
       scheme: 'mailto',
       path: 'mpankov.ndr@gmail.com',
-      query: 'subject=Kindli Support Request',
+      query: 'subject=Intended Support Request',
     );
 
     if (await canLaunchUrl(emailUri)) {
@@ -116,16 +150,53 @@ class _ProfileScreenState extends State<ProfileScreen> {
           title: 'Cannot open email',
           subtitle: 'Please email us at\nmpankov.ndr@gmail.com',
           actions: [
-            SizedBox(
+            Container(
               width: double.infinity,
-              child: CupertinoButton(
-                onPressed: () => Navigator.pop(context),
-                color: const Color(0xFF6B5B4A),
-                borderRadius: BorderRadius.circular(ComponentSizes.buttonRadius),
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: Text(
-                  'OK',
-                  style: AppTextStyles.buttonPrimary(context),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF3C342A).withOpacity(0.2),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          const Color(0xFF8B7563).withOpacity(0.85),
+                          const Color(0xFF7A6B5F).withOpacity(0.75),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: const Color(0xFF8B7563).withOpacity(0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: CupertinoButton(
+                      padding: const EdgeInsets.symmetric(vertical: 13),
+                      borderRadius: BorderRadius.circular(16),
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text(
+                        'OK',
+                        style: TextStyle(
+                          fontFamily: 'Sora',
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFFFFFFFF),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -407,7 +478,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                         // Options
                         const Text(
-                          '• One-time: €0.99\n• Kindli Beyond: Unlimited',
+                          '• One-time: €0.99\n• Intended+: Unlimited',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontFamily: 'DM Sans',
@@ -481,7 +552,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                         const SizedBox(height: 14),
 
-                        // Secondary button (Go Beyond)
+                        // Secondary button (Unlock Intended+)
                         SizedBox(
                           width: double.infinity,
                           child: ClipRRect(
@@ -512,7 +583,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   padding: const EdgeInsets.symmetric(vertical: 16),
                                   borderRadius: BorderRadius.circular(20),
                                   child: const Text(
-                                    'Go Kindli Beyond',
+                                    'Unlock Intended+',
                                     style: TextStyle(
                                       fontFamily: 'Sora',
                                       fontSize: 17,
@@ -601,24 +672,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  void _showMilestoneHistory() {
-    Navigator.of(context, rootNavigator: true).push(
-      CupertinoPageRoute(
-        builder: (context) => const MilestoneHistoryScreen(),
-      ),
-    );
-  }
-
-  Future<int> _countEarnedMilestones() async {
-    int count = 0;
-    for (var milestone in Milestone.values) {
-      if (await MilestoneTracker.hasAchieved(milestone)) {
-        count++;
-      }
-    }
-    return count;
-  }
-
   void _showRefreshConfirmation() {
     showStyledPopup(
       context: context,
@@ -693,7 +746,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         context: context,
         title: 'Daily limit reached',
         subtitle:
-            'You\'ve refreshed your habits 3 times today. Try again tomorrow, or upgrade to Beyond for unlimited refreshes.',
+            'You\'ve refreshed your habits 3 times today. Try again tomorrow, or upgrade to Intended+ for unlimited refreshes.',
         actions: [
           CupertinoDialogAction(
             child: const Text('OK'),
@@ -873,7 +926,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         'Your name',
                         style: TextStyle(
                           fontFamily: 'Sora',
-                          fontSize: 12,
+                          fontSize: 13,
                           fontWeight: FontWeight.w500,
                           color: Color(0xFF9A8A78),
                         ),
@@ -995,7 +1048,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         'Plan',
                         style: TextStyle(
                           fontFamily: 'Sora',
-                          fontSize: 12,
+                          fontSize: 13,
                           fontWeight: FontWeight.w500,
                           color: Color(0xFF9A8A78),
                         ),
@@ -1008,7 +1061,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             child: Consumer<UserState>(
                               builder: (context, userState, child) {
                                 return Text(
-                                  userState.hasSubscription ? 'Kindli Beyond' : 'Core',
+                                  userState.hasSubscription ? 'Intended+' : 'Core',
                                   style: const TextStyle(
                                     fontFamily: 'Sora',
                                     fontSize: 20,
@@ -1037,7 +1090,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ),
                                 );
                               } else {
-                                // Show "GO BEYOND" button for free users
+                                // Show "UNLOCK INTENDED+" button for free users
                                 return CupertinoButton(
                                   padding: EdgeInsets.zero,
                                   onPressed: _showUpgradeScreen,
@@ -1055,7 +1108,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       ),
                                     ),
                                     child: const Text(
-                                      'GO BEYOND',
+                                      'UNLOCK INTENDED+',
                                       style: TextStyle(
                                         fontFamily: 'Sora',
                                         fontSize: 11,
@@ -1086,7 +1139,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           'Focus areas',
                           style: TextStyle(
                             fontFamily: 'Sora',
-                            fontSize: 12,
+                            fontSize: 13,
                             fontWeight: FontWeight.w500,
                             color: Color(0xFF9A8A78),
                           ),
@@ -1127,12 +1180,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       const SizedBox(height: 24),
 
-                      // Section: Your Milestones
+                      // Section: Your Moments
                       const Text(
-                        'Your milestones',
+                        'Your moments',
                         style: TextStyle(
                           fontFamily: 'Sora',
-                          fontSize: 12,
+                          fontSize: 15,
                           fontWeight: FontWeight.w500,
                           color: Color(0xFF9A8A78),
                         ),
@@ -1140,14 +1193,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const SizedBox(height: 8),
 
                       FutureBuilder<int>(
-                        future: _countEarnedMilestones(),
+                        future: MomentsService.getCount(),
                         builder: (context, snapshot) {
                           final count = snapshot.data ?? 0;
+                          final label = count == 0
+                              ? 'None yet'
+                              : count == 1
+                                  ? '1 moment'
+                                  : '$count moments';
                           return Row(
                             children: [
                               Expanded(
                                 child: Text(
-                                  '$count earned',
+                                  label,
                                   style: const TextStyle(
                                     fontFamily: 'Sora',
                                     fontSize: 17,
@@ -1158,7 +1216,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                               CupertinoButton(
                                 padding: EdgeInsets.zero,
-                                onPressed: _showMilestoneHistory,
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    CupertinoPageRoute(
+                                      builder: (_) => const MomentsCollectionScreen(),
+                                    ),
+                                  );
+                                },
                                 child: const Icon(
                                   CupertinoIcons.chevron_right,
                                   size: 20,
@@ -1192,23 +1257,264 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                 // Notifications Card
                 _GlassCard(
-                  child: _ProfileButton(
-                    iconContainer: Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFD4B782).withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(16),
+                  child: Column(
+                    children: [
+                      // Row 1: Daily reminders toggle
+                      Row(
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFD4B782).withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              CupertinoIcons.bell,
+                              size: 18,
+                              color: Color(0xFF9A8566),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          const Expanded(
+                            child: Text(
+                              'Daily reminders',
+                              style: TextStyle(
+                                fontFamily: 'Sora',
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xFF3C342A),
+                              ),
+                            ),
+                          ),
+                          CupertinoSwitch(
+                            value: _dailyEnabled,
+                            activeTrackColor: const Color(0xFF7A8B6F),
+                            thumbColor: const Color(0xFFFFFFFF),
+                            onChanged: (value) async {
+                              if (value) {
+                                final granted = await NotificationScheduler.requestPermission();
+                                if (granted) {
+                                  await NotificationPreferencesService.setEnabled(true);
+                                  await NotificationScheduler.scheduleDaily();
+                                  if (mounted) {
+                                    setState(() {
+                                      _dailyEnabled = true;
+                                      _notifPermissionDenied = false;
+                                    });
+                                  }
+                                } else {
+                                  await NotificationPreferencesService.setEnabled(false);
+                                  if (mounted) {
+                                    setState(() {
+                                      _notifPermissionDenied = true;
+                                    });
+                                  }
+                                }
+                              } else {
+                                await NotificationPreferencesService.setEnabled(false);
+                                await NotificationScheduler.cancelAll();
+                                if (mounted) {
+                                  setState(() {
+                                    _dailyEnabled = false;
+                                    _notifPermissionDenied = false;
+                                  });
+                                }
+                              }
+                            },
+                          ),
+                        ],
                       ),
-                      child: const Icon(
-                        CupertinoIcons.bell,
-                        size: 20,
-                        color: Color(0xFF9A8566),
+
+                      // Time picker row (visible when daily is ON)
+                      AnimatedSize(
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.easeOut,
+                        child: _dailyEnabled
+                            ? Padding(
+                                padding: const EdgeInsets.only(top: 16),
+                                child: Row(
+                                  children: [
+                                    const SizedBox(width: 52),
+                                    const Expanded(
+                                      child: Text(
+                                        'Remind me at',
+                                        style: TextStyle(
+                                          fontFamily: 'Sora',
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w400,
+                                          color: Color(0xFF8B7563),
+                                        ),
+                                      ),
+                                    ),
+                                    CupertinoButton(
+                                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                      minSize: 0,
+                                      onPressed: () {
+                                        DateTime tempTime = DateTime(
+                                          2024, 1, 1, _notifHour, _notifMinute,
+                                        );
+                                        showCupertinoModalPopup(
+                                          context: context,
+                                          builder: (ctx) => Container(
+                                            height: 280,
+                                            color: const Color(0xFFF5ECE0),
+                                            child: Column(
+                                              children: [
+                                                Row(
+                                                  mainAxisAlignment: MainAxisAlignment.end,
+                                                  children: [
+                                                    CupertinoButton(
+                                                      child: const Text(
+                                                        'Done',
+                                                        style: TextStyle(
+                                                          fontFamily: 'Sora',
+                                                          fontSize: 16,
+                                                          fontWeight: FontWeight.w600,
+                                                          color: Color(0xFF8B7563),
+                                                        ),
+                                                      ),
+                                                      onPressed: () async {
+                                                        Navigator.pop(ctx);
+                                                        await NotificationPreferencesService.setHour(tempTime.hour);
+                                                        await NotificationPreferencesService.setMinute(tempTime.minute);
+                                                        final enabled = await NotificationPreferencesService.isEnabled();
+                                                        if (enabled) {
+                                                          await NotificationScheduler.rescheduleAll();
+                                                        }
+                                                        if (mounted) {
+                                                          setState(() {
+                                                            _notifHour = tempTime.hour;
+                                                            _notifMinute = tempTime.minute;
+                                                          });
+                                                        }
+                                                      },
+                                                    ),
+                                                  ],
+                                                ),
+                                                Expanded(
+                                                  child: CupertinoDatePicker(
+                                                    mode: CupertinoDatePickerMode.time,
+                                                    initialDateTime: tempTime,
+                                                    onDateTimeChanged: (dt) {
+                                                      tempTime = dt;
+                                                    },
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFEDE8E0),
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        child: Text(
+                                          _formatTime(_notifHour, _notifMinute),
+                                          style: const TextStyle(
+                                            fontFamily: 'Sora',
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w500,
+                                            color: Color(0xFF3C342A),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : const SizedBox.shrink(),
                       ),
-                    ),
-                    title: 'Notifications',
-                    subtitle: 'Daily habit reminders',
-                    onTap: () {},
+
+                      // Divider
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Container(
+                          height: 1,
+                          color: const Color(0xFF8B7563).withOpacity(0.1),
+                        ),
+                      ),
+
+                      // Row 2: Weekly summary toggle
+                      Row(
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFD4B782).withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              CupertinoIcons.calendar,
+                              size: 18,
+                              color: Color(0xFF9A8566),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Weekly summary',
+                                  style: TextStyle(
+                                    fontFamily: 'Sora',
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(0xFF3C342A),
+                                  ),
+                                ),
+                                SizedBox(height: 2),
+                                Text(
+                                  'Every Sunday evening',
+                                  style: TextStyle(
+                                    fontFamily: 'Sora',
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w400,
+                                    color: Color(0xFF9A8A78),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          CupertinoSwitch(
+                            value: _weeklyEnabled,
+                            activeTrackColor: const Color(0xFF7A8B6F),
+                            thumbColor: const Color(0xFFFFFFFF),
+                            onChanged: (value) async {
+                              await NotificationPreferencesService.setWeeklyEnabled(value);
+                              await NotificationScheduler.rescheduleAll();
+                              if (mounted) {
+                                setState(() {
+                                  _weeklyEnabled = value;
+                                });
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+
+                      // Permission denied message
+                      if (_notifPermissionDenied)
+                        const Padding(
+                          padding: EdgeInsets.only(top: 16),
+                          child: Text(
+                            'No worries — you can enable notifications in your device Settings.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: 'Sora',
+                              fontSize: 13,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xFF9B8A7A),
+                              height: 1.5,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
 
@@ -1232,7 +1538,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 // Support Card (Multi-Item)
                 Container(
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFFFFF).withOpacity(0.45),
+                        color: const Color(0xFFFFFFFF).withOpacity(0.50),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: const Color(0xFFFFFFFF).withOpacity(0.6),
@@ -1343,7 +1649,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 // Sign-In Card (Multi-Button)
                 Container(
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFFFFF).withOpacity(0.45),
+                        color: const Color(0xFFFFFFFF).withOpacity(0.50),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: const Color(0xFFFFFFFF).withOpacity(0.6),
@@ -1362,8 +1668,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           // Google Sign In Button
                           CupertinoButton(
                             padding: const EdgeInsets.all(16),
-                            onPressed: () {
-                              // TODO: Implement Google sign in
+                            onPressed: () async {
+                              try {
+                                await AuthService.signInWithGoogle();
+                              } catch (e) {
+                                // handle error
+                              }
                             },
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -1395,7 +1705,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           CupertinoButton(
                             padding: const EdgeInsets.all(16),
                             onPressed: () async {
-                              // TODO: Implement Apple sign in
+                              try {
+                                await AuthService.signInWithApple();
+                              } catch (e) {
+                                // handle error
+                              }
                             },
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -1433,7 +1747,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     // Sign Out Button
                     Container(
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFFFFFF).withOpacity(0.45),
+                            color: const Color(0xFFFFFFFF).withOpacity(0.50),
                             borderRadius: BorderRadius.circular(100),
                             border: Border.all(
                               color: const Color(0xFFFFFFFF).withOpacity(0.6),
@@ -1449,7 +1763,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           child: CupertinoButton(
                             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                            onPressed: () {},
+                            onPressed: () async {
+                              await AuthService.signOut();
+                            },
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: const [
@@ -1494,7 +1810,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                     // Version Label
                     const Text(
-                      'Kindli v1.0.0',
+                      'Intended v1.0.0',
                       style: TextStyle(
                         fontFamily: 'Sora',
                         fontSize: 13,
@@ -1526,7 +1842,7 @@ class _GlassCard extends StatelessWidget {
     return Container(
       padding: padding ?? const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFFFFF).withOpacity(0.45),
+        color: const Color(0xFFFFFFFF).withOpacity(0.50),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: const Color(0xFFFFFFFF).withOpacity(0.6),

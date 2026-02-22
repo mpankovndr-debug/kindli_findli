@@ -11,7 +11,7 @@ class OnboardingState extends ChangeNotifier {
   bool _onboardingComplete = false;
   List<String> userHabits = [];
   List<String> _customHabits = [];
-  static const int _maxCustomHabitsCore = 1;
+  static const int _maxCustomHabitsCore = 2;
   
   // NEW: Pin tracking
   String? _pinnedHabit;
@@ -22,9 +22,6 @@ class OnboardingState extends ChangeNotifier {
   
   // NEW: Focus area change tracking
   DateTime? _lastFocusAreaChange;
-  
-  // NEW: First-time tips
-  bool _hasSeenPinTip = false;
 
   DateTime? _lastHabitRefresh;
   int _habitRefreshCount = 0;
@@ -38,7 +35,6 @@ class OnboardingState extends ChangeNotifier {
   String? get reminderTime => _reminderTime;
   bool get onboardingComplete => _onboardingComplete;
   String? get pinnedHabit => _pinnedHabit;
-  bool get hasSeenPinTip => _hasSeenPinTip;
   List<String> get customHabits => List.unmodifiable(_customHabits);
 
   // All available habits by category (EXPANDED TO 12 EACH)
@@ -291,8 +287,6 @@ class OnboardingState extends ChangeNotifier {
       _lastFocusAreaChange = DateTime.parse(lastFocusStr);
     }
     
-    _hasSeenPinTip = prefs.getBool('has_seen_pin_tip') ?? false;
-
     _habitRefreshCount = prefs.getInt('habit_refresh_count') ?? 0;
     final lastRefreshStr = prefs.getString('last_habit_refresh');
     if (lastRefreshStr != null) {
@@ -355,10 +349,6 @@ class OnboardingState extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('pinned_habit', habitTitle);
     
-    // Mark tip as seen
-    _hasSeenPinTip = true;
-    await prefs.setBool('has_seen_pin_tip', true);
-    
     // ❌ DO NOT mark habit as done here!
     // ❌ DO NOT call HabitTracker.markDone()!
   }
@@ -372,7 +362,7 @@ class OnboardingState extends ChangeNotifier {
     await prefs.remove('pinned_habit');
   }
 
-  // Check if user can pin (Core: 1, Beyond: unlimited)
+  // Check if user can pin (Core: 1, Intended+: unlimited)
   bool canPinHabit() {
     // For now, allow 1 pinned habit (Core plan logic)
     return _pinnedHabit == null;
@@ -388,26 +378,24 @@ class OnboardingState extends ChangeNotifier {
     return null;
   }
 
-  // Check if user can swap in a category
+  // Check if user can swap (2 total per month for free users)
   bool canSwapInCategory(String category) {
     _checkMonthlyReset();
-    final used = _swapsUsed[category] ?? 0;
-    return used < 2; // 2 swaps per category
+    return getTotalSwapsUsed() < 2;
   }
 
-  // Get remaining swaps for category
+  // Get remaining swaps (global, not per-category)
   int getRemainingSwaps(String category) {
     _checkMonthlyReset();
-    final used = _swapsUsed[category] ?? 0;
-    return 2 - used;
+    return 2 - getTotalSwapsUsed();
   }
 
   // Swap a habit
-  Future<bool> swapHabit(String oldHabit, String newHabit) async {
+  Future<bool> swapHabit(String oldHabit, String newHabit, {bool isPremium = false}) async {
     final category = getCategoryForHabit(oldHabit);
     if (category == null) return false;
 
-    if (!canSwapInCategory(category)) return false;
+    if (!isPremium && !canSwapInCategory(category)) return false;
 
     final index = userHabits.indexOf(oldHabit);
     if (index == -1) return false;
@@ -442,27 +430,7 @@ class OnboardingState extends ChangeNotifier {
     return 2 - getTotalSwapsUsed();
   }
 
-  // Perform swap from Browse (increments first focus area's swap count)
-  Future<bool> swapHabitFromBrowse(String oldHabit, String newHabit) async {
-    if (!canSwapFromBrowse()) return false;
 
-    final index = userHabits.indexOf(oldHabit);
-    if (index == -1) return false;
-
-    userHabits[index] = newHabit;
-
-    // Increment swap count for first focus area (or 'Browse' category)
-    final category = _focusAreas.isNotEmpty ? _focusAreas.first : 'Browse';
-    _swapsUsed[category] = (_swapsUsed[category] ?? 0) + 1;
-
-    // Save
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList('user_habits', userHabits);
-    await _saveSwapData();
-
-    notifyListeners();
-    return true;
-  }
 
   // Get alternative habits for swapping
   List<String> getAlternativeHabits(String currentHabit) {
@@ -476,14 +444,6 @@ class OnboardingState extends ChangeNotifier {
     
     available.shuffle();
     return available.take(3).toList();
-  }
-
-  // Mark pin tip as seen
-  Future<void> markPinTipSeen() async {
-    _hasSeenPinTip = true;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('has_seen_pin_tip', true);
-    notifyListeners();
   }
 
   // Check if user can change focus areas
@@ -551,14 +511,15 @@ class OnboardingState extends ChangeNotifier {
   }
 
   bool canAddCustomHabit() {
-    // TODO: Check if user has Beyond plan
-    // For now, enforce Core limit (1 custom habit)
+    // TODO: Check if user has Intended+ plan
+    // For now, enforce Core limit (2 custom habits)
     return _customHabits.length < _maxCustomHabitsCore;
   }
 
   Future<void> addCustomHabit(String habitTitle) async {
     if (!canAddCustomHabit()) return;
-    
+    if (userHabits.any((h) => h.toLowerCase() == habitTitle.toLowerCase())) return;
+
     _customHabits.add(habitTitle);
     userHabits.add(habitTitle);
     
@@ -604,7 +565,6 @@ class OnboardingState extends ChangeNotifier {
     _swapsUsed.clear();
     _lastSwapReset = null;
     _lastFocusAreaChange = null;
-    _hasSeenPinTip = false;
     _habitRefreshCount = 0;
     _lastHabitRefresh = null;
     notifyListeners();
@@ -616,7 +576,6 @@ class OnboardingState extends ChangeNotifier {
     await prefs.remove('pinned_habit');
     await prefs.remove('swaps_used');
     await prefs.remove('last_swap_reset');
-    await prefs.remove('has_seen_pin_tip');
     await prefs.remove('habit_refresh_count');
     await prefs.remove('last_habit_refresh');
   }

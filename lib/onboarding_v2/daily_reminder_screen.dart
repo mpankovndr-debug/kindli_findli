@@ -6,6 +6,8 @@ import 'package:provider/provider.dart';
 
 import 'habit_reveal_screen.dart';
 import 'onboarding_state.dart';
+import '../services/notification_scheduler.dart';
+import '../services/notification_preferences_service.dart';
 
 class DailyReminderScreen extends StatefulWidget {
   const DailyReminderScreen({super.key});
@@ -16,6 +18,8 @@ class DailyReminderScreen extends StatefulWidget {
 
 class _DailyReminderScreenState extends State<DailyReminderScreen> {
   late TextEditingController _timeController;
+  bool _permissionDenied = false;
+  bool _weeklyEnabled = false;
 
   @override
   void initState() {
@@ -165,11 +169,12 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
 
                     // Main content
                     Expanded(
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.fromLTRB(28, 32, 28, 200),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 28),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            const SizedBox(height: 32),
                             const Text(
                               'Want a gentle daily reminder?',
                               style: TextStyle(
@@ -191,13 +196,19 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                                 color: Color(0xFF7A6B5F),
                               ),
                             ),
-                            const SizedBox(height: 36),
+
+                            const SizedBox(height: 60),
 
                             // Toggle card
                             _buildToggleCard(state),
 
+                            const SizedBox(height: 16),
+
+                            // Weekly summary toggle
+                            _buildWeeklySummaryCard(state),
+
                             // Helper message when OFF
-                            if (!state.dailyReminderEnabled)
+                            if (!state.dailyReminderEnabled && !_permissionDenied)
                               const Padding(
                                 padding: EdgeInsets.only(top: 4, bottom: 20),
                                 child: Center(
@@ -214,6 +225,27 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                                   ),
                                 ),
                               ),
+
+                            // Permission denied message
+                            if (_permissionDenied)
+                              const Padding(
+                                padding: EdgeInsets.only(top: 4, bottom: 20),
+                                child: Center(
+                                  child: Text(
+                                    'No worries — you can turn these on anytime from your profile.',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontFamily: 'Sora',
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                      color: Color(0xFF9B8A7A),
+                                      height: 1.5,
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                            const SizedBox(height: 160),
                           ],
                         ),
                       ),
@@ -249,7 +281,7 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                 Positioned(
                   left: 28,
                   right: 28,
-                  bottom: 48,
+                  bottom: 34,
                   child: Column(
                     children: [
                       // Start button
@@ -283,7 +315,7 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                               ),
                               child: CupertinoButton(
                                 onPressed: _handleContinue,
-                                padding: const EdgeInsets.symmetric(vertical: 18),
+                                padding: const EdgeInsets.symmetric(vertical: 16),
                                 child: Text(
                                   hasName ? 'Let\'s go, $userName' : 'Start',
                                   style: const TextStyle(
@@ -393,8 +425,8 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                const Color(0xFFFFFFFF).withOpacity(0.45),
-                const Color(0xFFF8F5F2).withOpacity(0.3),
+                const Color(0xFFFFFFFF).withOpacity(0.65),
+                const Color(0xFFF8F5F2).withOpacity(0.60),
               ],
             ),
             borderRadius: BorderRadius.circular(22),
@@ -584,7 +616,7 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                                                       ),
                                                     ),
                                                     GestureDetector(
-                                                      onTap: () {
+                                                      onTap: () async {
                                                         HapticFeedback.lightImpact();
                                                         setState(() {
                                                           _timeController.text =
@@ -592,6 +624,12 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                                                           context.read<OnboardingState>().setReminderTime(_timeController.text);
                                                         });
                                                         Navigator.pop(context);
+                                                        await NotificationPreferencesService.setHour(tempTime.hour);
+                                                        await NotificationPreferencesService.setMinute(tempTime.minute);
+                                                        final enabled = await NotificationPreferencesService.isEnabled();
+                                                        if (enabled) {
+                                                          await NotificationScheduler.rescheduleAll();
+                                                        }
                                                       },
                                                       child: Container(
                                                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -693,11 +731,178 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
     );
   }
 
+  Widget _buildWeeklySummaryCard(OnboardingState state) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(22),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                const Color(0xFFFFFFFF).withOpacity(0.65),
+                const Color(0xFFF8F5F2).withOpacity(0.60),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(
+              color: const Color(0xFFFFFFFF).withOpacity(0.4),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF3C342A).withOpacity(0.08),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text(
+                        'Weekly summary',
+                        style: TextStyle(
+                          fontFamily: 'Sora',
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF3C342A),
+                        ),
+                      ),
+                      SizedBox(height: 2),
+                      Text(
+                        'Every Sunday evening',
+                        style: TextStyle(
+                          fontFamily: 'Sora',
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF8B7563),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () async {
+                    HapticFeedback.selectionClick();
+                    final value = !_weeklyEnabled;
+                    setState(() => _weeklyEnabled = value);
+                    await NotificationPreferencesService.setWeeklyEnabled(value);
+                    if (value) {
+                      if (state.dailyReminderEnabled) {
+                        await NotificationScheduler.rescheduleAll();
+                      }
+                    } else {
+                      await NotificationScheduler.rescheduleAll();
+                    }
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    width: 54,
+                    height: 32,
+                    padding: const EdgeInsets.all(3),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: _weeklyEnabled
+                            ? [
+                                const Color(0xFF8B7563).withOpacity(0.9),
+                                const Color(0xFF7A6B5F).withOpacity(0.85),
+                              ]
+                            : [
+                                const Color(0xFFE0D8CD).withOpacity(0.8),
+                                const Color(0xFFD2CABF).withOpacity(0.7),
+                              ],
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: _weeklyEnabled
+                            ? const Color(0xFF8B7563).withOpacity(0.3)
+                            : const Color(0xFFC8BEB4).withOpacity(0.3),
+                        width: 1,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF3C342A).withOpacity(_weeklyEnabled ? 0.2 : 0.08),
+                          blurRadius: _weeklyEnabled ? 8 : 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Stack(
+                      children: [
+                        AnimatedPositioned(
+                          duration: const Duration(milliseconds: 200),
+                          curve: Curves.easeOut,
+                          left: _weeklyEnabled ? 22 : 0,
+                          child: Container(
+                            width: 24,
+                            height: 24,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFFFFF),
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.15),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildToggleSwitch(OnboardingState state) {
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
         HapticFeedback.selectionClick();
-        context.read<OnboardingState>().setDailyReminder(!state.dailyReminderEnabled);
+        final enabling = !state.dailyReminderEnabled;
+
+        if (enabling) {
+          final granted = await NotificationScheduler.requestPermission();
+          if (granted) {
+            await NotificationPreferencesService.setEnabled(true);
+            final time = _parseTime(_timeController.text);
+            await NotificationPreferencesService.setHour(time.hour);
+            await NotificationPreferencesService.setMinute(time.minute);
+            await NotificationScheduler.scheduleDaily();
+            if (mounted) {
+              setState(() => _permissionDenied = false);
+              context.read<OnboardingState>().setDailyReminder(true);
+            }
+          } else {
+            await NotificationPreferencesService.setEnabled(false);
+            if (mounted) {
+              setState(() => _permissionDenied = true);
+            }
+          }
+        } else {
+          await NotificationPreferencesService.setEnabled(false);
+          await NotificationScheduler.cancelAll();
+          if (mounted) {
+            setState(() => _permissionDenied = false);
+            context.read<OnboardingState>().setDailyReminder(false);
+          }
+        }
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),

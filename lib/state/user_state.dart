@@ -4,7 +4,7 @@ import '../onboarding_v2/onboarding_state.dart';
 class UserState extends ChangeNotifier {
   String? _name;
   List<String> _focusAreas = [];
-  bool _hasSubscription = false; // Track Kindli Beyond subscription
+  bool _hasSubscription = false; // Track Intended+ subscription
 
   // Getters
   String? get name => _name;

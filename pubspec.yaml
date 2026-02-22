@@ -1,5 +1,5 @@
 name: kindli
-description: "Kindli - A gentle approach to building better habits."
+description: "Intended - A gentle approach to building better habits."
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -20,11 +20,15 @@ dependencies:
   intl: ^0.19.0
   dotted_border: ^2.1.0
   flutter_svg: ^2.0.10+1
-  sign_in_with_apple: ^6.1.3
+  sign_in_with_apple: ^7.0.1
   google_sign_in: ^6.2.1
   google_sign_in_ios: 5.7.0
   sign_in_button: ^3.2.0
   device_info_plus: ^9.1.1
+  firebase_analytics: ^11.6.0
+  firebase_crashlytics: ^4.3.10
+  flutter_local_notifications: ^18.0.0
+  timezone: ^0.9.0
 
 dev_dependencies:
   flutter_launcher_icons: ^0.14.3

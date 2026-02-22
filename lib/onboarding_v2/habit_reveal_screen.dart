@@ -19,6 +19,8 @@ class _HabitRevealScreenState extends State<HabitRevealScreen>
   List<AnimationController> _controllers = [];
   List<Animation<double>> _fadeAnimations = [];
   List<Animation<Offset>> _slideAnimations = [];
+  List<Animation<double>> _scaleAnimations = [];
+  bool _allCardsRevealed = false;
 
   @override
   void initState() {
@@ -42,7 +44,7 @@ class _HabitRevealScreenState extends State<HabitRevealScreen>
       habitCount,
       (index) => AnimationController(
         vsync: this,
-        duration: const Duration(milliseconds: 600),
+        duration: Duration(milliseconds: index == 0 ? 900 : 650),
       ),
     );
 
@@ -52,23 +54,48 @@ class _HabitRevealScreenState extends State<HabitRevealScreen>
       );
     }).toList();
 
-    _slideAnimations = _controllers.map((controller) {
+    _slideAnimations = _controllers.asMap().entries.map((entry) {
+      final index = entry.key;
+      final controller = entry.value;
       return Tween<Offset>(
-        begin: const Offset(0, 0.3),
+        begin: Offset(0, index == 0 ? 0.5 : 0.25),
         end: Offset.zero,
       ).animate(
         CurvedAnimation(parent: controller, curve: Curves.easeOutCubic),
       );
     }).toList();
 
-    // Start staggered animations
-    for (var i = 0; i < _controllers.length; i++) {
-      Future.delayed(Duration(milliseconds: i * 200), () {
-        if (mounted) {
-          _controllers[i].forward();
+    _scaleAnimations = _controllers.asMap().entries.map((entry) {
+      final index = entry.key;
+      final controller = entry.value;
+      return Tween<double>(
+        begin: index == 0 ? 0.9 : 1.0,
+        end: 1.0,
+      ).animate(
+        CurvedAnimation(parent: controller, curve: Curves.easeOutBack),
+      );
+    }).toList();
+
+    // Listen for last card animation to complete
+    if (_controllers.isNotEmpty) {
+      _controllers.last.addStatusListener((status) {
+        if (status == AnimationStatus.completed && mounted) {
+          setState(() => _allCardsRevealed = true);
         }
       });
     }
+
+    // Start staggered animations after 800ms anticipation
+    Future.delayed(const Duration(milliseconds: 800), () {
+      for (var i = 0; i < _controllers.length; i++) {
+        Future.delayed(Duration(milliseconds: i * 300), () {
+          if (mounted) {
+            HapticFeedback.lightImpact();
+            _controllers[i].forward();
+          }
+        });
+      }
+    });
   }
 
   @override
@@ -139,150 +166,209 @@ class _HabitRevealScreenState extends State<HabitRevealScreen>
 
           // Content
           SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(28, 80, 28, 48),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header
-                  Center(
-                    child: Column(
-                      children: [
-                        const Text(
-                          'Here\'s what we picked for you',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: 'Sora',
-                            fontSize: 26,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF3C342A),
-                            height: 1.3,
-                            letterSpacing: -0.3,
+            bottom: false,
+            child: Stack(
+              children: [
+                // Scrollable content
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(28, 80, 28, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Header
+                      Center(
+                        child: Column(
+                          children: [
+                            const Text(
+                              'Here\'s what we picked for you',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontFamily: 'Sora',
+                                fontSize: 26,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF3C342A),
+                                height: 1.3,
+                                letterSpacing: -0.3,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            _buildSubheading(state),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 32),
+
+                      // Habits list (animated)
+                      Expanded(
+                        child: ListView.builder(
+                          padding: const EdgeInsets.only(bottom: 200),
+                          itemCount: state.userHabits.length,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 16),
+                              child: _buildAnimatedHabitCard(
+                                state.userHabits[index],
+                                index,
+                                state,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Gradient overlay
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  height: 180,
+                  child: IgnorePointer(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            const Color(0xFFD5CCB8).withOpacity(0.0),
+                            const Color(0xFFD5CCB8).withOpacity(0.92),
+                            const Color(0xFFD5CCB8).withOpacity(0.98),
+                          ],
+                          stops: const [0.0, 0.5, 1.0],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Buttons
+                Positioned(
+                  left: 28,
+                  right: 28,
+                  bottom: 93,
+                  child: Column(
+                    children: [
+                      // Reassurance message
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  const Color(0xFFFFFFFF).withOpacity(0.60),
+                                  const Color(0xFFF8F5F2).withOpacity(0.50),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: const Color(0xFFFFFFFF).withOpacity(0.35),
+                                width: 1.5,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFF3C342A).withOpacity(0.06),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: const Text(
+                              'You can add, remove, or browse more habits anytime. There\'s no pressure to do them all.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontFamily: 'Sora',
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xFF7A6B5F),
+                                height: 1.6,
+                              ),
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 10),
-                        _buildSubheading(state),
-                      ],
-                    ),
-                  ),
+                      ),
 
-                  const SizedBox(height: 32),
+                      const SizedBox(height: 20),
 
-                  // Habits list (animated)
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: state.userHabits.length,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: _buildAnimatedHabitCard(
-                            state.userHabits[index],
-                            index,
-                            state,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  // Reassurance message
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      // CTA button
+                      Container(
+                        width: double.infinity,
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              const Color(0xFFFFFFFF).withOpacity(0.4),
-                              const Color(0xFFF8F5F2).withOpacity(0.25),
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: const Color(0xFFFFFFFF).withOpacity(0.35),
-                            width: 1.5,
-                          ),
+                          borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF3C342A).withOpacity(0.06),
-                              blurRadius: 10,
-                              offset: const Offset(0, 2),
+                              color: const Color(0xFF3C342A).withOpacity(0.35),
+                              blurRadius: 24,
+                              spreadRadius: 2,
+                              offset: const Offset(0, 8),
                             ),
                           ],
                         ),
-                        child: const Text(
-                          'You can add, remove, or browse more habits anytime. There\'s no pressure to do them all.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: 'Sora',
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Color(0xFF7A6B5F),
-                            height: 1.6,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // CTA button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                const Color(0xFF8B7563).withOpacity(0.9),
-                                const Color(0xFF7A6B5F).withOpacity(0.85),
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: const Color(0xFF8B7563).withOpacity(0.4),
-                              width: 1,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFF3C342A).withOpacity(0.25),
-                                blurRadius: 24,
-                                offset: const Offset(0, 6),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 250),
+                              curve: Curves.easeInOut,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: _allCardsRevealed
+                                      ? [
+                                          const Color(0xFF6B8E6E).withOpacity(0.9),
+                                          const Color(0xFF5A7D5D).withOpacity(0.85),
+                                        ]
+                                      : [
+                                          const Color(0xFF8B7563).withOpacity(0.9),
+                                          const Color(0xFF7A6B5F).withOpacity(0.85),
+                                        ],
+                                ),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: _allCardsRevealed
+                                      ? const Color(0xFF6B8E6E).withOpacity(0.4)
+                                      : const Color(0xFF8B7563).withOpacity(0.4),
+                                  width: 1,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFF3C342A).withOpacity(0.25),
+                                    blurRadius: 24,
+                                    offset: const Offset(0, 6),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                          child: CupertinoButton(
-                            onPressed: _handleContinue,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            borderRadius: BorderRadius.circular(20),
-                            child: const Text(
-                              'Let\'s begin',
-                              style: TextStyle(
-                                fontFamily: 'Sora',
-                                fontSize: 17,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFFFFFFFF),
+                              child: CupertinoButton(
+                                onPressed: _allCardsRevealed ? _handleContinue : null,
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                borderRadius: BorderRadius.circular(20),
+                                child: const Text(
+                                  'Let\'s begin',
+                                  style: TextStyle(
+                                    fontFamily: 'Sora',
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFFFFFFFF),
+                                  ),
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ],
@@ -347,35 +433,38 @@ class _HabitRevealScreenState extends State<HabitRevealScreen>
       opacity: _fadeAnimations[index],
       child: SlideTransition(
         position: _slideAnimations[index],
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFFFFF).withOpacity(0.3),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
+        child: ScaleTransition(
+          scale: _scaleAnimations[index],
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                decoration: BoxDecoration(
                   color: const Color(0xFFFFFFFF).withOpacity(0.3),
-                  width: 1,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF3C342A).withOpacity(0.05),
-                    blurRadius: 20,
-                    offset: const Offset(0, 4),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: const Color(0xFFFFFFFF).withOpacity(0.3),
+                    width: 1,
                   ),
-                ],
-              ),
-              child: Text(
-                habit,
-                style: const TextStyle(
-                  fontFamily: 'Sora',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF3C342A),
-                  height: 1.4,
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF3C342A).withOpacity(0.05),
+                      blurRadius: 20,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Text(
+                  habit,
+                  style: const TextStyle(
+                    fontFamily: 'Sora',
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF3C342A),
+                    height: 1.4,
+                  ),
                 ),
               ),
             ),

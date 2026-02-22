@@ -10,8 +10,33 @@ class PaywallScreen extends StatefulWidget {
   State<PaywallScreen> createState() => _PaywallScreenState();
 }
 
-class _PaywallScreenState extends State<PaywallScreen> {
+class _PaywallScreenState extends State<PaywallScreen>
+    with SingleTickerProviderStateMixin {
   String _selectedPlan = 'yearly'; // monthly, yearly, lifetime
+  late final AnimationController _bulletController;
+  late final List<Animation<double>> _bulletAnimations;
+
+  @override
+  void initState() {
+    super.initState();
+    _bulletController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    _bulletAnimations = [
+      CurvedAnimation(parent: _bulletController, curve: const Interval(0.0, 0.55, curve: Curves.easeOut)),
+      CurvedAnimation(parent: _bulletController, curve: const Interval(0.15, 0.70, curve: Curves.easeOut)),
+      CurvedAnimation(parent: _bulletController, curve: const Interval(0.30, 0.85, curve: Curves.easeOut)),
+      CurvedAnimation(parent: _bulletController, curve: const Interval(0.45, 1.0, curve: Curves.easeOut)),
+    ];
+    _bulletController.forward();
+  }
+
+  @override
+  void dispose() {
+    _bulletController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +102,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                             _buildTulipIcon(),
                             const SizedBox(height: 20),
                             const Text(
-                              'Kindli Beyond',
+                              'Intended+',
                               style: TextStyle(
                                 fontFamily: 'Sora',
                                 fontSize: 30,
@@ -89,7 +114,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Kindli is free forever. Beyond gives you more room to grow.',
+                              'Intended is free forever. Intended+ gives you more freedom to make it yours.',
                               style: TextStyle(
                                 fontFamily: 'Sora',
                                 fontSize: 14,
@@ -103,26 +128,14 @@ class _PaywallScreenState extends State<PaywallScreen> {
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 4),
                               child: Column(
-                                children: const [
-                                  _FeatureItem(
-                                    icon: CupertinoIcons.star_fill,
-                                    text: 'Create habits that truly fit your life',
-                                  ),
-                                  SizedBox(height: 16),
-                                  _FeatureItem(
-                                    icon: CupertinoIcons.arrow_2_circlepath,
-                                    text: 'Unlimited swaps and refreshes',
-                                  ),
-                                  SizedBox(height: 16),
-                                  _FeatureItem(
-                                    icon: CupertinoIcons.arrow_up_circle,
-                                    text: 'Shareable weekly progress cards',
-                                  ),
-                                  SizedBox(height: 16),
-                                  _FeatureItem(
-                                    icon: CupertinoIcons.chat_bubble,
-                                    text: 'Unlimited pinned habits and focus area changes',
-                                  ),
+                                children: [
+                                  _buildAnimatedBullet(0, CupertinoIcons.star_fill, 'Create habits that truly fit your life'),
+                                  const SizedBox(height: 16),
+                                  _buildAnimatedBullet(1, CupertinoIcons.arrow_2_circlepath, 'Change your habits whenever life changes'),
+                                  const SizedBox(height: 16),
+                                  _buildAnimatedBullet(2, CupertinoIcons.arrow_up_circle, 'Shareable weekly progress cards'),
+                                  const SizedBox(height: 16),
+                                  _buildAnimatedBullet(3, CupertinoIcons.chat_bubble, 'Adjust your focus areas as often as you need'),
                                 ],
                               ),
                             ),
@@ -174,6 +187,23 @@ class _PaywallScreenState extends State<PaywallScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildAnimatedBullet(int index, IconData icon, String text) {
+    return AnimatedBuilder(
+      animation: _bulletAnimations[index],
+      builder: (context, child) {
+        final value = _bulletAnimations[index].value;
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, 8 * (1 - value)),
+            child: child,
+          ),
+        );
+      },
+      child: _FeatureItem(icon: icon, text: text),
     );
   }
 
@@ -476,7 +506,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
           padding: const EdgeInsets.symmetric(vertical: 8),
           onPressed: () => Navigator.pop(context),
           child: const Text(
-            'Continue with Free',
+            'Continue with Core',
             style: TextStyle(
               fontFamily: 'Sora',
               fontSize: 16,

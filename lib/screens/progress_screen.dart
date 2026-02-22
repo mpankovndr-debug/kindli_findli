@@ -5,8 +5,9 @@ import 'package:provider/provider.dart';
 
 import '../main.dart';
 import '../onboarding_v2/onboarding_state.dart';
-import '../utils/milestone_tracker.dart';
-import 'milestone_history_screen.dart';
+import '../models/moment.dart';
+import '../services/moments_service.dart';
+import 'moments_collection_screen.dart';
 
 class ProgressScreen extends StatefulWidget {
   const ProgressScreen({super.key});
@@ -101,43 +102,6 @@ class _ProgressScreenState extends State<ProgressScreen> {
     );
   }
 
-  Future<_RecentMilestone?> _getRecentMilestone() async {
-    // Check all milestones, find the most recently earned
-    DateTime? latestDate;
-    Milestone? latestMilestone;
-
-    for (final milestone in Milestone.values) {
-      if (await MilestoneTracker.hasAchieved(milestone)) {
-        final date = await MilestoneTracker.getAchievementDate(milestone);
-        if (date != null && (latestDate == null || date.isAfter(latestDate))) {
-          latestDate = date;
-          latestMilestone = milestone;
-        }
-      }
-    }
-
-    if (latestMilestone == null || latestDate == null) return null;
-
-    final now = DateTime.now();
-    final diff = now.difference(latestDate);
-    String timeLabel;
-    if (diff.inDays == 0) {
-      timeLabel = 'Earned today';
-    } else if (diff.inDays == 1) {
-      timeLabel = 'Earned yesterday';
-    } else if (diff.inDays < 7) {
-      timeLabel = 'Earned ${diff.inDays} days ago';
-    } else {
-      timeLabel = 'Earned ${diff.inDays ~/ 7}w ago';
-    }
-
-    final info = MilestoneTracker.info[latestMilestone]!;
-    return _RecentMilestone(
-      title: info.title,
-      timeLabel: timeLabel,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
@@ -172,7 +136,6 @@ class _ProgressScreenState extends State<ProgressScreen> {
                       }
 
                       final stats = snapshot.data!;
-                      final todayIndex = now.weekday - 1; // 0=Mon, 6=Sun
 
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -197,7 +160,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                               padding: const EdgeInsets.fromLTRB(24, 0, 24, 140),
                               children: [
                           // 2. Main Unified Card
-                          _buildMainCard(stats, todayIndex),
+                          _buildMainCard(stats),
                           const SizedBox(height: 24),
 
                           // 3. Motivational Text
@@ -218,15 +181,17 @@ class _ProgressScreenState extends State<ProgressScreen> {
                           ),
                           const SizedBox(height: 32),
 
-                          // 4. Recent Milestone
-                          FutureBuilder<_RecentMilestone?>(
-                            future: _getRecentMilestone(),
-                            builder: (context, milestoneSnap) {
-                              if (!milestoneSnap.hasData || milestoneSnap.data == null) {
+                          // 4. Recent Moment
+                          FutureBuilder<List<Moment>>(
+                            future: MomentsService.getAll(),
+                            builder: (context, snap) {
+                              if (!snap.hasData || snap.data!.isEmpty) {
                                 return const SizedBox.shrink();
                               }
-                              final milestone = milestoneSnap.data!;
-                              return _buildRecentMilestone(milestone);
+                              final moments = snap.data!;
+                              final count = moments.length;
+                              final recent = moments.first;
+                              return _buildRecentMoment(count, recent);
                             },
                           ),
                               ],
@@ -241,7 +206,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
     );
   }
 
-  Widget _buildMainCard(_WeekStats stats, int todayIndex) {
+  Widget _buildMainCard(_WeekStats stats) {
     final habitsToShow = _showAllHabits
         ? stats.completedHabits
         : stats.completedHabits.take(3).toList();
@@ -254,7 +219,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: const Color(0xFFFFFFFF).withOpacity(0.35),
+            color: const Color(0xFFFFFFFF).withOpacity(0.50),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: const Color(0xFFFFFFFF).withOpacity(0.40),
@@ -402,50 +367,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
               if (stats.completedHabits.isNotEmpty)
                 const SizedBox(height: 20),
 
-              // 2g. Week Dots
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: List.generate(7, (index) {
-                    final isCompleted = stats.dailyActivity[index];
-                    final isToday = index == todayIndex;
-                    final dayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-
-                    return Column(
-                      children: [
-                        // Dot
-                        Container(
-                          width: isToday ? 10 : 8,
-                          height: isToday ? 10 : 8,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: isCompleted
-                                ? const Color(0xFF6B5B4A)
-                                : const Color(0xFF8B7563).withOpacity(0.2),
-                            border: isToday
-                                ? Border.all(
-                                    color: const Color(0xFF6B5B4A),
-                                    width: 1.5,
-                                  )
-                                : null,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        // Day label
-                        Text(
-                          dayLabels[index],
-                          style: const TextStyle(
-                            fontFamily: 'DMSans',
-                            fontSize: 12,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xFF9A8A78),
-                          ),
-                        ),
-                      ],
-                    );
-                  }),
-                ),
+              // 2g. Week Dots (animated)
+              _AnimatedWeekDots(
+                dailyActivity: stats.dailyActivity,
               ),
             ],
           ),
@@ -454,13 +378,30 @@ class _ProgressScreenState extends State<ProgressScreen> {
     );
   }
 
-  Widget _buildRecentMilestone(_RecentMilestone milestone) {
+  Widget _buildRecentMoment(int count, Moment recent) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final momentDay = DateTime(
+      recent.completedAt.year,
+      recent.completedAt.month,
+      recent.completedAt.day,
+    );
+
+    final String timeLabel;
+    if (momentDay == today) {
+      timeLabel = 'Earlier today';
+    } else if (momentDay == today.subtract(const Duration(days: 1))) {
+      timeLabel = 'Yesterday';
+    } else {
+      final diff = today.difference(momentDay).inDays;
+      timeLabel = '$diff days ago';
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Section Label
         const Text(
-          'RECENT MILESTONE',
+          'YOUR MOMENTS',
           style: TextStyle(
             fontFamily: 'Sora',
             fontSize: 11,
@@ -471,12 +412,11 @@ class _ProgressScreenState extends State<ProgressScreen> {
         ),
         const SizedBox(height: 8),
 
-        // Milestone Card
         GestureDetector(
           onTap: () {
             Navigator.of(context, rootNavigator: true).push(
               CupertinoPageRoute(
-                builder: (_) => const MilestoneHistoryScreen(),
+                builder: (_) => const MomentsCollectionScreen(),
               ),
             );
           },
@@ -488,7 +428,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFFFFF).withOpacity(0.18),
+                  color: const Color(0xFFFFFFFF).withOpacity(0.25),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: const Color(0xFFFFFFFF).withOpacity(0.25),
@@ -497,12 +437,11 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 ),
                 child: Row(
                   children: [
-                    // Left content
                     Expanded(
                       child: Row(
                         children: [
                           Text(
-                            milestone.title,
+                            '$count ${count == 1 ? 'moment' : 'moments'} collected',
                             style: const TextStyle(
                               fontFamily: 'DMSans',
                               fontSize: 15,
@@ -510,12 +449,12 @@ class _ProgressScreenState extends State<ProgressScreen> {
                               color: Color(0xFF3C342A),
                             ),
                           ),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 8),
                           Text(
-                            '· ${milestone.timeLabel}',
+                            '· $timeLabel',
                             style: const TextStyle(
                               fontFamily: 'DMSans',
-                              fontSize: 13,
+                              fontSize: 14,
                               fontWeight: FontWeight.w400,
                               color: Color(0xFF9A8A78),
                             ),
@@ -523,7 +462,6 @@ class _ProgressScreenState extends State<ProgressScreen> {
                         ],
                       ),
                     ),
-                    // Chevron
                     const Icon(
                       CupertinoIcons.chevron_right,
                       size: 16,
@@ -552,9 +490,103 @@ class _WeekStats {
   });
 }
 
-class _RecentMilestone {
-  final String title;
-  final String timeLabel;
+class _AnimatedWeekDots extends StatefulWidget {
+  final List<bool> dailyActivity;
 
-  _RecentMilestone({required this.title, required this.timeLabel});
+  const _AnimatedWeekDots({
+    required this.dailyActivity,
+  });
+
+  @override
+  State<_AnimatedWeekDots> createState() => _AnimatedWeekDotsState();
+}
+
+class _AnimatedWeekDotsState extends State<_AnimatedWeekDots>
+    with TickerProviderStateMixin {
+  late List<AnimationController> _controllers;
+  late List<Animation<double>> _scaleAnimations;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controllers = List.generate(
+      7,
+      (index) => AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 200),
+      ),
+    );
+
+    _scaleAnimations = _controllers.map((controller) {
+      return Tween<double>(begin: 0.0, end: 1.0).animate(
+        CurvedAnimation(
+          parent: controller,
+          curve: Curves.easeOutBack,
+        ),
+      );
+    }).toList();
+
+    // Start staggered animations (30ms between each)
+    for (var i = 0; i < 7; i++) {
+      Future.delayed(Duration(milliseconds: i * 30), () {
+        if (mounted) {
+          _controllers[i].forward();
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    for (var controller in _controllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final dayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: List.generate(7, (index) {
+          final isCompleted = widget.dailyActivity[index];
+
+          return Column(
+            children: [
+              // Animated Dot
+              ScaleTransition(
+                scale: _scaleAnimations[index],
+                child: Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isCompleted
+                        ? const Color(0xFF7A8B6F)
+                        : const Color(0xFFBFB9B0),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              // Day label (no animation needed)
+              Text(
+                dayLabels[index],
+                style: const TextStyle(
+                  fontFamily: 'DMSans',
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                  color: Color(0xFF9A8A78),
+                ),
+              ),
+            ],
+          );
+        }),
+      ),
+    );
+  }
 }
