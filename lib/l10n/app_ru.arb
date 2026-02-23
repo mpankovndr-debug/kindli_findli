@@ -1,0 +1,791 @@
+{
+  "@@locale": "ru",
+  "commonOk": "ОК",
+  "commonCancel": "Отмена",
+  "commonDelete": "Удалить",
+  "commonClose": "Закрыть",
+  "commonSave": "Сохранить",
+  "commonGreat": "Отлично",
+  "commonContinue": "Продолжить",
+  "commonDone": "Готово",
+  "commonNotNow": "Не сейчас",
+  "commonStart": "Начать",
+  "commonSkip": "Пропустить",
+  "commonRefresh": "Обновить",
+  "appNameIntended": "Intended",
+  "appNameIntendedPlus": "Intended+",
+  "appPlanCore": "Core",
+  "appUnlockPlus": "Перейти на Intended+",
+  "welcomeTitle": "Добро пожаловать в Intended",
+  "welcomeTitleWithName": "Добро пожаловать\nв Intended, {name}",
+  "@welcomeTitleWithName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "welcomeSubtitle": "Маленькие шаги.\nБез давления.",
+  "onboardingTagline": "Намерение, а не перфекционизм.",
+  "onboardingNamePrompt": "Как тебя зовут?",
+  "onboardingSkipForNow": "Пропустить",
+  "onboardingNameTooLong": "Имя должно быть короче {max} символов",
+  "@onboardingNameTooLong": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingNameInappropriate": "Пожалуйста, выбери другое имя",
+  "onboardingOops": "Упс",
+  "focusAreaHealth": "Здоровье",
+  "focusAreaMood": "Настроение",
+  "focusAreaProductivity": "Продуктивность",
+  "focusAreaHome": "Дом и порядок",
+  "focusAreaRelationships": "Отношения",
+  "focusAreaCreativity": "Творчество",
+  "focusAreaFinances": "Финансы",
+  "focusAreaSelfCare": "Забота о себе",
+  "focusAreasTitle": "Направления",
+  "focusAreasPromptWithName": "Что тебе сейчас важно, {name}?",
+  "@focusAreasPromptWithName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "focusAreasPrompt": "Что тебе сейчас важно?",
+  "focusAreasChooseCount": "Выбери до двух направлений ({count}/{max})",
+  "@focusAreasChooseCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "focusAreasChangeLater": "Это всегда можно изменить.",
+  "focusAreasLimitTitle": "Лимит достигнут",
+  "focusAreasLimitMessage": "Можно выбрать до 2 направлений. Убери одно, чтобы выбрать другое.",
+  "reminderTitle": "Напоминание",
+  "reminderSubtitle": "Хочешь ненавязчивое ежедневное напоминание?",
+  "reminderDescription": "Всего раз в день. Без давления.",
+  "reminderDailyToggle": "Ежедневное напоминание",
+  "reminderAroundTime": "Около {time}",
+  "@reminderAroundTime": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "reminderTimeLabel": "Напомнить в",
+  "reminderTimePicker": "Время напоминания",
+  "reminderSwitchHint": "Включи, чтобы выбрать время ежедневного напоминания.",
+  "reminderNoWorries": "Ничего страшного — включить можно в любой момент в профиле.",
+  "reminderWeeklySummary": "Итоги недели",
+  "reminderWeeklySubtitle": "Каждое воскресенье вечером",
+  "reminderLetsGo": "Поехали, {name}",
+  "@reminderLetsGo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "themeSelectionTitle": "Выбери своё пространство",
+  "themeSelectionSubtitle": "Это всегда можно изменить.",
+  "themeSelectionConfirm": "Мне нравится",
+  "themeSelectionPremiumHint": "Clear Sky и Morning Slate доступны с Intended+. Их можно открыть после настройки.",
+  "habitRevealTitle": "Вот что мы подобрали для тебя",
+  "habitRevealSubtitleDefault": "На основе твоих предпочтений",
+  "habitRevealSubtitleOneArea": "На основе направления «{area}»",
+  "@habitRevealSubtitleOneArea": {
+    "placeholders": {
+      "area": {
+        "type": "String"
+      }
+    }
+  },
+  "habitRevealSubtitleTwoAreas": "На основе «{area1}» и «{area2}»",
+  "@habitRevealSubtitleTwoAreas": {
+    "placeholders": {
+      "area1": {
+        "type": "String"
+      },
+      "area2": {
+        "type": "String"
+      }
+    }
+  },
+  "habitRevealDescription": "Ты можешь добавлять, убирать или искать другие привычки в любое время. Не нужно делать всё сразу.",
+  "habitRevealBegin": "Начнём",
+  "habitsHoldForOptions": "Удерживай для опций",
+  "habitsCompleteOnboarding": "Заверши настройку, чтобы начать",
+  "habitsPinned": "ЗАКРЕПЛЁННЫЕ",
+  "habitsSuggestions": "ПРЕДЛОЖЕНИЯ",
+  "habitsCreateCustom": "Создать свою привычку",
+  "habitsBrowseAll": "Все привычки",
+  "habitsMoreAvailable": "Ещё {count} доступно",
+  "@habitsMoreAvailable": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "habitBreath": "Три медленных вдоха",
+  "habitPause": "Десять секунд тишины",
+  "habitWater": "Осознанный глоток воды",
+  "habitStretch": "Мягкая растяжка",
+  "habitPriority": "Один приоритет",
+  "habitCheckin": "Честная проверка себя",
+  "dayMonday": "Понедельник",
+  "dayTuesday": "Вторник",
+  "dayWednesday": "Среда",
+  "dayThursday": "Четверг",
+  "dayFriday": "Пятница",
+  "daySaturday": "Суббота",
+  "daySunday": "Воскресенье",
+  "dayShortMon": "П",
+  "dayShortTue": "В",
+  "dayShortWed": "С",
+  "dayShortThu": "Ч",
+  "dayShortFri": "П",
+  "dayShortSat": "С",
+  "dayShortSun": "В",
+  "monthJanuary": "Январь",
+  "monthFebruary": "Февраль",
+  "monthMarch": "Март",
+  "monthApril": "Апрель",
+  "monthMay": "Май",
+  "monthJune": "Июнь",
+  "monthJuly": "Июль",
+  "monthAugust": "Август",
+  "monthSeptember": "Сентябрь",
+  "monthOctober": "Октябрь",
+  "monthNovember": "Ноябрь",
+  "monthDecember": "Декабрь",
+  "dailyMessage1": "Делай то, что чувствуется правильным сегодня",
+  "dailyMessage2": "Сегодня — чистый лист",
+  "dailyMessage3": "Даже одна мелочь — это уже что-то",
+  "dailyMessage4": "Будь добрее к себе сегодня",
+  "dailyMessage5": "Не спеши. Ты справляешься",
+  "dailyMessage6": "Начни с малого, действуй мягко",
+  "dailyMessage7": "Твой темп — только твой",
+  "dailyMessage8": "Даже один шаг — это прогресс",
+  "dailyMessage9": "Бери то, что подходит, остальное оставь",
+  "dailyMessage10": "Не нужно делать всё сразу",
+  "dailyMessage11": "Маленькие моменты складываются в большое",
+  "dailyMessage12": "Будь здесь и сейчас",
+  "dailyMessage13": "Нет неправильного способа начать",
+  "dailyMessage14": "Прислушайся к тому, что тебе нужно сегодня",
+  "dailyMessage15": "Прогресс каждый день выглядит по-разному",
+  "dailyMessage16": "Ты имеешь право не торопиться",
+  "dailyMessage17": "Одно дело за раз — этого достаточно",
+  "dailyMessage18": "Разреши себе отдохнуть",
+  "dailyMessage19": "Начни оттуда, где ты сейчас",
+  "dailyMessage20": "Не нужно быть готовым, чтобы начать",
+  "dailyMessage21": "Доверяй своему ритму",
+  "dailyMessage22": "Можно подстраиваться на ходу",
+  "dailyMessage23": "Мягко — уже достаточно",
+  "dailyMessage24": "Маленькая забота о себе — тоже забота",
+  "dailyMessage25": "Ты делаешь больше, чем тебе кажется",
+  "customHabitTitle": "Создать свою привычку",
+  "customHabitPrompt": "Какое маленькое действие ты хочешь добавить?",
+  "customHabitHint": "Просто и конкретно.",
+  "customHabitPlaceholder": "Например: прогулка 5 минут",
+  "customHabitCharCount": "{count}/50 символов",
+  "@customHabitCharCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "customHabitSubmit": "Добавить",
+  "customHabitCreatedTitle": "Привычка создана",
+  "customHabitCreatedMessage": "«{title}» добавлена в твои привычки.",
+  "@customHabitCreatedMessage": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "customHabitLimitTitle": "Создать ещё?",
+  "customHabitLimitMessage": "Intended: 2 свои привычки\nIntended+: без ограничений",
+  "menuUnpin": "Открепить",
+  "menuPinToTop": "Закрепить",
+  "menuSwap": "Заменить",
+  "replacePinTitle": "Заменить закреплённую?",
+  "replacePinDescription": "Сейчас: {current}\nНовая: {newHabit}",
+  "@replacePinDescription": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "newHabit": {
+        "type": "String"
+      }
+    }
+  },
+  "replacePinConfirm": "Заменить",
+  "swapCantTitle": "Нельзя заменить",
+  "swapCantMessage": "Свои привычки нельзя заменить. Ты можешь удалить её и добавить новую.",
+  "swapTitle": "Заменить «{title}»?",
+  "@swapTitle": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "swapCategoryHabits": "Другие привычки из «{category}»:",
+  "@swapCategoryHabits": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "swapFreeRemaining": "Бесплатных замен: {remaining}",
+  "@swapFreeRemaining": {
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      }
+    }
+  },
+  "swapSuccessTitle": "Привычка заменена",
+  "swapSuccessMessage": "Заменена на «{habit}»",
+  "@swapSuccessMessage": {
+    "placeholders": {
+      "habit": {
+        "type": "String"
+      }
+    }
+  },
+  "swapErrorTitle": "Что-то пошло не так",
+  "swapErrorMessage": "Не удалось заменить привычку. Попробуй ещё раз.",
+  "swapLimitTitle": "Заменить привычку?",
+  "swapLimitMessage": "Ты уже использовал 2 бесплатные замены в этом месяце.\n\nIntended+: без ограничений",
+  "swapNoAltTitle": "Нет альтернатив",
+  "swapNoAltMessage": "Ты уже используешь все привычки из этой категории.",
+  "deleteHabitTitle": "Удалить привычку?",
+  "deleteHabitMessage": "«{title}» будет удалена, а прогресс потерян.",
+  "@deleteHabitMessage": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "completionQuestion": "Ты это сделал сегодня?",
+  "completionConfirm": "Да, сделал",
+  "completionDecline": "Не сегодня",
+  "celebrationNice": "Отлично",
+  "celebrationWellDone": "Молодец",
+  "celebrationYouDidIt": "Получилось",
+  "celebrationGreat": "Здорово",
+  "celebrationWayToGo": "Так держать",
+  "celebrationGoodJob": "Хорошая работа",
+  "celebrationLovely": "Чудесно",
+  "celebrationThatCounts": "Это считается",
+  "completionMsg1": "Такие маленькие шаги важны.",
+  "completionMsg2": "Ты пришёл сегодня.",
+  "completionMsg3": "Вот так и происходят перемены.",
+  "completionMsg4": "Ещё на шаг ближе.",
+  "completionMsg5": "Ты сделал то, что задумал.",
+  "completionMsg6": "Это потребовало усилий. Молодец.",
+  "completionMsg7": "Ещё одна маленькая победа.",
+  "completionMsg8": "У тебя получилось.",
+  "completionMsg9": "Прогресс — это прогресс.",
+  "completionMsg10": "Ты довёл дело до конца.",
+  "completionMsg11": "Это считается.",
+  "completionMsg12": "Ты сдержал слово перед собой.",
+  "completionMsg13": "Молодец.",
+  "completionMsg14": "Ты нашёл на это время.",
+  "completionMsg15": "Вот он — рост.",
+  "completionMsg16": "Ты не сдался.",
+  "completionMsg17": "Ещё одна привычка укрепилась.",
+  "completionMsg18": "Ты решил — и сделал.",
+  "completionMsg19": "Всё складывается.",
+  "completionMsg20": "Ты следуешь своему намерению.",
+  "insightWater1": "Даже лёгкое обезвоживание влияет на настроение и концентрацию.",
+  "insightWater2": "Мозг на 75% состоит из воды. Гидратация влияет на ясность мышления.",
+  "insightWater3": "Стакан воды может снизить усталость на 14%.",
+  "insightExercise1": "Всего 10 минут движения улучшают кровообращение в мозге.",
+  "insightExercise2": "Движение высвобождает эндорфины, которые поднимают настроение на часы.",
+  "insightExercise3": "Регулярное движение снижает тревогу так же эффективно, как медитация.",
+  "insightWalk1": "Прогулка на свежем воздухе снижает уровень кортизола за 20 минут.",
+  "insightWalk2": "10-минутная прогулка может повысить креативность на 60%.",
+  "insightWalk3": "Ходьба улучшает память, активируя гиппокамп.",
+  "insightStretch1": "Растяжка улучшает кровообращение и снимает мышечное напряжение.",
+  "insightStretch2": "Регулярная растяжка улучшает гибкость на 20% всего за несколько недель.",
+  "insightStretch3": "Растяжка активирует парасимпатическую нервную систему, снижая стресс.",
+  "insightSleep1": "Качественный сон укрепляет память на 40%.",
+  "insightSleep2": "Регулярный режим сна улучшает циркадные ритмы и настроение.",
+  "insightSleep3": "Недосып влияет на мышление так же, как алкоголь.",
+  "insightBed1": "Ритуал перед сном подготавливает мозг к отдыху.",
+  "insightBed2": "Ложиться в одно время улучшает качество сна на 25%.",
+  "insightBed3": "Мелатонин вырабатывается лучше, когда есть режим.",
+  "insightBreathe1": "Глубокое дыхание активирует блуждающий нерв и успокаивает нервную систему.",
+  "insightBreathe2": "Осознанное дыхание снижает гормоны стресса за считанные минуты.",
+  "insightBreathe3": "Квадратное дыхание используют спецназовцы для управления стрессом.",
+  "insightMeditate1": "Всего 10 минут медитации увеличивают серое вещество мозга.",
+  "insightMeditate2": "Регулярная медитация уменьшает миндалевидное тело — центр страха.",
+  "insightMeditate3": "Практика осознанности улучшает эмоциональную регуляцию.",
+  "insightRead1": "6 минут чтения снижают стресс на 68%.",
+  "insightRead2": "Регулярное чтение укрепляет нейронные связи.",
+  "insightRead3": "Чтение перед сном улучшает его качество лучше, чем экраны.",
+  "insightCall1": "Общение так же важно для здоровья, как спорт и питание.",
+  "insightCall2": "10-минутный разговор может уменьшить чувство одиночества.",
+  "insightCall3": "Голосовое общение высвобождает окситоцин — гормон привязанности.",
+  "insightFriend1": "Крепкие дружеские связи могут продлить жизнь на 50%.",
+  "insightFriend2": "Хорошая дружба значительно снижает гормоны стресса.",
+  "insightFriend3": "Общение с друзьями укрепляет иммунитет.",
+  "insightWrite1": "Письмо о чувствах активирует префронтальную кору, снижая стресс.",
+  "insightWrite2": "Ведение записей может улучшить иммунитет и уменьшить симптомы.",
+  "insightWrite3": "Экспрессивное письмо помогает пережить трудный опыт.",
+  "insightJournal1": "Ежедневные записи повышают самосознание и эмоциональную ясность.",
+  "insightJournal2": "Запись тревожных мыслей уменьшает навязчивые переживания.",
+  "insightJournal3": "Дневник благодарности перестраивает мозг на позитив.",
+  "insightVegetable1": "Овощи улучшают микробиом кишечника, влияя на настроение.",
+  "insightVegetable2": "Растительные нутриенты поддерживают выработку нейромедиаторов.",
+  "insightVegetable3": "Яркие овощи содержат антиоксиданты, защищающие клетки мозга.",
+  "insightBreakfast1": "Завтрак стабилизирует уровень сахара и улучшает концентрацию.",
+  "insightBreakfast2": "Утренняя еда запускает обмен веществ на весь день.",
+  "insightBreakfast3": "Те, кто завтракает, лучше справляются с когнитивными задачами.",
+  "insightPhone1": "Меньше экранов перед сном улучшает качество сна на 30%.",
+  "insightPhone2": "Синий свет подавляет мелатонин до 3 часов.",
+  "insightPhone3": "Перерывы от экрана уменьшают усталость глаз и головные боли.",
+  "insightScreen1": "Каждый час без экрана улучшает ясность мышления.",
+  "insightScreen2": "Цифровой детокс снижает тревогу и улучшает живое общение.",
+  "insightScreen3": "Перерывы от экранов помогают регулировать дофамин.",
+  "insightClean1": "Порядок вокруг снижает уровень кортизола и мысленный хаос.",
+  "insightClean2": "Организованное пространство улучшает концентрацию на 25%.",
+  "insightClean3": "Уборка — это форма физической активности, снижающая стресс.",
+  "insightOrganize1": "Порядок уменьшает усталость от принятия решений в течение дня.",
+  "insightOrganize2": "Пространство без хаоса улучшает когнитивные процессы.",
+  "insightOrganize3": "Организованная среда улучшает качество сна.",
+  "insightDraw1": "Творчество естественным образом повышает уровень дофамина.",
+  "insightDraw2": "Рисование задействует оба полушария, улучшая нейронные связи.",
+  "insightDraw3": "Рисование снижает гормоны стресса за 45 минут.",
+  "insightMusic1": "Занятия музыкой укрепляют мозолистое тело в мозге.",
+  "insightMusic2": "Музыкальная практика улучшает исполнительные функции и память.",
+  "insightMusic3": "Музыка активирует систему вознаграждения, высвобождая дофамин.",
+  "warmthMsg1": "Ничего страшного. Завтра всё ещё впереди.",
+  "warmthMsg2": "Отдых тоже считается.",
+  "warmthMsg3": "Не каждый день. Просто иногда.",
+  "warmthMsg4": "Не сегодня — и это нормально.",
+  "warmthMsg5": "Будь к себе так же добр, как был бы к другу.",
+  "warmthMsg6": "Привычка никуда не денется. Она подождёт.",
+  "warmthMsg7": "Даже мягкий шаг назад — это всё ещё участие.",
+  "warmthMsg8": "Ничего не потеряно. Ты здесь.",
+  "warmthMsg9": "Некоторые дни — для отдыха. Может, сегодня такой.",
+  "warmthMsg10": "Доброта к себе — привычка, которую стоит сохранить.",
+  "warmthMsg11": "Нет серии, которую можно прервать. Нет очков, которые можно потерять. Просто ты.",
+  "warmthMsg12": "Самые мягкие дни тоже важны.",
+  "warmthMsg13": "Ты уже сделал достаточно сегодня — просто тем, что ты здесь.",
+  "warmthMsg14": "Можно отпустить эту.",
+  "warmthMsg15": "Прогресс не всегда видим. Иногда это просто — выстоять.",
+  "notifMsg1": "Не спеши сегодня. Даже одна мелочь имеет значение.",
+  "notifMsg2": "Не нужно быть продуктивным, чтобы заслужить отдых.",
+  "notifMsg3": "Просто заглянул. Что бы ты ни сделал сегодня — этого достаточно.",
+  "notifMsg4": "Одна маленькая привычка. Вот и всё.",
+  "notifMsg5": "Ты пришёл вчера. Это уже важно.",
+  "notifMsg6": "Сегодня не должен быть идеальным, чтобы быть хорошим.",
+  "notifMsg7": "Будь к себе так же мягок, как был бы к другу.",
+  "notifMsg8": "Маленькие шаги всё равно двигают вперёд.",
+  "notifMsg9": "Начинать медленно — это нормально.",
+  "notifMsg10": "Ты справляешься лучше, чем тебе кажется.",
+  "notifMsg11": "Прогресс не всегда похож на прогресс.",
+  "notifMsg12": "По одному делу. Без давления.",
+  "notifMsg13": "Не нужно заслуживать отдых.",
+  "notifMsg14": "Доброта к себе — тоже привычка.",
+  "notifMsg15": "Сегодня — новый шанс, а не экзамен.",
+  "notifMsg16": "Даже чуть-чуть — это больше, чем ничего.",
+  "notifMsg17": "Ты всё ещё здесь. Это уже кое-что.",
+  "notifMsg18": "Нет неправильного способа провести мягкий день.",
+  "notifMsg19": "Что бы ни принёс сегодняшний день — ты справишься мягко.",
+  "notifMsg20": "Отдых — тоже часть работы.",
+  "notifMsg21": "Не нужно делать всё. Просто одно дело.",
+  "notifMsg22": "Сегодняшние привычки — завтрашний фундамент.",
+  "notifMsg23": "Будь терпелив с собой сегодня.",
+  "notifMsg24": "Рост происходит тихо. Доверяй ему.",
+  "notifMsg25": "Ты строишь что-то настоящее, не торопясь.",
+  "notifMsg26": "Одна привычка. Один момент. Этого достаточно.",
+  "notifMsg27": "Как ты на самом деле сегодня?",
+  "notifMsg28": "Ты уже справлялся с трудным. Сегодня может быть мягко.",
+  "notifMsg29": "Не нужно совершенство, чтобы стоило делать.",
+  "notifMsg30": "Ты имеешь право идти шаг за шагом.",
+  "notifMsg31": "Тот ты, что начал этот путь, гордился бы тобой.",
+  "notifMsg32": "Рост тише всего, когда он настоящий. Доверяй процессу.",
+  "notifMsg33": "Ты приходишь раз за разом. Это редкость.",
+  "notifMsg34": "Маленькие ритуалы складываются в жизнь.",
+  "notifMsg35": "Ты не отстаёшь. Ты именно там, где есть.",
+  "notifMsg36": "Самые мягкие привычки — часто самые стойкие.",
+  "notifMsg37": "Ты строишь отношения с собой. Не торопись.",
+  "notifMsg38": "Сегодняшнее маленькое действие — норма через месяц.",
+  "notifMsg39": "Привычки — не про силу воли. Они про заботу.",
+  "notifMsg40": "Ты знаешь себя лучше любого приложения. Доверяй себе.",
+  "notifMsg41": "Цель никогда не была совершенством. Цель — приходить.",
+  "notifMsg42": "Иногда привычка дня — просто быть добрее к себе.",
+  "notifMsg43": "Ты переживал дни и потруднее.",
+  "notifMsg44": "Каждый мягкий выбор складывается.",
+  "notifMsg45": "Не нужна мотивация. Нужен один момент.",
+  "notifMsg46": "Твой темп — только твой. Без сравнений.",
+  "notifMsg47": "Тихие дни важны не меньше.",
+  "notifMsg48": "Ты не начинаешь заново — ты продолжаешь.",
+  "notifMsg49": "Постоянство — это доброта, повторённая много раз.",
+  "notifMsg50": "По одной привычке — вот как на самом деле меняются жизни.",
+  "notifMsg51": "Сегодня хороший день, чтобы быть мягче к себе.",
+  "notifMsg52": "Ты пришёл. В этом и суть.",
+  "notifMsg53": "Маленький — не значит незначительный.",
+  "notifMsg54": "Что бы ты ни делал сегодня — делай с заботой.",
+  "notifMsg55": "Твои привычки — это форма уважения к себе.",
+  "notifMsg56": "Ничего не потеряно. Всегда можно начать снова.",
+  "notifMsg57": "Ты в этом надолго. Медленно — нормально.",
+  "notifMsg58": "Сегодняшнее усилие незаметно сейчас и неоспоримо потом.",
+  "notifMsg59": "Ты имеешь право быть в процессе.",
+  "notifMsg60": "Вот так и выглядит забота о себе.",
+  "notifWeeklyBody": "Оглянись на свою неделю. Твои привычки были рядом.",
+  "notifDailyChannelName": "Ежедневные напоминания",
+  "notifDailyChannelDesc": "Мягкие ежедневные напоминания о привычках",
+  "notifWeeklyChannelName": "Еженедельные напоминания",
+  "notifWeeklyChannelDesc": "Напоминания для недельной рефлексии",
+  "affirmation1": "Пропущенные дни не отменяют того, что ты уже сделал.",
+  "affirmation2": "Не нужно заслуживать отдых.",
+  "affirmation3": "Три привычки или одна — обе формы достаточны.",
+  "affirmation4": "То, что ты здесь, уже говорит о тебе хорошее.",
+  "affirmation5": "Прогресс — не про совершенство, а про то, чтобы приходить.",
+  "affirmation6": "У тебя есть право на нелёгкие дни.",
+  "affirmation7": "Маленькие действия считаются, даже когда кажутся маленькими.",
+  "affirmation8": "Ты не отстаёшь. Ты именно там, где нужно.",
+  "affirmation9": "Постоянство важно, но самосострадание тоже.",
+  "affirmation10": "Твоя ценность не измеряется количеством галочек.",
+  "affirmation11": "Некоторые недели труднее. Это просто быть человеком.",
+  "affirmation12": "Не нужно делать всё, чтобы делать достаточно.",
+  "affirmation13": "Отдых — часть прогресса, а не его противоположность.",
+  "affirmation14": "Приходить несовершенным — это всё равно приходить.",
+  "affirmation15": "Ты справляешься лучше, чем тебе кажется.",
+  "affirmation16": "Можно начинать заново столько раз, сколько нужно.",
+  "affirmation17": "Твой темп — только твой. Сравнение не поможет.",
+  "affirmation18": "Каждая попытка имеет значение, даже та, что кажется мелкой.",
+  "affirmation19": "Не нужна мотивация, чтобы заслужить доброту к себе.",
+  "affirmation20": "Прогресс может выглядеть просто как «попробую завтра».",
+  "affirmation21": "Ты имеешь право пересматривать свои ожидания.",
+  "affirmation22": "Перерыв — не значит провал.",
+  "affirmation23": "Самое трудное — начать. А ты уже это сделал.",
+  "affirmation24": "Не нужно разрешение, чтобы позаботиться о себе.",
+  "affirmation25": "Твой максимум сегодня может отличаться от вчерашнего. Это нормально.",
+  "affirmation26": "Трудности не значат, что ты делаешь что-то не так.",
+  "affirmation27": "Ты уже справлялся с трудным. Справишься и с этим.",
+  "affirmation28": "Твой прогресс может не быть похож на чужой. И это нормально.",
+  "affirmation29": "Тебе не нужно никому ничего доказывать.",
+  "affirmation30": "Иногда просто пережить день — уже достаточный прогресс.",
+  "affirmation31": "Ты учишься, даже когда так не кажется.",
+  "affirmation32": "Быть мягче к себе — это не сдаваться.",
+  "affirmation33": "Не нужна причина, чтобы быть к себе добрее.",
+  "affirmation34": "То, что ты делаешь прямо сейчас — достаточно.",
+  "affirmation35": "Завтра — всегда шанс попробовать снова.",
+  "progressOnboardingPrompt": "Заверши настройку, чтобы увидеть свою неделю",
+  "progressTitle": "Твоя неделя",
+  "progressWeeklySummary": "ИТОГИ НЕДЕЛИ",
+  "progressWeekBeginning": "Неделя только начинается.",
+  "progressShowedUpOnce": "Ты отметился один раз на этой неделе.",
+  "progressShowedUpCount": "Ты отметился {count} раз на этой неделе.",
+  "@progressShowedUpCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "progressMore": "+{count} ещё",
+  "@progressMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "progressSeeAll": "Показать все",
+  "progressShowLess": "Свернуть",
+  "progressYourMoments": "ТВОИ МОМЕНТЫ",
+  "progressEarlierToday": "Ранее сегодня",
+  "progressYesterday": "Вчера",
+  "progressDaysAgo": "{count} дн. назад",
+  "@progressDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "progressMomentsCollected": "{count, plural, =1{1 момент собран} few{{count} момента собрано} other{{count} моментов собрано}}",
+  "@progressMomentsCollected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "momentsTitle": "Твои моменты",
+  "momentsSubtitle": "Каждая привычка, которую ты выполнил, сохранена навсегда.",
+  "momentsEmptyTitle": "Здесь появятся твои моменты.",
+  "momentsEmptyMessage": "Каждая выполненная привычка становится частью твоей коллекции — навсегда.",
+  "momentsToday": "Сегодня",
+  "momentsYesterday": "Вчера",
+  "paywallTitle": "Intended+",
+  "paywallDescription": "Intended бесплатен навсегда. Intended+ даёт больше свободы сделать его по-своему.",
+  "paywallFeature1": "Создавай привычки, которые подходят именно тебе",
+  "paywallFeature2": "Меняй привычки, когда меняется жизнь",
+  "paywallFeature3": "Карточки недельного прогресса для друзей",
+  "paywallFeature4": "Меняй направления так часто, как нужно",
+  "paywallMonthly": "Ежемесячно",
+  "paywallMonthlyPrice": "€4,99",
+  "paywallMonthlyPeriod": "в месяц",
+  "paywallYearly": "Ежегодно",
+  "paywallYearlyPrice": "€39,99",
+  "paywallYearlyPeriod": "в год",
+  "paywallYearlySave": "Экономия 33%",
+  "paywallLifetime": "Навсегда",
+  "paywallLifetimePrice": "€69,99",
+  "paywallLifetimePeriod": "один раз",
+  "paywallLifetimeBadge": "Спецпредложение",
+  "paywallCta": "Начать 7-дневный пробный период",
+  "paywallContinueFree": "Продолжить с Core",
+  "paywallUpgradeHint": "Перейти на Intended+ можно в любой момент в профиле.",
+  "subscriptionTitle": "Intended+",
+  "subscriptionSupporter": "Ты наш сторонник ♥",
+  "subscriptionPlan": "Тариф",
+  "subscriptionPrice": "Цена",
+  "subscriptionRenews": "Продление",
+  "subscriptionThankYou": "Спасибо, что поддерживаешь Intended.\nТвоя подписка помогает нам\nстроить более мягкий путь к росту.",
+  "subscriptionManage": "Управление в App Store",
+  "profileTitle": "Профиль",
+  "profileNameError": "Хм",
+  "profileNameErrorMessage": "Пожалуйста, выбери другое имя",
+  "profileYourName": "Твоё имя",
+  "profileAddName": "Добавь имя",
+  "profileEnterName": "Введи своё имя",
+  "profilePlan": "Тариф",
+  "profileManage": "Управлять",
+  "profileUnlockPlus": "ПЕРЕЙТИ НА INTENDED+",
+  "profileFocusAreas": "Направления",
+  "profileYourMoments": "Твои моменты",
+  "profileMomentsNone": "Пока нет",
+  "profileMomentsCount": "{count, plural, =1{1 момент} few{{count} момента} other{{count} моментов}}",
+  "@profileMomentsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "profileSettings": "НАСТРОЙКИ",
+  "profileDailyReminders": "Ежедневные напоминания",
+  "profileRemindAt": "Напомнить в",
+  "profileWeeklySummary": "Итоги недели",
+  "profileWeeklySubtitle": "Каждое воскресенье вечером",
+  "profileNotifDenied": "Ничего страшного — включить уведомления можно в настройках устройства.",
+  "profileAppearance": "Внешний вид",
+  "profileSupport": "ПОДДЕРЖКА",
+  "profileHelpSupport": "Помощь и поддержка",
+  "profilePrivacy": "Политика конфиденциальности",
+  "profileTerms": "Условия использования",
+  "profileConnectAccount": "ПОДКЛЮЧИТЬ АККАУНТ",
+  "profileSignInGoogle": "Войти через Google",
+  "profileSignInApple": "Войти через Apple",
+  "profileSignOut": "Выйти",
+  "profileDeleteData": "Удалить данные профиля",
+  "profileVersion": "Intended v1.0.0",
+  "profileCannotOpenEmail": "Не удалось открыть почту",
+  "profileEmailFallback": "Напиши нам на\nsupport@intendedapp.com",
+  "profileChangeFocusTitle": "Сменить направления?",
+  "profileChangeFocusMessage": "Привычки обновятся на основе новых направлений.",
+  "profileChangeAreas": "Сменить направления",
+  "profileFocusLimitMessage": "Бесплатная смена в этом месяце уже использована.",
+  "profileFocusLimitOptions": "• Разово: €0,99\n• Intended+: без ограничений",
+  "profilePayAmount": "Оплатить €0,99",
+  "profilePaymentTitle": "Оплата",
+  "profilePaymentMessage": "Встроенные покупки скоро появятся!",
+  "profileChangeSpace": "Сменить пространство",
+  "profileRefreshTitle": "Обновить привычки?",
+  "profileRefreshMessage": "Ты получишь новый набор привычек на основе своих направлений.",
+  "profileRefreshSuccessTitle": "Привычки обновлены",
+  "profileRefreshSuccessMessage": "Новый набор привычек уже ждёт тебя.",
+  "profileDailyLimitTitle": "Дневной лимит достигнут",
+  "profileDailyLimitMessage": "Ты обновил привычки 3 раза сегодня. Попробуй завтра или открой Intended+ для безлимитных обновлений.",
+  "profileCannotOpenLink": "Не удалось открыть ссылку",
+  "profilePrivacyFallback": "Открой intendedapp.com/privacy в браузере",
+  "profileTermsFallback": "Открой intendedapp.com/terms в браузере",
+  "profileDeleteAllTitle": "Удалить все данные?",
+  "profileDeleteAllMessage": "Все привычки, прогресс и настройки будут удалены безвозвратно.",
+  "profileChangeFocusAreasScreenTitle": "Смена направлений",
+  "profileChooseUpTo2": "Выбери до 2 направлений",
+  "profileSaveChanges": "Сохранить",
+  "themeWarmClay": "Обоженная глина",
+  "themeIris": "Ирис",
+  "themeClearSky": "Ясное небо",
+  "themeMorningSlate": "Утренний сланец",
+  "browseHabitsTitle": "Все привычки",
+  "browseHabitsAvailable": "Доступно привычек: {count}",
+  "@browseHabitsAvailable": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "browseHabitsSearch": "Поиск привычек...",
+  "browseAlreadyAddedTitle": "Уже добавлена",
+  "browseAlreadyAddedMessage": "«{habit}» уже есть в твоих привычках.",
+  "@browseAlreadyAddedMessage": {
+    "placeholders": {
+      "habit": {
+        "type": "String"
+      }
+    }
+  },
+  "browseSwapLimitTitle": "Лимит замен достигнут",
+  "browseSwapConfirmTitle": "Заменить одну из привычек?",
+  "browseSwapConfirmMessage": "Заменить одну из текущих привычек на «{habit}».",
+  "@browseSwapConfirmMessage": {
+    "placeholders": {
+      "habit": {
+        "type": "String"
+      }
+    }
+  },
+  "browseSwapRemainingCount": "{count, plural, =1{Осталась {count} замена} few{Осталось {count} замены} other{Осталось {count} замен}} в этом месяце.",
+  "@browseSwapRemainingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "browseChooseHabitToSwap": "Выбери привычку для замены",
+  "browseWhichToReplace": "Какую привычку заменить?",
+  "browseChooseToReplaceMessage": "Выбери, какую из текущих привычек заменить на «{habit}»",
+  "@browseChooseToReplaceMessage": {
+    "placeholders": {
+      "habit": {
+        "type": "String"
+      }
+    }
+  },
+  "browseHabitAddedTitle": "Привычка добавлена",
+  "browseHabitAddedMessage": "«{habit}» добавлена в твои привычки.",
+  "@browseHabitAddedMessage": {
+    "placeholders": {
+      "habit": {
+        "type": "String"
+      }
+    }
+  },
+  "browseHabitAddedConfirm": "Отлично!",
+  "habitDrinkWater": "Выпей стакан воды",
+  "habitThreeSlowBreaths": "Сделай 3 медленных вдоха",
+  "habitStretchTenSeconds": "Потянись 10 секунд",
+  "habitRollShoulders": "Встань и разомни плечи",
+  "habitStepOutside": "Выйди на улицу на 30 секунд",
+  "habitCloseEyes": "Закрой глаза на 20 секунд",
+  "habitNeckRolls": "5 мягких вращений шеей",
+  "habitWalkToWindow": "Дойди до окна и обратно",
+  "habitBellyBreaths": "5 глубоких вдохов животом",
+  "habitBodyScan": "Сканирование тела — 2 минуты",
+  "habitGentleMovement": "10 минут мягкого движения",
+  "habitMindfulMeal": "Один осознанный приём пищи",
+  "habitTenSecondPause": "Пауза на 10 секунд",
+  "habitNoticeFeeling": "Заметь одно ощущение",
+  "habitGroundingBreath": "Один заземляющий вдох",
+  "habitLookAway": "Отведи взгляд от экрана на 10 секунд",
+  "habitNameThreeThings": "Назови три вещи, которые видишь",
+  "habitNoticeSound": "Заметь один звук вокруг",
+  "habitFeelFeet": "Почувствуй ступни на полу",
+  "habitHandOnHeart": "Положи руку на сердце на мгновение",
+  "habitGratefulThing": "Заметь одну вещь, за которую благодарен",
+  "habitSmileGently": "Мягко улыбнись себе",
+  "habitAskNeed": "Спроси себя: «Что мне сейчас нужно?»",
+  "habitPermissionToRest": "Разреши себе отдохнуть",
+  "habitSetPriority": "Определи один приоритет",
+  "habitClearSmallThing": "Разберись с одной мелочью",
+  "habitPlanTomorrow": "Опиши завтрашний день одним предложением",
+  "habitThirtySecondReset": "Перезагрузка на 30 секунд",
+  "habitWriteIdea": "Запиши одну идею",
+  "habitFinishTinyTask": "Заверши одно маленькое дело",
+  "habitDeclutterDesk": "Разбери стол за 2 минуты",
+  "habitReviewCalendar": "Загляни в календарь",
+  "habitTurnOffNotification": "Отключи одно уведомление",
+  "habitCloseTab": "Закрой одну вкладку",
+  "habitArchiveEmails": "Архивируй 5 старых писем",
+  "habitUpdateTodo": "Обнови один пункт в списке дел",
+  "habitTidyOneThing": "Убери одну мелочь",
+  "habitPutBack": "Положи одну вещь на место",
+  "habitWipeSurface": "Протри одну поверхность",
+  "habitFreshAir": "Открой окно для свежего воздуха",
+  "habitMakeBed": "Заправь кровать",
+  "habitClearShelf": "Разбери одну полку",
+  "habitWashDishes": "Помой 3 тарелки",
+  "habitTakeOutTrash": "Вынеси один мешок мусора",
+  "habitFoldClothing": "Сложи 3 вещи",
+  "habitOrganizeDrawer": "Разбери один ящик",
+  "habitWaterPlant": "Полей одно растение",
+  "habitLightCandle": "Зажги свечу",
+  "habitSendMessage": "Напиши одно сообщение кому-нибудь",
+  "habitAppreciatePerson": "Подумай о человеке, которого ценишь",
+  "habitAskHowAreYou": "Спроси кого-нибудь, как дела",
+  "habitGiveCompliment": "Сделай один искренний комплимент",
+  "habitCallSomeone": "Позвони тому, кто тебе дорог",
+  "habitShareSmile": "Поделись тем, что вызвало улыбку",
+  "habitThankSomeone": "Поблагодари кого-нибудь сегодня",
+  "habitListenFully": "Слушай, не планируя ответ",
+  "habitReachOut": "Напиши тому, по кому скучаешь",
+  "habitTellMeaning": "Скажи кому-то, как он тебе важен",
+  "habitOfferHelp": "Предложи кому-нибудь помощь",
+  "habitCelebrateOthers": "Порадуйся за чью-то победу",
+  "habitWriteSentence": "Напиши одно предложение",
+  "habitDoodle": "Рисуй каракули 10 секунд",
+  "habitCaptureIdea": "Запиши одну идею",
+  "habitNoticeBeauty": "Заметь одну красивую вещь",
+  "habitTakePhoto": "Сфотографируй что-то, что нравится",
+  "habitDrawShape": "Нарисуй одну простую фигуру",
+  "habitHumTune": "Напой мелодию, которая нравится",
+  "habitRearrange": "Переставь что-нибудь по мелочи",
+  "habitTryNewWord": "Попробуй одно новое слово",
+  "habitCreateTinyThing": "Создай одну маленькую вещь",
+  "habitPlayCreative": "Поиграй с одним творческим материалом",
+  "habitImagine": "Представь одну возможность",
+  "habitCheckBalance": "Проверь баланс",
+  "habitMoveToSavings": "Отложи €1 в копилку",
+  "habitReviewSubscription": "Проверь одну подписку",
+  "habitNoteExpense": "Запиши одну трату",
+  "habitFinancialTip": "Прочитай один финансовый совет",
+  "habitDeleteReceipt": "Удали один старый чек",
+  "habitUpdateBudget": "Обнови одну категорию бюджета",
+  "habitReviewBill": "Проверь один счёт",
+  "habitPriceCheck": "Сравни цену перед покупкой",
+  "habitWait24Hours": "Подожди 24 часа перед одной покупкой",
+  "habitCelebrateMoneyWin": "Порадуйся одной финансовой победе",
+  "habitSavingsGoal": "Поставь одну маленькую цель для накоплений",
+  "habitSitStill": "Посиди тихо 10 секунд",
+  "habitKindThing": "Сделай одну приятную вещь для себя",
+  "habitDrinkSlowly": "Выпей воды не торопясь",
+  "habitStretchNeck": "Потяни шею",
+  "habitOneSlowBreath": "Один медленный вдох",
+  "habitNoticeLikeAboutSelf": "Заметь что-то, что тебе в себе нравится",
+  "habitPermissionSayNo": "Разреши себе сказать «нет»",
+  "habitFeelGood": "Сделай что-то приятное",
+  "habitRestTwoMinutes": "Отдохни 2 минуты",
+  "habitPutOnComfortable": "Надень что-нибудь удобное",
+  "habitListenToSong": "Послушай одну любимую песню",
+  "habitDoNothing": "Ничего не делай 30 секунд"
+}

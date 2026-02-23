@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Colors;
+import '../l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -14,8 +15,10 @@ import '../state/user_state.dart';
 import '../utils/profanity_filter.dart';
 import '../utils/text_styles.dart';
 import '../utils/responsive_utils.dart';
+import '../theme/theme_provider.dart';
 import 'paywall_screen.dart';
 import 'subscription_management_modal.dart';
+import '../widgets/theme_picker.dart';
 import '../services/auth_service.dart';
 import '../services/moments_service.dart';
 import '../services/notification_scheduler.dart';
@@ -78,6 +81,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.dispose();
   }
 
+  String _localizedAreaName(AppLocalizations l10n, String area) {
+    switch (area) {
+      case 'Health': return l10n.focusAreaHealth;
+      case 'Mood': return l10n.focusAreaMood;
+      case 'Productivity': return l10n.focusAreaProductivity;
+      case 'Home & organization': return l10n.focusAreaHome;
+      case 'Relationships': return l10n.focusAreaRelationships;
+      case 'Creativity': return l10n.focusAreaCreativity;
+      case 'Finances': return l10n.focusAreaFinances;
+      case 'Self-care': return l10n.focusAreaSelfCare;
+      default: return area;
+    }
+  }
+
   bool get canSave {
     final text = controller.text.trim();
     final currentName = userNameNotifier.value;
@@ -91,13 +108,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (!canSave) return;
 
     if (ProfanityFilter.containsProfanity(name)) {
-      showKindliDialog(
+      final l10n = AppLocalizations.of(context);
+      showIntendedDialog(
         context: context,
-        title: 'Hmm',
-        subtitle: 'Please choose a different name',
+        title: l10n.profileNameError,
+        subtitle: l10n.profileNameErrorMessage,
         actions: [
           CupertinoDialogAction(
-            child: const Text('OK'),
+            child: Text(l10n.commonOk),
             onPressed: () => Navigator.pop(context),
           ),
         ],
@@ -137,18 +155,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _contactSupport() async {
     final Uri emailUri = Uri(
       scheme: 'mailto',
-      path: 'mpankov.ndr@gmail.com',
-      query: 'subject=Intended Support Request',
+      path: 'support@intendedapp.com',
+      query: 'subject=Intended App — Support Request',
     );
 
     if (await canLaunchUrl(emailUri)) {
       await launchUrl(emailUri);
     } else {
       if (mounted) {
-        showKindliModal(
+        final l10n = AppLocalizations.of(context);
+        final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
+        showIntendedModal(
           context: context,
-          title: 'Cannot open email',
-          subtitle: 'Please email us at\nmpankov.ndr@gmail.com',
+          title: l10n.profileCannotOpenEmail,
+          subtitle: l10n.profileEmailFallback,
           actions: [
             Container(
               width: double.infinity,
@@ -156,7 +176,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF3C342A).withOpacity(0.2),
+                    color: colors.textPrimary.withOpacity(0.2),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -172,13 +192,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          const Color(0xFF8B7563).withOpacity(0.85),
-                          const Color(0xFF7A6B5F).withOpacity(0.75),
+                          colors.ctaPrimary.withOpacity(0.85),
+                          colors.ctaSecondary.withOpacity(0.75),
                         ],
                       ),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: const Color(0xFF8B7563).withOpacity(0.3),
+                        color: colors.ctaPrimary.withOpacity(0.3),
                         width: 1,
                       ),
                     ),
@@ -186,9 +206,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 13),
                       borderRadius: BorderRadius.circular(16),
                       onPressed: () => Navigator.pop(context),
-                      child: const Text(
-                        'OK',
-                        style: TextStyle(
+                      child: Text(
+                        l10n.commonOk,
+                        style: const TextStyle(
                           fontFamily: 'Sora',
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -218,11 +238,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showChangeFocusAreasConfirmation() {
+    final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
+    final l10n = AppLocalizations.of(context);
+
     showCupertinoDialog(
       context: context,
       barrierDismissible: true,
       builder: (context) => Container(
-        color: const Color(0xFF504638).withOpacity(0.28),
+        color: colors.barrierColor.withOpacity(colors.barrierOpacity),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
           child: Center(
@@ -236,15 +259,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Container(
                     padding: const EdgeInsets.fromLTRB(28, 32, 28, 36),
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        begin: Alignment(0.0, 2.41),
-                        end: Alignment(0.0, -2.41),
+                      gradient: LinearGradient(
+                        begin: const Alignment(0.0, 2.41),
+                        end: const Alignment(0.0, -2.41),
                         colors: [
-                          Color.fromRGBO(245, 236, 224, 0.96),
-                          Color.fromRGBO(237, 228, 216, 0.93),
-                          Color.fromRGBO(230, 221, 209, 0.95),
+                          colors.modalBg1.withOpacity(0.96),
+                          colors.modalBg2.withOpacity(0.93),
+                          colors.modalBg3.withOpacity(0.95),
                         ],
-                        stops: [0.0, 0.5, 1.0],
+                        stops: const [0.0, 0.5, 1.0],
                       ),
                       borderRadius: BorderRadius.circular(32),
                       border: Border.all(
@@ -253,7 +276,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF32281E).withOpacity(0.4),
+                          color: colors.modalShadow.withOpacity(0.4),
                           blurRadius: 70,
                           offset: const Offset(0, 25),
                         ),
@@ -270,14 +293,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         // Title
-                        const Text(
-                          'Change focus areas?',
+                        Text(
+                          l10n.profileChangeFocusTitle,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontFamily: 'Sora',
                             fontSize: 24,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF3C342A),
+                            color: colors.textPrimary,
                             letterSpacing: -0.3,
                             height: 1.3,
                           ),
@@ -285,14 +308,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         const SizedBox(height: 12),
 
                         // Description
-                        const Text(
-                          'Your habits will refresh based on new areas.',
+                        Text(
+                          l10n.profileChangeFocusMessage,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontFamily: 'DM Sans',
                             fontSize: 16,
                             fontWeight: FontWeight.w400,
-                            color: Color(0xFF8B7563),
+                            color: colors.ctaPrimary,
                             height: 1.5,
                           ),
                         ),
@@ -308,22 +331,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
                               child: Container(
                                 decoration: BoxDecoration(
-                                  gradient: const LinearGradient(
+                                  gradient: LinearGradient(
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
                                     colors: [
-                                      Color.fromRGBO(139, 117, 99, 0.92),
-                                      Color.fromRGBO(122, 107, 95, 0.88),
+                                      colors.ctaPrimary.withOpacity(0.92),
+                                      colors.ctaSecondary.withOpacity(0.88),
                                     ],
                                   ),
                                   borderRadius: BorderRadius.circular(20),
                                   border: Border.all(
-                                    color: const Color(0xFF8B7563).withOpacity(0.4),
+                                    color: colors.ctaPrimary.withOpacity(0.4),
                                     width: 1,
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: const Color(0xFF3C342A).withOpacity(0.3),
+                                      color: colors.textPrimary.withOpacity(0.3),
                                       blurRadius: 24,
                                       offset: const Offset(0, 6),
                                     ),
@@ -348,9 +371,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   },
                                   padding: const EdgeInsets.symmetric(vertical: 16),
                                   borderRadius: BorderRadius.circular(20),
-                                  child: const Text(
-                                    'Change areas',
-                                    style: TextStyle(
+                                  child: Text(
+                                    l10n.profileChangeAreas,
+                                    style: const TextStyle(
                                       fontFamily: 'Sora',
                                       fontSize: 17,
                                       fontWeight: FontWeight.w600,
@@ -371,13 +394,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           child: CupertinoButton(
                             onPressed: () => Navigator.pop(context),
                             padding: const EdgeInsets.symmetric(vertical: 12),
-                            child: const Text(
-                              'Cancel',
+                            child: Text(
+                              l10n.commonCancel,
                               style: TextStyle(
                                 fontFamily: 'Sora',
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
-                                color: Color(0xFF9B8A7A),
+                                color: colors.textTertiary,
                               ),
                             ),
                           ),
@@ -395,11 +418,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showFocusAreaLimitDialog() {
+    final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
+    final l10n = AppLocalizations.of(context);
+
     showCupertinoDialog(
       context: context,
       barrierDismissible: true,
       builder: (context) => Container(
-        color: const Color(0xFF504638).withOpacity(0.28),
+        color: colors.barrierColor.withOpacity(colors.barrierOpacity),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
           child: Center(
@@ -413,15 +439,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Container(
                     padding: const EdgeInsets.fromLTRB(28, 32, 28, 36),
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        begin: Alignment(0.0, 2.41),
-                        end: Alignment(0.0, -2.41),
+                      gradient: LinearGradient(
+                        begin: const Alignment(0.0, 2.41),
+                        end: const Alignment(0.0, -2.41),
                         colors: [
-                          Color.fromRGBO(245, 236, 224, 0.96),
-                          Color.fromRGBO(237, 228, 216, 0.93),
-                          Color.fromRGBO(230, 221, 209, 0.95),
+                          colors.modalBg1.withOpacity(0.96),
+                          colors.modalBg2.withOpacity(0.93),
+                          colors.modalBg3.withOpacity(0.95),
                         ],
-                        stops: [0.0, 0.5, 1.0],
+                        stops: const [0.0, 0.5, 1.0],
                       ),
                       borderRadius: BorderRadius.circular(32),
                       border: Border.all(
@@ -430,7 +456,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF32281E).withOpacity(0.4),
+                          color: colors.modalShadow.withOpacity(0.4),
                           blurRadius: 70,
                           offset: const Offset(0, 25),
                         ),
@@ -447,14 +473,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         // Title
-                        const Text(
-                          'Change focus areas?',
+                        Text(
+                          l10n.profileChangeFocusTitle,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontFamily: 'Sora',
                             fontSize: 24,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF3C342A),
+                            color: colors.textPrimary,
                             letterSpacing: -0.3,
                             height: 1.3,
                           ),
@@ -462,14 +488,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         const SizedBox(height: 12),
 
                         // Description
-                        const Text(
-                          'You\'ve used your free change this month.',
+                        Text(
+                          l10n.profileFocusLimitMessage,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontFamily: 'DM Sans',
                             fontSize: 16,
                             fontWeight: FontWeight.w400,
-                            color: Color(0xFF8B7563),
+                            color: colors.ctaPrimary,
                             height: 1.5,
                           ),
                         ),
@@ -477,14 +503,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         const SizedBox(height: 20),
 
                         // Options
-                        const Text(
-                          '• One-time: €0.99\n• Intended+: Unlimited',
+                        Text(
+                          l10n.profileFocusLimitOptions,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontFamily: 'DM Sans',
                             fontSize: 15,
                             fontWeight: FontWeight.w400,
-                            color: Color(0xFF8B7563),
+                            color: colors.ctaPrimary,
                             height: 1.6,
                           ),
                         ),
@@ -500,22 +526,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
                               child: Container(
                                 decoration: BoxDecoration(
-                                  gradient: const LinearGradient(
+                                  gradient: LinearGradient(
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
                                     colors: [
-                                      Color.fromRGBO(139, 117, 99, 0.92),
-                                      Color.fromRGBO(122, 107, 95, 0.88),
+                                      colors.ctaPrimary.withOpacity(0.92),
+                                      colors.ctaSecondary.withOpacity(0.88),
                                     ],
                                   ),
                                   borderRadius: BorderRadius.circular(20),
                                   border: Border.all(
-                                    color: const Color(0xFF8B7563).withOpacity(0.4),
+                                    color: colors.ctaPrimary.withOpacity(0.4),
                                     width: 1,
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: const Color(0xFF3C342A).withOpacity(0.3),
+                                      color: colors.textPrimary.withOpacity(0.3),
                                       blurRadius: 24,
                                       offset: const Offset(0, 6),
                                     ),
@@ -535,9 +561,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   },
                                   padding: const EdgeInsets.symmetric(vertical: 16),
                                   borderRadius: BorderRadius.circular(20),
-                                  child: const Text(
-                                    'Pay €0.99',
-                                    style: TextStyle(
+                                  child: Text(
+                                    l10n.profilePayAmount,
+                                    style: const TextStyle(
                                       fontFamily: 'Sora',
                                       fontSize: 17,
                                       fontWeight: FontWeight.w600,
@@ -569,7 +595,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: const Color(0xFF3C342A).withOpacity(0.05),
+                                      color: colors.textPrimary.withOpacity(0.05),
                                       blurRadius: 16,
                                       offset: const Offset(0, 4),
                                     ),
@@ -582,13 +608,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   },
                                   padding: const EdgeInsets.symmetric(vertical: 16),
                                   borderRadius: BorderRadius.circular(20),
-                                  child: const Text(
-                                    'Unlock Intended+',
+                                  child: Text(
+                                    l10n.appUnlockPlus,
                                     style: TextStyle(
                                       fontFamily: 'Sora',
                                       fontSize: 17,
                                       fontWeight: FontWeight.w600,
-                                      color: Color(0xFF8B7563),
+                                      color: colors.ctaPrimary,
                                     ),
                                   ),
                                 ),
@@ -605,13 +631,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           child: CupertinoButton(
                             onPressed: () => Navigator.pop(context),
                             padding: const EdgeInsets.symmetric(vertical: 12),
-                            child: const Text(
-                              'Cancel',
+                            child: Text(
+                              l10n.commonCancel,
                               style: TextStyle(
                                 fontFamily: 'Sora',
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
-                                color: Color(0xFF9B8A7A),
+                                color: colors.textTertiary,
                               ),
                             ),
                           ),
@@ -629,25 +655,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showPaymentPlaceholder() {
+    final l10n = AppLocalizations.of(context);
     showStyledPopup(
       context: context,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Payment',
+            l10n.profilePaymentTitle,
             style: AppTextStyles.h2(context),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 12),
           Text(
-            'In-app purchase coming soon!',
+            l10n.profilePaymentMessage,
             style: AppTextStyles.body(context),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
           styledPrimaryButton(
-            label: 'OK',
+            label: l10n.commonOk,
             onPressed: () => Navigator.pop(context),
           ),
         ],
@@ -664,6 +691,88 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  void _showAppearancePicker(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final userState = Provider.of<UserState>(context, listen: false);
+
+    showCupertinoModalPopup(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.5),
+      filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+      builder: (context) => Consumer<ThemeProvider>(
+        builder: (context, themeProvider, _) {
+          final colors = themeProvider.colors;
+          return Container(
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        colors.modalBg1.withOpacity(0.98),
+                        colors.modalBg2.withOpacity(0.96),
+                        colors.modalBg3.withOpacity(0.98),
+                      ],
+                    ),
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.6),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: SafeArea(
+                    top: false,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Drag handle
+                          Container(
+                            width: 36,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          // Title
+                          Text(
+                            l10n.profileChangeSpace,
+                            style: TextStyle(
+                              fontFamily: 'Sora',
+                              fontSize: 17,
+                              fontWeight: FontWeight.w600,
+                              color: colors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          // Theme picker
+                          ThemePicker(
+                            isPremium: userState.hasSubscription,
+                            compact: true,
+                            onPremiumTap: () {
+                              Navigator.pop(context);
+                              _showUpgradeScreen();
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   void _showSubscriptionManagement() {
     showCupertinoDialog(
       context: context,
@@ -673,25 +782,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showRefreshConfirmation() {
+    final l10n = AppLocalizations.of(context);
     showStyledPopup(
       context: context,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Refresh habits?',
+            l10n.profileRefreshTitle,
             style: AppTextStyles.h2(context),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 12),
           Text(
-            'You\'ll get a new set of habits based on your focus areas.',
+            l10n.profileRefreshMessage,
             style: AppTextStyles.body(context),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
           styledPrimaryButton(
-            label: 'Refresh',
+            label: l10n.commonRefresh,
             onPressed: () async {
               Navigator.pop(context);
               final onboardingState = context.read<OnboardingState>();
@@ -703,7 +813,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 14),
           styledSecondaryButton(
-            label: 'Cancel',
+            label: l10n.commonCancel,
             onPressed: () => Navigator.pop(context),
           ),
         ],
@@ -712,25 +822,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showRefreshSuccess() {
+    final l10n = AppLocalizations.of(context);
     showStyledPopup(
       context: context,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Habits refreshed',
+            l10n.profileRefreshSuccessTitle,
             style: AppTextStyles.h2(context),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 12),
           Text(
-            'You have a new set of habits waiting for you.',
+            l10n.profileRefreshSuccessMessage,
             style: AppTextStyles.body(context),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
           styledPrimaryButton(
-            label: 'Great',
+            label: l10n.commonGreat,
             onPressed: () => Navigator.pop(context),
           ),
         ],
@@ -742,14 +853,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final onboardingState = context.read<OnboardingState>();
 
     if (!onboardingState.canRefreshHabits()) {
-      showKindliDialog(
+      final l10n = AppLocalizations.of(context);
+      showIntendedDialog(
         context: context,
-        title: 'Daily limit reached',
-        subtitle:
-            'You\'ve refreshed your habits 3 times today. Try again tomorrow, or upgrade to Intended+ for unlimited refreshes.',
+        title: l10n.profileDailyLimitTitle,
+        subtitle: l10n.profileDailyLimitMessage,
         actions: [
           CupertinoDialogAction(
-            child: const Text('OK'),
+            child: Text(l10n.commonOk),
             onPressed: () => Navigator.pop(context),
           ),
         ],
@@ -761,20 +872,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _openPrivacyPolicy() async {
-    final Uri url = Uri.parse('https://kindli.app/privacy');
+    final Uri url = Uri.parse('https://intendedapp.com/privacy');
 
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
     } else {
       if (mounted) {
-        showKindliDialog(
+        final l10n = AppLocalizations.of(context);
+        showIntendedDialog(
           context: context,
-          title: 'Cannot open link',
-          subtitle: 'Please visit kindli.app/privacy in your browser',
+          title: l10n.profileCannotOpenLink,
+          subtitle: l10n.profilePrivacyFallback,
           actions: [
             CupertinoDialogAction(
               onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
+              child: Text(l10n.commonOk),
             ),
           ],
         );
@@ -783,20 +895,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _openTermsOfService() async {
-    final Uri url = Uri.parse('https://kindli.app/terms');
+    final Uri url = Uri.parse('https://intendedapp.com/terms');
 
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
     } else {
       if (mounted) {
-        showKindliDialog(
+        final l10n = AppLocalizations.of(context);
+        showIntendedDialog(
           context: context,
-          title: 'Cannot open link',
-          subtitle: 'Please visit kindli.app/terms in your browser',
+          title: l10n.profileCannotOpenLink,
+          subtitle: l10n.profileTermsFallback,
           actions: [
             CupertinoDialogAction(
               onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
+              child: Text(l10n.commonOk),
             ),
           ],
         );
@@ -805,19 +918,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _deleteProfileData() {
+    final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
+    final l10n = AppLocalizations.of(context);
+
     showStyledPopup(
       context: context,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Delete all data?',
+            l10n.profileDeleteAllTitle,
             style: AppTextStyles.h2(context),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 12),
           Text(
-            'This will permanently delete all your habits, progress, and settings. This action cannot be undone.',
+            l10n.profileDeleteAllMessage,
             style: AppTextStyles.body(context),
             textAlign: TextAlign.center,
           ),
@@ -830,14 +946,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  const Color(0xFFC4605A).withOpacity(0.92),
-                  const Color(0xFFB5524D).withOpacity(0.88),
+                  colors.destructive.withOpacity(0.92),
+                  colors.destructiveDark.withOpacity(0.88),
                 ],
               ),
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFFB5524D).withOpacity(0.3),
+                  color: colors.destructiveDark.withOpacity(0.3),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -862,9 +978,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   );
                 }
               },
-              child: const Text(
-                'Delete',
-                style: TextStyle(
+              child: Text(
+                l10n.commonDelete,
+                style: const TextStyle(
                   fontFamily: 'Sora',
                   fontSize: 17,
                   fontWeight: FontWeight.w600,
@@ -874,7 +990,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
           styledSecondaryButton(
-            label: 'Cancel',
+            label: l10n.commonCancel,
             onPressed: () => Navigator.pop(context),
           ),
         ],
@@ -884,9 +1000,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final onboardingState = context.watch<OnboardingState>();
     final hasHabits = onboardingState.userHabits.isNotEmpty;
     final focusAreas = onboardingState.focusAreas;
+    final colors = context.watch<ThemeProvider>().colors;
 
     return CupertinoPageScaffold(
       backgroundColor: Colors.transparent,
@@ -900,13 +1018,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 // Header (fixed)
                 Padding(
                   padding: EdgeInsets.fromLTRB(24, MediaQuery.of(context).padding.top + 24, 24, 20),
-                  child: const Text(
-                    'Profile',
+                  child: Text(
+                    l10n.profileTitle,
                     style: TextStyle(
                       fontFamily: 'Sora',
                       fontSize: 32,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF3C342A),
+                      color: colors.textPrimary,
                     ),
                   ),
                 ),
@@ -922,13 +1040,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Section 1: Your Name
-                      const Text(
-                        'Your name',
+                      Text(
+                        l10n.profileYourName,
                         style: TextStyle(
                           fontFamily: 'Sora',
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
-                          color: Color(0xFF9A8A78),
+                          color: colors.textSecondary,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -938,7 +1056,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           valueListenable: userNameNotifier,
                           builder: (context, name, _) {
                             final displayName =
-                                (name != null && name.isNotEmpty) ? name : 'Add your name';
+                                (name != null && name.isNotEmpty) ? name : l10n.profileAddName;
                             final hasName = name != null && name.isNotEmpty;
 
                             return Row(
@@ -951,17 +1069,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       fontSize: 17,
                                       fontWeight: FontWeight.w500,
                                       color:
-                                          hasName ? const Color(0xFF3C342A) : const Color(0xFFB5A89A),
+                                          hasName ? colors.textPrimary : colors.textDisabled,
                                     ),
                                   ),
                                 ),
                                 CupertinoButton(
                                   padding: EdgeInsets.zero,
                                   onPressed: _startEditing,
-                                  child: const Icon(
+                                  child: Icon(
                                     CupertinoIcons.pencil,
                                     size: 20,
-                                    color: Color(0xFF8B7563),
+                                    color: colors.ctaPrimary,
                                   ),
                                 ),
                               ],
@@ -971,24 +1089,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ] else ...[
                         CupertinoTextField(
                           controller: controller,
-                          placeholder: 'Enter your name',
+                          placeholder: l10n.profileEnterName,
                           autofocus: true,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: 'Sora',
                             fontSize: 17,
                             fontWeight: FontWeight.w500,
-                            color: Color(0xFF3C342A),
+                            color: colors.textPrimary,
                           ),
-                          placeholderStyle: const TextStyle(
+                          placeholderStyle: TextStyle(
                             fontFamily: 'Sora',
                             fontSize: 17,
-                            color: Color(0xFFB5A89A),
+                            color: colors.textDisabled,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFAF9F6),
+                            color: colors.surfaceLightest,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: const Color(0xFFE8E3DB),
+                              color: colors.borderWarm,
                               width: 0.8,
                             ),
                           ),
@@ -999,20 +1117,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             Expanded(
                               child: CupertinoButton(
                                 color: canSave
-                                    ? const Color(0xFF6B5B4A)
-                                    : const Color(0xFFD8D2C8),
+                                    ? colors.buttonDark
+                                    : colors.borderMedium,
                                 borderRadius: BorderRadius.circular(12),
                                 padding: const EdgeInsets.symmetric(vertical: 12),
                                 onPressed: canSave ? _saveName : null,
                                 child: Text(
-                                  'Save',
+                                  l10n.commonSave,
                                   style: TextStyle(
                                     fontFamily: 'Sora',
                                     fontSize: 15,
                                     fontWeight: FontWeight.w600,
                                     color: canSave
-                                        ? const Color(0xFFF6F5F1)
-                                        : const Color(0xFFB5A89A),
+                                        ? colors.surfaceLightest
+                                        : colors.textDisabled,
                                   ),
                                 ),
                               ),
@@ -1021,13 +1139,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             CupertinoButton(
                               padding: const EdgeInsets.symmetric(horizontal: 16),
                               onPressed: _cancelEditing,
-                              child: const Text(
-                                'Cancel',
+                              child: Text(
+                                l10n.commonCancel,
                                 style: TextStyle(
                                   fontFamily: 'Sora',
                                   fontSize: 15,
                                   fontWeight: FontWeight.w500,
-                                  color: Color(0xFF8B7563),
+                                  color: colors.ctaPrimary,
                                 ),
                               ),
                             ),
@@ -1039,18 +1157,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const SizedBox(height: 24),
                       Container(
                         height: 1,
-                        color: const Color(0xFF8B7563).withOpacity(0.1),
+                        color: colors.ctaPrimary.withOpacity(0.1),
                       ),
                       const SizedBox(height: 24),
 
                       // Section 2: Plan
-                      const Text(
-                        'Plan',
+                      Text(
+                        l10n.profilePlan,
                         style: TextStyle(
                           fontFamily: 'Sora',
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
-                          color: Color(0xFF9A8A78),
+                          color: colors.textSecondary,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -1061,12 +1179,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             child: Consumer<UserState>(
                               builder: (context, userState, child) {
                                 return Text(
-                                  userState.hasSubscription ? 'Intended+' : 'Core',
-                                  style: const TextStyle(
+                                  userState.hasSubscription ? l10n.appNameIntendedPlus : l10n.appPlanCore,
+                                  style: TextStyle(
                                     fontFamily: 'Sora',
                                     fontSize: 20,
                                     fontWeight: FontWeight.w600,
-                                    color: Color(0xFF3C342A),
+                                    color: colors.textPrimary,
                                   ),
                                 );
                               },
@@ -1079,13 +1197,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 return CupertinoButton(
                                   padding: EdgeInsets.zero,
                                   onPressed: _showSubscriptionManagement,
-                                  child: const Text(
-                                    'Manage',
+                                  child: Text(
+                                    l10n.profileManage,
                                     style: TextStyle(
                                       fontFamily: 'Sora',
                                       fontSize: 14,
                                       fontWeight: FontWeight.w500,
-                                      color: Color(0xFF8B7563),
+                                      color: colors.ctaPrimary,
                                     ),
                                   ),
                                 );
@@ -1100,20 +1218,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       vertical: 8,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFFD7BAA3).withOpacity(0.5),
+                                      color: colors.accentRegular.withOpacity(0.5),
                                       borderRadius: BorderRadius.circular(100),
                                       border: Border.all(
-                                        color: const Color(0xFFD7BAA3).withOpacity(0.6),
+                                        color: colors.accentRegular.withOpacity(0.6),
                                         width: 1,
                                       ),
                                     ),
-                                    child: const Text(
-                                      'UNLOCK INTENDED+',
+                                    child: Text(
+                                      l10n.profileUnlockPlus,
                                       style: TextStyle(
                                         fontFamily: 'Sora',
                                         fontSize: 11,
                                         fontWeight: FontWeight.w600,
-                                        color: Color(0xFF8B7563),
+                                        color: colors.ctaPrimary,
                                         letterSpacing: 0.5,
                                       ),
                                     ),
@@ -1130,18 +1248,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         const SizedBox(height: 24),
                         Container(
                           height: 1,
-                          color: const Color(0xFF8B7563).withOpacity(0.1),
+                          color: colors.ctaPrimary.withOpacity(0.1),
                         ),
                         const SizedBox(height: 24),
 
                         // Section 3: Focus Areas
-                        const Text(
-                          'Focus areas',
+                        Text(
+                          l10n.profileFocusAreas,
                           style: TextStyle(
                             fontFamily: 'Sora',
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
-                            color: Color(0xFF9A8A78),
+                            color: colors.textSecondary,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -1150,22 +1268,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           children: [
                             Expanded(
                               child: Text(
-                                focusAreas.join(', '),
-                                style: const TextStyle(
+                                focusAreas.map((a) => _localizedAreaName(l10n, a)).join(', '),
+                                style: TextStyle(
                                   fontFamily: 'Sora',
                                   fontSize: 17,
                                   fontWeight: FontWeight.w500,
-                                  color: Color(0xFF3C342A),
+                                  color: colors.textPrimary,
                                 ),
                               ),
                             ),
                             CupertinoButton(
                               padding: EdgeInsets.zero,
                               onPressed: _changeFocusAreas,
-                              child: const Icon(
+                              child: Icon(
                                 CupertinoIcons.pencil,
                                 size: 20,
-                                color: Color(0xFF8B7563),
+                                color: colors.ctaPrimary,
                               ),
                             ),
                           ],
@@ -1176,18 +1294,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const SizedBox(height: 24),
                       Container(
                         height: 1,
-                        color: const Color(0xFF8B7563).withOpacity(0.1),
+                        color: colors.ctaPrimary.withOpacity(0.1),
                       ),
                       const SizedBox(height: 24),
 
                       // Section: Your Moments
-                      const Text(
-                        'Your moments',
+                      Text(
+                        l10n.profileYourMoments,
                         style: TextStyle(
                           fontFamily: 'Sora',
                           fontSize: 15,
                           fontWeight: FontWeight.w500,
-                          color: Color(0xFF9A8A78),
+                          color: colors.textSecondary,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -1197,20 +1315,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         builder: (context, snapshot) {
                           final count = snapshot.data ?? 0;
                           final label = count == 0
-                              ? 'None yet'
-                              : count == 1
-                                  ? '1 moment'
-                                  : '$count moments';
+                              ? l10n.profileMomentsNone
+                              : l10n.profileMomentsCount(count);
                           return Row(
                             children: [
                               Expanded(
                                 child: Text(
                                   label,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontFamily: 'Sora',
                                     fontSize: 17,
                                     fontWeight: FontWeight.w500,
-                                    color: Color(0xFF3C342A),
+                                    color: colors.textPrimary,
                                   ),
                                 ),
                               ),
@@ -1224,10 +1340,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     ),
                                   );
                                 },
-                                child: const Icon(
+                                child: Icon(
                                   CupertinoIcons.chevron_right,
                                   size: 20,
-                                  color: Color(0xFF8B7563),
+                                  color: colors.ctaPrimary,
                                 ),
                               ),
                             ],
@@ -1241,15 +1357,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(height: 16),
 
                 // SETTINGS label
-                const Padding(
-                  padding: EdgeInsets.only(top: 16, bottom: 4),
+                Padding(
+                  padding: const EdgeInsets.only(top: 16, bottom: 4),
                   child: Text(
-                    'SETTINGS',
+                    l10n.profileSettings,
                     style: TextStyle(
                       fontFamily: 'Sora',
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFF9A8A78),
+                      color: colors.textSecondary,
                       letterSpacing: 0.8,
                     ),
                   ),
@@ -1266,37 +1382,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             width: 40,
                             height: 40,
                             decoration: BoxDecoration(
-                              color: const Color(0xFFD4B782).withOpacity(0.15),
+                              color: colors.ctaPrimary.withOpacity(0.15),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               CupertinoIcons.bell,
                               size: 18,
-                              color: Color(0xFF9A8566),
+                              color: colors.textMutedBrown,
                             ),
                           ),
                           const SizedBox(width: 12),
-                          const Expanded(
+                          Expanded(
                             child: Text(
-                              'Daily reminders',
+                              l10n.profileDailyReminders,
                               style: TextStyle(
                                 fontFamily: 'Sora',
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
-                                color: Color(0xFF3C342A),
+                                color: colors.textPrimary,
                               ),
                             ),
                           ),
                           CupertinoSwitch(
                             value: _dailyEnabled,
-                            activeTrackColor: const Color(0xFF7A8B6F),
+                            activeTrackColor: colors.success,
                             thumbColor: const Color(0xFFFFFFFF),
                             onChanged: (value) async {
                               if (value) {
                                 final granted = await NotificationScheduler.requestPermission();
                                 if (granted) {
                                   await NotificationPreferencesService.setEnabled(true);
-                                  await NotificationScheduler.scheduleDaily();
+                                  final l10n = AppLocalizations.of(context);
+                                  await NotificationScheduler.scheduleDaily(l10n);
                                   if (mounted) {
                                     setState(() {
                                       _dailyEnabled = true;
@@ -1336,14 +1453,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 child: Row(
                                   children: [
                                     const SizedBox(width: 52),
-                                    const Expanded(
+                                    Expanded(
                                       child: Text(
-                                        'Remind me at',
+                                        l10n.profileRemindAt,
                                         style: TextStyle(
                                           fontFamily: 'Sora',
                                           fontSize: 15,
                                           fontWeight: FontWeight.w400,
-                                          color: Color(0xFF8B7563),
+                                          color: colors.ctaPrimary,
                                         ),
                                       ),
                                     ),
@@ -1358,20 +1475,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           context: context,
                                           builder: (ctx) => Container(
                                             height: 280,
-                                            color: const Color(0xFFF5ECE0),
+                                            color: colors.modalBg1,
                                             child: Column(
                                               children: [
                                                 Row(
                                                   mainAxisAlignment: MainAxisAlignment.end,
                                                   children: [
                                                     CupertinoButton(
-                                                      child: const Text(
-                                                        'Done',
+                                                      child: Text(
+                                                        l10n.commonDone,
                                                         style: TextStyle(
                                                           fontFamily: 'Sora',
                                                           fontSize: 16,
                                                           fontWeight: FontWeight.w600,
-                                                          color: Color(0xFF8B7563),
+                                                          color: colors.ctaPrimary,
                                                         ),
                                                       ),
                                                       onPressed: () async {
@@ -1380,7 +1497,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                         await NotificationPreferencesService.setMinute(tempTime.minute);
                                                         final enabled = await NotificationPreferencesService.isEnabled();
                                                         if (enabled) {
-                                                          await NotificationScheduler.rescheduleAll();
+                                                          final l10n = AppLocalizations.of(context);
+                                                          await NotificationScheduler.rescheduleAll(l10n);
                                                         }
                                                         if (mounted) {
                                                           setState(() {
@@ -1409,16 +1527,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       child: Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                         decoration: BoxDecoration(
-                                          color: const Color(0xFFEDE8E0),
+                                          color: colors.borderWarm,
                                           borderRadius: BorderRadius.circular(10),
                                         ),
                                         child: Text(
                                           _formatTime(_notifHour, _notifMinute),
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontFamily: 'Sora',
                                             fontSize: 15,
                                             fontWeight: FontWeight.w500,
-                                            color: Color(0xFF3C342A),
+                                            color: colors.textPrimary,
                                           ),
                                         ),
                                       ),
@@ -1434,7 +1552,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         child: Container(
                           height: 1,
-                          color: const Color(0xFF8B7563).withOpacity(0.1),
+                          color: colors.ctaPrimary.withOpacity(0.1),
                         ),
                       ),
 
@@ -1445,37 +1563,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             width: 40,
                             height: 40,
                             decoration: BoxDecoration(
-                              color: const Color(0xFFD4B782).withOpacity(0.15),
+                              color: colors.ctaPrimary.withOpacity(0.15),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               CupertinoIcons.calendar,
                               size: 18,
-                              color: Color(0xFF9A8566),
+                              color: colors.textMutedBrown,
                             ),
                           ),
                           const SizedBox(width: 12),
-                          const Expanded(
+                          Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Weekly summary',
+                                  l10n.profileWeeklySummary,
                                   style: TextStyle(
                                     fontFamily: 'Sora',
                                     fontSize: 16,
                                     fontWeight: FontWeight.w500,
-                                    color: Color(0xFF3C342A),
+                                    color: colors.textPrimary,
                                   ),
                                 ),
-                                SizedBox(height: 2),
+                                const SizedBox(height: 2),
                                 Text(
-                                  'Every Sunday evening',
+                                  l10n.profileWeeklySubtitle,
                                   style: TextStyle(
                                     fontFamily: 'Sora',
                                     fontSize: 13,
                                     fontWeight: FontWeight.w400,
-                                    color: Color(0xFF9A8A78),
+                                    color: colors.textSecondary,
                                   ),
                                 ),
                               ],
@@ -1483,11 +1601,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           CupertinoSwitch(
                             value: _weeklyEnabled,
-                            activeTrackColor: const Color(0xFF7A8B6F),
+                            activeTrackColor: colors.success,
                             thumbColor: const Color(0xFFFFFFFF),
                             onChanged: (value) async {
                               await NotificationPreferencesService.setWeeklyEnabled(value);
-                              await NotificationScheduler.rescheduleAll();
+                              final l10n = AppLocalizations.of(context);
+                              await NotificationScheduler.rescheduleAll(l10n);
                               if (mounted) {
                                 setState(() {
                                   _weeklyEnabled = value;
@@ -1500,20 +1619,68 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                       // Permission denied message
                       if (_notifPermissionDenied)
-                        const Padding(
-                          padding: EdgeInsets.only(top: 16),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 16),
                           child: Text(
-                            'No worries — you can enable notifications in your device Settings.',
+                            l10n.profileNotifDenied,
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontFamily: 'Sora',
                               fontSize: 13,
                               fontWeight: FontWeight.w400,
-                              color: Color(0xFF9B8A7A),
+                              color: colors.textTertiary,
                               height: 1.5,
                             ),
                           ),
                         ),
+
+                      // Divider
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Container(
+                          height: 1,
+                          color: colors.ctaPrimary.withOpacity(0.1),
+                        ),
+                      ),
+
+                      // Row 3: Appearance
+                      GestureDetector(
+                        onTap: () => _showAppearancePicker(context),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: colors.ctaPrimary.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Icon(
+                                CupertinoIcons.paintbrush,
+                                size: 18,
+                                color: colors.textMutedBrown,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                l10n.profileAppearance,
+                                style: TextStyle(
+                                  fontFamily: 'Sora',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: colors.textPrimary,
+                                ),
+                              ),
+                            ),
+                            Icon(
+                              CupertinoIcons.chevron_right,
+                              size: 16,
+                              color: colors.textSecondary,
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -1521,15 +1688,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(height: 12),
 
                 // SUPPORT label
-                const Padding(
-                  padding: EdgeInsets.only(top: 12, bottom: 4),
+                Padding(
+                  padding: const EdgeInsets.only(top: 12, bottom: 4),
                   child: Text(
-                    'SUPPORT',
+                    l10n.profileSupport,
                     style: TextStyle(
                       fontFamily: 'Sora',
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFF9A8A78),
+                      color: colors.textSecondary,
                       letterSpacing: 0.8,
                     ),
                   ),
@@ -1538,7 +1705,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 // Support Card (Multi-Item)
                 Container(
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFFFFF).withOpacity(0.50),
+                        color: colors.profileCard.withOpacity(colors.profileCardOpacity),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: const Color(0xFFFFFFFF).withOpacity(0.6),
@@ -1546,7 +1713,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF3C342A).withOpacity(0.04),
+                            color: colors.textPrimary.withOpacity(0.04),
                             blurRadius: 12,
                             offset: const Offset(0, 4),
                           ),
@@ -1561,22 +1728,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 width: 48,
                                 height: 48,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFC5A395).withOpacity(0.12),
+                                  color: colors.accentRegular.withOpacity(0.12),
                                   borderRadius: BorderRadius.circular(16),
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   CupertinoIcons.question_circle,
                                   size: 20,
-                                  color: Color(0xFFA08876),
+                                  color: colors.textMutedBrown,
                                 ),
                               ),
-                              title: 'Help & Support',
+                              title: l10n.profileHelpSupport,
                               onTap: _contactSupport,
                             ),
                           ),
                           Container(
                             height: 1,
-                            color: const Color(0xFF8B7563).withOpacity(0.1),
+                            color: colors.ctaPrimary.withOpacity(0.1),
                           ),
                           Padding(
                             padding: const EdgeInsets.all(20),
@@ -1585,22 +1752,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 width: 48,
                                 height: 48,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF8B7563).withOpacity(0.12),
+                                  color: colors.ctaPrimary.withOpacity(0.12),
                                   borderRadius: BorderRadius.circular(16),
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   CupertinoIcons.shield,
                                   size: 20,
-                                  color: Color(0xFF8B7563),
+                                  color: colors.ctaPrimary,
                                 ),
                               ),
-                              title: 'Privacy Policy',
+                              title: l10n.profilePrivacy,
                               onTap: _openPrivacyPolicy,
                             ),
                           ),
                           Container(
                             height: 1,
-                            color: const Color(0xFF8B7563).withOpacity(0.1),
+                            color: colors.ctaPrimary.withOpacity(0.1),
                           ),
                           Padding(
                             padding: const EdgeInsets.all(20),
@@ -1609,16 +1776,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 width: 48,
                                 height: 48,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF9A8A78).withOpacity(0.12),
+                                  color: colors.textSecondary.withOpacity(0.12),
                                   borderRadius: BorderRadius.circular(16),
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   CupertinoIcons.doc_text,
                                   size: 20,
-                                  color: Color(0xFF9A8A78),
+                                  color: colors.textSecondary,
                                 ),
                               ),
-                              title: 'Terms of Service',
+                              title: l10n.profileTerms,
                               onTap: _openTermsOfService,
                             ),
                           ),
@@ -1633,13 +1800,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   padding: const EdgeInsets.only(top: 16, bottom: 4),
                   child: Opacity(
                     opacity: 0.6,
-                    child: const Text(
-                      'CONNECT ACCOUNT',
+                    child: Text(
+                      l10n.profileConnectAccount,
                       style: TextStyle(
                         fontFamily: 'Sora',
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
-                        color: Color(0xFF9A8A78),
+                        color: colors.textSecondary,
                         letterSpacing: 0.8,
                       ),
                     ),
@@ -1649,7 +1816,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 // Sign-In Card (Multi-Button)
                 Container(
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFFFFF).withOpacity(0.50),
+                        color: colors.profileCard.withOpacity(colors.profileCardOpacity),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: const Color(0xFFFFFFFF).withOpacity(0.6),
@@ -1657,7 +1824,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF3C342A).withOpacity(0.04),
+                            color: colors.textPrimary.withOpacity(0.04),
                             blurRadius: 12,
                             offset: const Offset(0, 4),
                           ),
@@ -1685,13 +1852,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   height: 22,
                                 ),
                                 const SizedBox(width: 12),
-                                const Text(
-                                  'Sign in with Google',
+                                Text(
+                                  l10n.profileSignInGoogle,
                                   style: TextStyle(
                                     fontFamily: 'Sora',
                                     fontSize: 16,
                                     fontWeight: FontWeight.w500,
-                                    color: Color(0xFF3C342A),
+                                    color: colors.textPrimary,
                                   ),
                                 ),
                               ],
@@ -1699,7 +1866,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           Container(
                             height: 1,
-                            color: const Color(0xFF8B7563).withOpacity(0.1),
+                            color: colors.ctaPrimary.withOpacity(0.1),
                           ),
                           // Apple Sign In Button
                           CupertinoButton(
@@ -1713,23 +1880,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             },
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
-                              children: const [
+                              children: [
                                 // Apple logo
                                 Text(
                                   '\uF8FF',
                                   style: TextStyle(
                                     fontSize: 22,
-                                    color: Color(0xFF3C342A),
+                                    color: colors.textPrimary,
                                   ),
                                 ),
-                                SizedBox(width: 12),
+                                const SizedBox(width: 12),
                                 Text(
-                                  'Sign in with Apple',
+                                  l10n.profileSignInApple,
                                   style: TextStyle(
                                     fontFamily: 'Sora',
                                     fontSize: 16,
                                     fontWeight: FontWeight.w500,
-                                    color: Color(0xFF3C342A),
+                                    color: colors.textPrimary,
                                   ),
                                 ),
                               ],
@@ -1747,7 +1914,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     // Sign Out Button
                     Container(
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFFFFFF).withOpacity(0.50),
+                            color: colors.profileCard.withOpacity(colors.profileCardOpacity),
                             borderRadius: BorderRadius.circular(100),
                             border: Border.all(
                               color: const Color(0xFFFFFFFF).withOpacity(0.6),
@@ -1755,7 +1922,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF3C342A).withOpacity(0.04),
+                                color: colors.textPrimary.withOpacity(0.04),
                                 blurRadius: 12,
                                 offset: const Offset(0, 4),
                               ),
@@ -1768,20 +1935,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             },
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
-                              children: const [
+                              children: [
                                 Icon(
                                   CupertinoIcons.arrow_right_square,
                                   size: 18,
-                                  color: Color(0xFFA08876),
+                                  color: colors.textMutedBrown,
                                 ),
-                                SizedBox(width: 8),
+                                const SizedBox(width: 8),
                                 Text(
-                                  'Sign out',
+                                  l10n.profileSignOut,
                                   style: TextStyle(
                                     fontFamily: 'Sora',
                                     fontSize: 15,
                                     fontWeight: FontWeight.w500,
-                                    color: Color(0xFFA08876),
+                                    color: colors.textMutedBrown,
                                   ),
                                 ),
                               ],
@@ -1795,13 +1962,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     CupertinoButton(
                       padding: EdgeInsets.zero,
                       onPressed: _deleteProfileData,
-                      child: const Text(
-                        'Delete profile data',
+                      child: Text(
+                        l10n.profileDeleteData,
                         style: TextStyle(
                           fontFamily: 'Sora',
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
-                          color: Color(0xFF9A8A78),
+                          color: colors.textSecondary,
                         ),
                       ),
                     ),
@@ -1809,13 +1976,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const SizedBox(height: 32),
 
                     // Version Label
-                    const Text(
-                      'Intended v1.0.0',
+                    Text(
+                      l10n.profileVersion,
                       style: TextStyle(
                         fontFamily: 'Sora',
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
-                        color: Color(0xFFA08876),
+                        color: colors.textMutedBrown,
                       ),
                     ),
                   ],
@@ -1839,10 +2006,12 @@ class _GlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.watch<ThemeProvider>().colors;
+
     return Container(
       padding: padding ?? const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFFFFF).withOpacity(0.50),
+        color: colors.profileCard.withOpacity(colors.profileCardOpacity),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: const Color(0xFFFFFFFF).withOpacity(0.6),
@@ -1850,7 +2019,7 @@ class _GlassCard extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF3C342A).withOpacity(0.04),
+            color: colors.textPrimary.withOpacity(0.04),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -1876,6 +2045,8 @@ class _ProfileButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.watch<ThemeProvider>().colors;
+
     return CupertinoButton(
       padding: EdgeInsets.zero,
       onPressed: onTap,
@@ -1890,11 +2061,11 @@ class _ProfileButton extends StatelessWidget {
                 Text(
                   title,
                   textAlign: TextAlign.left,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Sora',
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
-                    color: Color(0xFF3C342A),
+                    color: colors.textPrimary,
                   ),
                 ),
                 if (subtitle != null) ...[
@@ -1902,21 +2073,21 @@ class _ProfileButton extends StatelessWidget {
                   Text(
                     subtitle!,
                     textAlign: TextAlign.left,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Sora',
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFF9A8A78),
+                      color: colors.textSecondary,
                     ),
                   ),
                 ],
               ],
             ),
           ),
-          const Icon(
+          Icon(
             CupertinoIcons.chevron_right,
             size: 20,
-            color: Color(0xFF8B7563),
+            color: colors.ctaPrimary,
           ),
         ],
       ),
@@ -1945,6 +2116,17 @@ class _FocusAreaChangeScreenState extends State<_FocusAreaChangeScreen> {
     'Finances',
     'Self-care',
   ];
+
+  Map<String, String> _localizedAreaNames(AppLocalizations l10n) => {
+    'Health': l10n.focusAreaHealth,
+    'Mood': l10n.focusAreaMood,
+    'Productivity': l10n.focusAreaProductivity,
+    'Home & organization': l10n.focusAreaHome,
+    'Relationships': l10n.focusAreaRelationships,
+    'Creativity': l10n.focusAreaCreativity,
+    'Finances': l10n.focusAreaFinances,
+    'Self-care': l10n.focusAreaSelfCare,
+  };
 
   @override
   void initState() {
@@ -1980,8 +2162,12 @@ class _FocusAreaChangeScreenState extends State<_FocusAreaChangeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.watch<ThemeProvider>().colors;
+    final l10n = AppLocalizations.of(context);
+    final areaNames = _localizedAreaNames(l10n);
+
     return CupertinoPageScaffold(
-      backgroundColor: const Color(0xFFF3F4EF),
+      backgroundColor: colors.surfaceLightest,
       child: SafeArea(
         child: Column(
           children: [
@@ -1992,14 +2178,14 @@ class _FocusAreaChangeScreenState extends State<_FocusAreaChangeScreen> {
                   CupertinoButton(
                     padding: EdgeInsets.zero,
                     onPressed: () => Navigator.pop(context),
-                    child: const Icon(
+                    child: Icon(
                       CupertinoIcons.chevron_left,
-                      color: Color(0xFF6B5B4A),
+                      color: colors.buttonDark,
                     ),
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'Change Focus Areas',
+                    l10n.profileChangeFocusAreasScreenTitle,
                     style: AppTextStyles.h2(context),
                   ),
                 ],
@@ -2010,7 +2196,7 @@ class _FocusAreaChangeScreenState extends State<_FocusAreaChangeScreen> {
                 padding: const EdgeInsets.all(24),
                 children: [
                   Text(
-                    'Choose up to 2 areas',
+                    l10n.profileChooseUpTo2,
                     style: AppTextStyles.body(context),
                   ),
                   const SizedBox(height: 24),
@@ -2025,13 +2211,13 @@ class _FocusAreaChangeScreenState extends State<_FocusAreaChangeScreen> {
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? const Color(0xFF6B5B4A).withOpacity(0.1)
+                                ? colors.buttonDark.withOpacity(0.1)
                                 : Colors.white,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: isSelected
-                                  ? const Color(0xFF6B5B4A)
-                                  : const Color(0xFFE8E3DB),
+                                  ? colors.buttonDark
+                                  : colors.borderWarm,
                               width: isSelected ? 2 : 1,
                             ),
                           ),
@@ -2039,21 +2225,21 @@ class _FocusAreaChangeScreenState extends State<_FocusAreaChangeScreen> {
                             children: [
                               Expanded(
                                 child: Text(
-                                  area,
+                                  areaNames[area] ?? area,
                                   style: TextStyle(
                                     fontSize: 17,
                                     fontWeight: FontWeight.w500,
                                     color: isSelected
-                                        ? const Color(0xFF6B5B4A)
-                                        : const Color(0xFF2F2E2A),
+                                        ? colors.buttonDark
+                                        : colors.textPrimary,
                                     fontFamily: 'Sora',
                                   ),
                                 ),
                               ),
                               if (isSelected)
-                                const Icon(
+                                Icon(
                                   CupertinoIcons.checkmark_circle_fill,
-                                  color: Color(0xFF6B5B4A),
+                                  color: colors.buttonDark,
                                   size: 24,
                                 ),
                             ],
@@ -2071,17 +2257,17 @@ class _FocusAreaChangeScreenState extends State<_FocusAreaChangeScreen> {
                 width: double.infinity,
                 child: CupertinoButton(
                   color: _selectedAreas.isNotEmpty
-                      ? const Color(0xFF6B5B4A)
-                      : const Color(0xFFD8D2C8),
+                      ? colors.buttonDark
+                      : colors.borderMedium,
                   borderRadius: BorderRadius.circular(ComponentSizes.buttonRadius),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   onPressed: _selectedAreas.isNotEmpty ? _saveAreas : null,
                   child: Text(
-                    'Save Changes',
+                    l10n.profileSaveChanges,
                     style: TextStyle(
                       color: _selectedAreas.isNotEmpty
-                          ? const Color(0xFFF6F5F1)
-                          : const Color(0xFFB5A89A),
+                          ? colors.surfaceLightest
+                          : colors.textDisabled,
                       fontFamily: 'Sora',
                       fontSize: 17,
                       fontWeight: FontWeight.w600,

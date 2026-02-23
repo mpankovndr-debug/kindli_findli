@@ -1,31 +1,33 @@
+import '../l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class WarmthMessageService {
   static const String _indexKey = 'warmth_message_index';
 
-  static const List<String> _messages = [
-    "That's okay. Tomorrow is still yours.",
-    "Rest counts too.",
-    "You don't have to every day. Just sometimes.",
-    "Not today — and that's allowed.",
-    "Be as kind to yourself as you'd be to a friend.",
-    "The habit will be here when you're ready.",
-    "Even stepping back gently is still showing up.",
-    "Nothing is lost. You're still here.",
-    "Some days are for resting. This might be one of them.",
-    "Kindness toward yourself is a habit worth keeping.",
-    "No streak to break. No score to lose. Just you.",
-    "The gentlest days matter too.",
-    "You showed up enough today just by being here.",
-    "It's okay to let this one go.",
-    "Progress isn't only visible. Sometimes it's just surviving.",
+  static List<String> _messages(AppLocalizations l10n) => [
+    l10n.warmthMsg1,
+    l10n.warmthMsg2,
+    l10n.warmthMsg3,
+    l10n.warmthMsg4,
+    l10n.warmthMsg5,
+    l10n.warmthMsg6,
+    l10n.warmthMsg7,
+    l10n.warmthMsg8,
+    l10n.warmthMsg9,
+    l10n.warmthMsg10,
+    l10n.warmthMsg11,
+    l10n.warmthMsg12,
+    l10n.warmthMsg13,
+    l10n.warmthMsg14,
+    l10n.warmthMsg15,
   ];
 
   /// Returns the next message in the rotation, persisted across sessions.
-  static Future<String> getNext() async {
+  static Future<String> getNext(AppLocalizations l10n) async {
     final prefs = await SharedPreferences.getInstance();
     final current = prefs.getInt(_indexKey) ?? 0;
-    final message = _messages[current % _messages.length];
+    final messages = _messages(l10n);
+    final message = messages[current % messages.length];
     await prefs.setInt(_indexKey, current + 1);
     return message;
   }

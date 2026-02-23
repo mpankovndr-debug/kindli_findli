@@ -1,7 +1,12 @@
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../l10n/app_localizations.dart';
+import '../theme/app_colors.dart';
+import '../theme/theme_provider.dart';
 
 /// Modal for managing active Intended+ subscription
 /// Shows subscription details and opens App Store for management
@@ -30,8 +35,11 @@ class SubscriptionManagementModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.watch<ThemeProvider>().colors;
+    final l10n = AppLocalizations.of(context);
+
     return Container(
-      color: const Color(0xFF504638).withOpacity(0.28),
+      color: colors.barrierColor.withOpacity(colors.barrierOpacity),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
         child: Center(
@@ -45,15 +53,15 @@ class SubscriptionManagementModal extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.fromLTRB(28, 36, 28, 36),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      begin: Alignment(0.0, 2.41), // 145° angle
-                      end: Alignment(0.0, -2.41),
+                    gradient: LinearGradient(
+                      begin: const Alignment(0.0, 2.41), // 145° angle
+                      end: const Alignment(0.0, -2.41),
                       colors: [
-                        Color.fromRGBO(245, 236, 224, 0.96),
-                        Color.fromRGBO(237, 228, 216, 0.93),
-                        Color.fromRGBO(230, 221, 209, 0.95),
+                        colors.modalBg1.withOpacity(0.96),
+                        colors.modalBg2.withOpacity(0.93),
+                        colors.modalBg3.withOpacity(0.95),
                       ],
-                      stops: [0.0, 0.5, 1.0],
+                      stops: const [0.0, 0.5, 1.0],
                     ),
                     borderRadius: BorderRadius.circular(32),
                     border: Border.all(
@@ -62,7 +70,7 @@ class SubscriptionManagementModal extends StatelessWidget {
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF32281E).withOpacity(0.4),
+                        color: colors.modalShadow.withOpacity(0.4),
                         blurRadius: 70,
                         offset: const Offset(0, 25),
                       ),
@@ -81,27 +89,27 @@ class SubscriptionManagementModal extends StatelessWidget {
                       // Header
                       Column(
                         children: [
-                          const Text(
-                            'Intended+',
+                          Text(
+                            l10n.subscriptionTitle,
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontFamily: 'Sora',
                               fontSize: 28,
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFF3C342A),
+                              color: colors.textPrimary,
                               letterSpacing: -0.4,
                               height: 1.2,
                             ),
                           ),
                           const SizedBox(height: 8),
-                          const Text(
-                            'You\'re a supporter ♥',
+                          Text(
+                            l10n.subscriptionSupporter,
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontFamily: 'DM Sans',
                               fontSize: 16,
                               fontWeight: FontWeight.w400,
-                              color: Color(0xFF8A7563),
+                              color: colors.ctaPrimary,
                               fontStyle: FontStyle.italic,
                               height: 1.5,
                             ),
@@ -119,12 +127,12 @@ class SubscriptionManagementModal extends StatelessWidget {
                           child: Container(
                             padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
-                              gradient: const LinearGradient(
+                              gradient: LinearGradient(
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                                 colors: [
-                                  Color.fromRGBO(255, 255, 255, 0.45),
-                                  Color.fromRGBO(248, 245, 242, 0.3),
+                                  const Color(0xFFFFFFFF).withOpacity(0.45),
+                                  colors.surfaceLight.withOpacity(0.3),
                                 ],
                               ),
                               borderRadius: BorderRadius.circular(20),
@@ -134,7 +142,7 @@ class SubscriptionManagementModal extends StatelessWidget {
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF3C342A).withOpacity(0.1),
+                                  color: colors.textPrimary.withOpacity(0.1),
                                   blurRadius: 16,
                                   offset: const Offset(0, 4),
                                 ),
@@ -150,33 +158,33 @@ class SubscriptionManagementModal extends StatelessWidget {
                             child: Column(
                               children: [
                                 // Plan row
-                                _buildDetailRow('Plan', plan),
+                                _buildDetailRow(l10n.subscriptionPlan, plan, colors),
 
                                 const SizedBox(height: 16),
 
                                 // Divider
                                 Container(
                                   height: 1,
-                                  color: const Color(0xFF8B7563).withOpacity(0.15),
+                                  color: colors.ctaPrimary.withOpacity(0.15),
                                 ),
 
                                 const SizedBox(height: 16),
 
                                 // Price row
-                                _buildDetailRow('Price', price),
+                                _buildDetailRow(l10n.subscriptionPrice, price, colors),
 
                                 const SizedBox(height: 16),
 
                                 // Divider
                                 Container(
                                   height: 1,
-                                  color: const Color(0xFF8B7563).withOpacity(0.15),
+                                  color: colors.ctaPrimary.withOpacity(0.15),
                                 ),
 
                                 const SizedBox(height: 16),
 
                                 // Renewal row
-                                _buildDetailRow('Renews', renewalDate),
+                                _buildDetailRow(l10n.subscriptionRenews, renewalDate, colors),
                               ],
                             ),
                           ),
@@ -186,14 +194,14 @@ class SubscriptionManagementModal extends StatelessWidget {
                       const SizedBox(height: 28),
 
                       // Thank you message
-                      const Text(
-                        'Thank you for supporting Intended.\nYour subscription helps us keep\nbuilding a kinder way to grow.',
+                      Text(
+                        l10n.subscriptionThankYou,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontFamily: 'DM Sans',
                           fontSize: 15,
                           fontWeight: FontWeight.w400,
-                          color: Color(0xFF8B7563),
+                          color: colors.ctaPrimary,
                           height: 1.6,
                         ),
                       ),
@@ -209,22 +217,22 @@ class SubscriptionManagementModal extends StatelessWidget {
                             filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
                             child: Container(
                               decoration: BoxDecoration(
-                                gradient: const LinearGradient(
+                                gradient: LinearGradient(
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                   colors: [
-                                    Color.fromRGBO(139, 117, 99, 0.92),
-                                    Color.fromRGBO(122, 107, 95, 0.88),
+                                    colors.ctaPrimary.withOpacity(0.92),
+                                    colors.ctaSecondary.withOpacity(0.88),
                                   ],
                                 ),
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
-                                  color: const Color(0xFF8B7563).withOpacity(0.4),
+                                  color: colors.ctaPrimary.withOpacity(0.4),
                                   width: 1,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFF3C342A).withOpacity(0.3),
+                                    color: colors.textPrimary.withOpacity(0.3),
                                     blurRadius: 24,
                                     offset: const Offset(0, 6),
                                   ),
@@ -241,9 +249,9 @@ class SubscriptionManagementModal extends StatelessWidget {
                                 onPressed: _openAppStoreSubscriptions,
                                 padding: const EdgeInsets.symmetric(vertical: 16),
                                 borderRadius: BorderRadius.circular(20),
-                                child: const Text(
-                                  'Manage in App Store',
-                                  style: TextStyle(
+                                child: Text(
+                                  l10n.subscriptionManage,
+                                  style: const TextStyle(
                                     fontFamily: 'Sora',
                                     fontSize: 17,
                                     fontWeight: FontWeight.w600,
@@ -267,13 +275,13 @@ class SubscriptionManagementModal extends StatelessWidget {
                             Navigator.pop(context);
                           },
                           padding: const EdgeInsets.symmetric(vertical: 12),
-                          child: const Text(
-                            'Close',
+                          child: Text(
+                            l10n.commonClose,
                             style: TextStyle(
                               fontFamily: 'Sora',
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
-                              color: Color(0xFF9B8A7A),
+                              color: colors.textTertiary,
                             ),
                           ),
                         ),
@@ -289,26 +297,26 @@ class SubscriptionManagementModal extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow(String label, String value) {
+  Widget _buildDetailRow(String label, String value, AppColorScheme colors) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: 'Sora',
             fontSize: 14,
             fontWeight: FontWeight.w500,
-            color: Color(0xFF8B7563),
+            color: colors.ctaPrimary,
           ),
         ),
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: 'Sora',
             fontSize: 16,
             fontWeight: FontWeight.w500,
-            color: Color(0xFF3C342A),
+            color: colors.textPrimary,
           ),
         ),
       ],

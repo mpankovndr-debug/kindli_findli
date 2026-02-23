@@ -1,189 +1,88 @@
 import 'dart:math';
 
+import '../l10n/app_localizations.dart';
+
 /// System for managing habit completion messages with scientific insights
 class CompletionMessages {
   static final Random _random = Random();
 
   // General supportive messages (used ~75% of the time)
-  static const List<String> _generalMessages = [
-    "Small steps like this matter.",
-    "You showed up today.",
-    "This is how change happens.",
-    "One step closer.",
-    "You did what you said you would.",
-    "That took effort. Good.",
-    "Another small victory.",
-    "You made it happen.",
-    "Progress is progress.",
-    "You followed through.",
-    "This counts.",
-    "You kept your word to yourself.",
-    "Well done.",
-    "You made time for this.",
-    "That's growth right there.",
-    "You pushed through.",
-    "Another habit built.",
-    "You committed and you did it.",
-    "This adds up.",
-    "You honored your intention.",
+  static List<String> _generalMessages(AppLocalizations l10n) => [
+    l10n.completionMsg1,
+    l10n.completionMsg2,
+    l10n.completionMsg3,
+    l10n.completionMsg4,
+    l10n.completionMsg5,
+    l10n.completionMsg6,
+    l10n.completionMsg7,
+    l10n.completionMsg8,
+    l10n.completionMsg9,
+    l10n.completionMsg10,
+    l10n.completionMsg11,
+    l10n.completionMsg12,
+    l10n.completionMsg13,
+    l10n.completionMsg14,
+    l10n.completionMsg15,
+    l10n.completionMsg16,
+    l10n.completionMsg17,
+    l10n.completionMsg18,
+    l10n.completionMsg19,
+    l10n.completionMsg20,
   ];
 
   // Scientific insights mapped to specific habit types
   // These are shown ~25% of the time for personalization
-  static const Map<String, List<String>> _habitInsights = {
-    // Water/Hydration habits
-    'water': [
-      'Even mild dehydration can affect mood and concentration.',
-      'Your brain is 75% water. Hydration affects cognitive function.',
-      'Drinking water can reduce fatigue by up to 14%.',
-    ],
-
-    // Exercise/Movement habits
-    'exercise': [
-      'Just 10 minutes of movement increases blood flow to your brain.',
-      'Exercise releases endorphins that improve mood for hours.',
-      'Regular movement reduces anxiety as effectively as meditation.',
-    ],
-    'walk': [
-      'Walking outdoors reduces cortisol levels within 20 minutes.',
-      'A 10-minute walk can boost creativity by 60%.',
-      'Walking improves memory recall by increasing hippocampal activity.',
-    ],
-    'stretch': [
-      'Stretching increases blood flow and reduces muscle tension.',
-      'Regular stretching can improve flexibility by 20% in just weeks.',
-      'Stretching triggers the parasympathetic nervous system, reducing stress.',
-    ],
-
-    // Sleep habits
-    'sleep': [
-      "Quality sleep strengthens memory consolidation by 40%.",
-      "Consistent sleep schedules regulate circadian rhythm and mood.",
-      "Sleep deprivation reduces cognitive performance like alcohol does.",
-    ],
-    'bed': [
-      "A consistent bedtime routine signals your brain to prepare for sleep.",
-      "Going to bed at the same time improves sleep quality by 25%.",
-      "Your body's natural melatonin production peaks with routine.",
-    ],
-
-    // Mindfulness/Breathing habits
-    'breathe': [
-      'Deep breathing activates the vagus nerve, calming your nervous system.',
-      'Controlled breathing can reduce stress hormones within minutes.',
-      'Box breathing is used by Navy SEALs to manage high-stress situations.',
-    ],
-    'meditate': [
-      'Just 10 minutes of meditation increases gray matter in the brain.',
-      'Regular meditation reduces the size of the amygdala (fear center).',
-      'Mindfulness practice improves emotional regulation over time.',
-    ],
-
-    // Reading habits
-    'read': [
-      'Reading for 6 minutes can reduce stress levels by 68%.',
-      'Regular reading strengthens neural pathways and connectivity.',
-      'Reading before bed improves sleep quality more than screens.',
-    ],
-
-    // Social connection habits
-    'call': [
-      'Social connection is as important to health as exercise and diet.',
-      'A 10-minute conversation can reduce feelings of loneliness.',
-      'Voice contact releases oxytocin, the bonding hormone.',
-    ],
-    'friend': [
-      'Strong social ties can increase longevity by 50%.',
-      'Quality friendships reduce stress hormones significantly.',
-      'Social connection boosts immune system function.',
-    ],
-
-    // Writing/Journaling habits
-    'write': [
-      'Writing about emotions activates the prefrontal cortex, reducing stress.',
-      'Journaling can improve immune function and reduce symptoms.',
-      'Expressive writing helps process difficult experiences.',
-    ],
-    'journal': [
-      'Daily journaling increases self-awareness and emotional clarity.',
-      'Writing down worries reduces rumination and anxiety.',
-      'Gratitude journaling rewires the brain for positivity over time.',
-    ],
-
-    // Nutrition habits
-    'vegetable': [
-      'Eating vegetables increases gut bacteria diversity, improving mood.',
-      'Plant nutrients support neurotransmitter production.',
-      'Colorful vegetables contain antioxidants that protect brain cells.',
-    ],
-    'breakfast': [
-      'Eating breakfast stabilizes blood sugar and improves focus.',
-      'Morning nutrition jumpstarts your metabolism for the day.',
-      'Breakfast eaters have better cognitive performance.',
-    ],
-
-    // Screen time/Digital habits
-    'phone': [
-      'Reducing screen time before bed improves sleep quality by 30%.',
-      'Blue light suppresses melatonin production for up to 3 hours.',
-      'Taking breaks from screens reduces eye strain and headaches.',
-    ],
-    'screen': [
-      'Every hour away from screens improves mental clarity.',
-      'Digital detoxes reduce anxiety and improve real-world connection.',
-      'Screen breaks help maintain healthy dopamine regulation.',
-    ],
-
-    // Cleaning/Organization habits
-    'clean': [
-      'A tidy space reduces cortisol levels and mental clutter.',
-      'Organized environments improve focus and productivity by 25%.',
-      'Cleaning is a form of physical activity that reduces stress.',
-    ],
-    'organize': [
-      'Organization reduces decision fatigue throughout your day.',
-      'Clutter-free spaces improve cognitive processing.',
-      'An organized environment correlates with better sleep quality.',
-    ],
-
-    // Creative habits
-    'draw': [
-      'Creative activities increase dopamine production naturally.',
-      'Art engages both brain hemispheres, improving neural connectivity.',
-      'Drawing reduces stress hormones within 45 minutes.',
-    ],
-    'music': [
-      'Playing music strengthens the corpus callosum in the brain.',
-      'Musical practice improves executive function and memory.',
-      'Music activates the reward system, releasing dopamine.',
-    ],
+  static Map<String, List<String>> _habitInsights(AppLocalizations l10n) => {
+    'water': [l10n.insightWater1, l10n.insightWater2, l10n.insightWater3],
+    'exercise': [l10n.insightExercise1, l10n.insightExercise2, l10n.insightExercise3],
+    'walk': [l10n.insightWalk1, l10n.insightWalk2, l10n.insightWalk3],
+    'stretch': [l10n.insightStretch1, l10n.insightStretch2, l10n.insightStretch3],
+    'sleep': [l10n.insightSleep1, l10n.insightSleep2, l10n.insightSleep3],
+    'bed': [l10n.insightBed1, l10n.insightBed2, l10n.insightBed3],
+    'breathe': [l10n.insightBreathe1, l10n.insightBreathe2, l10n.insightBreathe3],
+    'meditate': [l10n.insightMeditate1, l10n.insightMeditate2, l10n.insightMeditate3],
+    'read': [l10n.insightRead1, l10n.insightRead2, l10n.insightRead3],
+    'call': [l10n.insightCall1, l10n.insightCall2, l10n.insightCall3],
+    'friend': [l10n.insightFriend1, l10n.insightFriend2, l10n.insightFriend3],
+    'write': [l10n.insightWrite1, l10n.insightWrite2, l10n.insightWrite3],
+    'journal': [l10n.insightJournal1, l10n.insightJournal2, l10n.insightJournal3],
+    'vegetable': [l10n.insightVegetable1, l10n.insightVegetable2, l10n.insightVegetable3],
+    'breakfast': [l10n.insightBreakfast1, l10n.insightBreakfast2, l10n.insightBreakfast3],
+    'phone': [l10n.insightPhone1, l10n.insightPhone2, l10n.insightPhone3],
+    'screen': [l10n.insightScreen1, l10n.insightScreen2, l10n.insightScreen3],
+    'clean': [l10n.insightClean1, l10n.insightClean2, l10n.insightClean3],
+    'organize': [l10n.insightOrganize1, l10n.insightOrganize2, l10n.insightOrganize3],
+    'draw': [l10n.insightDraw1, l10n.insightDraw2, l10n.insightDraw3],
+    'music': [l10n.insightMusic1, l10n.insightMusic2, l10n.insightMusic3],
   };
 
   /// Get a completion message (75% general, 25% scientific insight)
-  static String getMessage(String habitTitle) {
+  static String getMessage(String habitTitle, AppLocalizations l10n) {
     // 25% chance (1 in 4) for scientific insight
     final showInsight = _random.nextInt(4) == 0;
 
     if (showInsight) {
-      final insight = _getScientificInsight(habitTitle);
+      final insight = _getScientificInsight(habitTitle, l10n);
       if (insight != null) {
         return insight;
       }
     }
 
     // Default to general message
-    return _generalMessages[_random.nextInt(_generalMessages.length)];
+    final messages = _generalMessages(l10n);
+    return messages[_random.nextInt(messages.length)];
   }
 
   /// Get a scientific insight based on habit content
-  static String? _getScientificInsight(String habitTitle) {
+  static String? _getScientificInsight(String habitTitle, AppLocalizations l10n) {
     final lowerTitle = habitTitle.toLowerCase();
+    final insights = _habitInsights(l10n);
 
     // Find matching insight category
-    for (final entry in _habitInsights.entries) {
+    for (final entry in insights.entries) {
       if (lowerTitle.contains(entry.key)) {
-        final insights = entry.value;
-        return insights[_random.nextInt(insights.length)];
+        final categoryInsights = entry.value;
+        return categoryInsights[_random.nextInt(categoryInsights.length)];
       }
     }
 
@@ -191,16 +90,16 @@ class CompletionMessages {
   }
 
   /// Get the celebration title (random warm word)
-  static String getCelebrationTitle() {
-    const titles = [
-      'Nice',
-      'Well done',
-      'You did it',
-      'Great',
-      'Way to go',
-      'Good job',
-      'Lovely',
-      'That counts',
+  static String getCelebrationTitle(AppLocalizations l10n) {
+    final titles = [
+      l10n.celebrationNice,
+      l10n.celebrationWellDone,
+      l10n.celebrationYouDidIt,
+      l10n.celebrationGreat,
+      l10n.celebrationWayToGo,
+      l10n.celebrationGoodJob,
+      l10n.celebrationLovely,
+      l10n.celebrationThatCounts,
     ];
     return titles[_random.nextInt(titles.length)];
   }

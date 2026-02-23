@@ -9,6 +9,11 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'l10n/app_localizations.dart';
+
+import 'theme/app_colors.dart';
+import 'theme/theme_provider.dart';
 import 'onboarding_v2/onboarding_state.dart';
 import 'onboarding_v2/welcome_v2_screen.dart';
 import 'state/user_state.dart';
@@ -23,12 +28,13 @@ import 'utils/ios_version.dart';
 import 'services/notification_scheduler.dart';
 
 // ✅ ADD THIS HELPER HERE (before the main() function):
-Future<T?> showKindliModal<T>({
+Future<T?> showIntendedModal<T>({
   required BuildContext context,
   required String title,
   String? subtitle,
   required List<Widget> actions,
 }) {
+  final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
   return showCupertinoDialog<T>(
     context: context,
     barrierDismissible: true,
@@ -41,15 +47,15 @@ Future<T?> showKindliModal<T>({
             filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
             child: Container(
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
+                gradient: LinearGradient(
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
                   colors: [
-                    Color.fromRGBO(245, 236, 224, 0.96),
-                    Color.fromRGBO(237, 228, 216, 0.96),
-                    Color.fromRGBO(229, 220, 208, 0.96),
+                    colors.modalBg1.withOpacity(0.96),
+                    colors.modalBg2.withOpacity(0.96),
+                    colors.modalBg3.withOpacity(0.96),
                   ],
-                  stops: [0.0, 0.5, 1.0],
+                  stops: const [0.0, 0.5, 1.0],
                 ),
                 borderRadius: BorderRadius.circular(32),
                 border: Border.all(
@@ -58,7 +64,7 @@ Future<T?> showKindliModal<T>({
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF32281E).withOpacity(0.35),
+                    color: colors.modalShadow.withOpacity(0.35),
                     blurRadius: 70,
                     offset: const Offset(0, 25),
                   ),
@@ -70,7 +76,7 @@ Future<T?> showKindliModal<T>({
                     blurStyle: BlurStyle.inner,
                   ),
                   BoxShadow(
-                    color: const Color(0xFFB4A591).withOpacity(0.15),
+                    color: colors.modalInnerShadow.withOpacity(0.15),
                     blurRadius: 0,
                     offset: const Offset(0, -1),
                     spreadRadius: 0,
@@ -114,16 +120,17 @@ Future<T?> showKindliModal<T>({
   );
 }
 
-/* -------------------- KINDLI DIALOG BUILDER -------------------- */
+/* -------------------- INTENDED DIALOG BUILDER -------------------- */
 
-void showKindliDialog({
+void showIntendedDialog({
   required BuildContext context,
   required String title,
   String? subtitle,
   required List<Widget> actions,
   Widget? content,
 }) {
-  showKindliModal(
+  final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
+  showIntendedModal(
     context: context,
     title: title,
     subtitle: subtitle,
@@ -139,8 +146,8 @@ void showKindliDialog({
               fontSize: 15,
               fontWeight: FontWeight.w500,
               color: action.isDefaultAction
-                  ? const Color(0xFF9A8A78)
-                  : const Color(0xFF3C342A),
+                  ? colors.textSecondary
+                  : colors.textPrimary,
             ),
             child: action.child,
           ),
@@ -157,6 +164,7 @@ Future<T?> showStyledPopup<T>({
   required BuildContext context,
   required Widget child,
 }) {
+  final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
   return showCupertinoModalPopup<T>(
     context: context,
     barrierColor: Colors.black.withOpacity(0.5),
@@ -179,12 +187,12 @@ Future<T?> showStyledPopup<T>({
           margin: const EdgeInsets.all(20),
           padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
+            gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Color(0xFFF5F0E8),
-                Color(0xFFEDE6DC),
+                colors.modalBg1,
+                colors.modalBg2,
               ],
             ),
             borderRadius: BorderRadius.circular(28),
@@ -213,35 +221,40 @@ Future<T?> showStyledPopup<T>({
 Widget styledPrimaryButton({
   required String label,
   required VoidCallback onPressed,
-  Color color = const Color(0xFF6B5B4A),
+  Color? color,
 }) {
-  return Container(
-    width: double.infinity,
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(16),
-      boxShadow: [
-        BoxShadow(
-          color: color.withOpacity(0.3),
-          blurRadius: 12,
-          offset: const Offset(0, 4),
+  return Builder(
+    builder: (ctx) {
+      final resolvedColor = color ?? Provider.of<ThemeProvider>(ctx, listen: false).colors.buttonDark;
+      return Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: resolvedColor.withOpacity(0.3),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-      ],
-    ),
-    child: CupertinoButton(
-      color: color,
-      borderRadius: BorderRadius.circular(16),
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      onPressed: onPressed,
-      child: Text(
-        label,
-        style: const TextStyle(
-          fontFamily: 'Sora',
-          fontSize: 17,
-          fontWeight: FontWeight.w600,
-          color: Color(0xFFFFFFFF),
+        child: CupertinoButton(
+          color: resolvedColor,
+          borderRadius: BorderRadius.circular(16),
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          onPressed: onPressed,
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontFamily: 'Sora',
+              fontSize: 17,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFFFFFFFF),
+            ),
+          ),
         ),
-      ),
-    ),
+      );
+    },
   );
 }
 
@@ -250,41 +263,43 @@ Widget styledSecondaryButton({
   required String label,
   required VoidCallback onPressed,
 }) {
-  return Container(
-    width: double.infinity,
-    decoration: BoxDecoration(
-      color: Colors.white.withOpacity(0.8),
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: const Color(0xFFD8D2C8), width: 1),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.04),
-          blurRadius: 8,
-          offset: const Offset(0, 2),
+  return Builder(
+    builder: (ctx) {
+      final colors = Provider.of<ThemeProvider>(ctx, listen: false).colors;
+      return Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.8),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: colors.borderMedium, width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
-      ],
-    ),
-    child: CupertinoButton(
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      onPressed: onPressed,
-      child: Text(
-        label,
-        style: const TextStyle(
-          fontFamily: 'Sora',
-          fontSize: 17,
-          fontWeight: FontWeight.w600,
-          color: Color(0xFF3C342A),
+        child: CupertinoButton(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          onPressed: onPressed,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontFamily: 'Sora',
+              fontSize: 17,
+              fontWeight: FontWeight.w600,
+              color: colors.textPrimary,
+            ),
+          ),
         ),
-      ),
-    ),
+      );
+    },
   );
 }
 
 /* -------------------- THEME COLORS -------------------- */
-
-const Color primaryBrown = AppColors.buttonPrimary;
-const Color lightBrown  = AppColors.cardBackground;
-const Color appBackground = AppColors.pageBackground;
+// Old module-level constants removed — use colors.buttonDark, colors.surfaceLightest, etc. via ThemeProvider
 
 /* -------------------- APP BACKGROUND -------------------- */
 
@@ -296,6 +311,8 @@ class AppBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Responsive.init(context);
+    final themeProvider = context.watch<ThemeProvider>();
+    final colors = themeProvider.colors;
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -303,12 +320,12 @@ class AppBackground extends StatelessWidget {
         ImageFiltered(
           imageFilter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
           child: Image.asset(
-            'assets/images/background_soft.png',
+            colors.backgroundSoft,
             fit: BoxFit.cover,
           ),
         ),
 
-        // Warm gradient overlay — peachy-amber with orange warmth
+        // Warm gradient overlay
         Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -316,13 +333,17 @@ class AppBackground extends StatelessWidget {
               end: Alignment.bottomCenter,
               stops: const [0.0, 0.45, 1.0],
               colors: [
-                const Color(0xFFF2D4B0).withOpacity(0.15),  // Top: lighter, more open
-                const Color(0xFFE8BFA0).withOpacity(0.38),  // Mid: dialed back slightly
-                const Color(0xFFD4A888).withOpacity(0.55),  // Bottom: warm clay
+                colors.bgGradientTop.withOpacity(0.15),
+                colors.bgGradientMid.withOpacity(0.38),
+                colors.bgGradientBottom.withOpacity(0.55),
               ],
             ),
           ),
         ),
+
+        // Grey wash — desaturates the combined bg + gradient (Iris only)
+        if (themeProvider.theme == AppTheme.iris)
+          Container(color: const Color(0xFFF0EDF2).withOpacity(0.45)),
 
         child,
       ],
@@ -372,14 +393,12 @@ class HabitTracker {
     final prefs = await SharedPreferences.getInstance();
     final key = _key(habitTitle, DateTime.now());
     await prefs.setBool(key, true);
-    print('✅ Marked done: $key'); // Debug log
   }
 
   static Future<bool> wasDone(String habitTitle, DateTime date) async {
     final prefs = await SharedPreferences.getInstance();
     final key = _key(habitTitle, date);
     final result = prefs.getBool(key) ?? false;
-    print('🔍 Checking: $key = $result'); // Debug log
     return result;
   }
 }
@@ -431,19 +450,30 @@ void main() async {
       providers: [
         ChangeNotifierProvider.value(value: onboardingState),
         ChangeNotifierProvider(create: (_) => UserState()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
-      child: const GentlyApp(),
+      child: const IntendedApp(),
     ),
   );
 }
 
-class GentlyApp extends StatelessWidget {
-  const GentlyApp({super.key});
+class IntendedApp extends StatelessWidget {
+  const IntendedApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return CupertinoApp(
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en'),
+        Locale('ru'),
+      ],
       theme: const CupertinoThemeData(
         textTheme: CupertinoTextThemeData(
           textStyle: TextStyle(
@@ -524,6 +554,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   @override
   Widget build(BuildContext context) {
     Responsive.init(context);
+    final colors = context.watch<ThemeProvider>().colors;
     return CupertinoPageScaffold(
       child: Stack(
         fit: StackFit.expand,
@@ -534,7 +565,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           ),
 
           Container(
-            color: const Color(0xFFF6F5F1).withOpacity(0.45),
+            color: colors.surfaceLightest.withOpacity(0.45),
           ),
 
           FadeTransition(
@@ -549,18 +580,19 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                       ValueListenableBuilder<String?>(
                         valueListenable: userNameNotifier,
                         builder: (context, name, _) {
+                          final l10n = AppLocalizations.of(context);
                           return Text(
                             name == null || name.isEmpty
-                                ? 'Welcome to Gently'
-                                : 'Welcome to Gently,\n$name',
+                                ? l10n.welcomeTitle
+                                : l10n.welcomeTitleWithName(name),
                             textAlign: TextAlign.center,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 38,
                               fontWeight: FontWeight.w600,
                               height: 1.18,
                               letterSpacing: -0.6,
-                              color: Color(0xFF2F2E2A),
-                              fontFamilyFallback: [
+                              color: colors.textPrimary,
+                              fontFamilyFallback: const [
                                 'SF Pro Rounded',
                                 'SF Pro',
                               ],
@@ -572,14 +604,14 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                       const SizedBox(height: 22),
 
                       Text(
-                        'Small steps.\nNo pressure.',
+                        AppLocalizations.of(context).welcomeSubtitle,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 21,
                           fontWeight: FontWeight.w500,
                           height: 1.45,
                           letterSpacing: -0.15,
-                          color: const Color(0xFF4E4C45),
+                          color: colors.textSubtitle,
                           fontFamilyFallback: const [
                             'SF Pro Rounded',
                             'SF Pro',
@@ -592,7 +624,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                             ),
                             Shadow(
                               blurRadius: 20,
-                              color: const Color(0xFFF6F5F1).withOpacity(0.9),
+                              color: colors.surfaceLightest.withOpacity(0.9),
                               offset: const Offset(0, 2),
                             ),
                             Shadow(
@@ -630,6 +662,7 @@ class _MainTabsState extends State<MainTabs> {
   @override
   Widget build(BuildContext context) {
     Responsive.init(context);
+    final colors = context.watch<ThemeProvider>().colors;
     return CupertinoPageScaffold(
       backgroundColor: Colors.transparent,
       child: Stack(
@@ -657,9 +690,9 @@ class _MainTabsState extends State<MainTabs> {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      const Color(0xFFC4B0A0).withOpacity(0.0),
-                      const Color(0xFFC4B0A0).withOpacity(0.85),
-                      const Color(0xFFC4B0A0).withOpacity(0.95),
+                      colors.tabBarFade.withOpacity(0.0),
+                      colors.tabBarFade.withOpacity(0.85),
+                      colors.tabBarFade.withOpacity(0.95),
                     ],
                     stops: const [0.0, 0.6, 1.0],
                   ),
@@ -698,6 +731,7 @@ class _CustomTabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.watch<ThemeProvider>().colors;
     return ClipRRect(
       borderRadius: BorderRadius.circular(40),
       child: BackdropFilter(
@@ -705,7 +739,7 @@ class _CustomTabBar extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
           decoration: BoxDecoration(
-            color: const Color(0xFFF5EDE0).withOpacity(0.85),
+            color: colors.modalBg1.withOpacity(0.85),
             borderRadius: BorderRadius.circular(40),
             border: Border.all(
               color: const Color(0xFFFFFFFF).withOpacity(0.6),
@@ -713,7 +747,7 @@ class _CustomTabBar extends StatelessWidget {
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF3C342A).withOpacity(0.12),
+                color: colors.textPrimary.withOpacity(0.12),
                 blurRadius: 24,
                 offset: const Offset(0, 8),
               ),
@@ -751,6 +785,7 @@ class _TabItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isSelected = index == currentIndex;
+    final colors = context.watch<ThemeProvider>().colors;
 
     return GestureDetector(
       onTap: () => onTap(index),
@@ -764,8 +799,8 @@ class _TabItem extends StatelessWidget {
             key: ValueKey(isSelected),
             size: 24,
             color: isSelected
-                ? const Color(0xFF8B7B6B)
-                : const Color(0xFFCFC0B0),
+                ? colors.ctaPrimary
+                : colors.textDisabled,
           ),
         ),
       ),
@@ -799,39 +834,23 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
   late Animation<Offset> _greetingSlideAnimation;
   bool _greetingAnimationInitialized = false;
 
-  // 25 rotating daily header messages
-  static const List<String> _dailyMessages = [
-    'Do what feels right today',
-    'Today is a fresh start',
-    'Just one small thing counts',
-    'Be kind to yourself today',
-    'No rush. You\'re doing well',
-    'Start small, stay gentle',
-    'Your pace is your own',
-    'Even one step is progress',
-    'Take what works, leave the rest',
-    'You don\'t have to do it all',
-    'Small moments add up',
-    'Be where you are right now',
-    'There\'s no wrong way to begin',
-    'Listen to what you need today',
-    'Progress looks different every day',
-    'You\'re allowed to take your time',
-    'One thing at a time is enough',
-    'Give yourself permission to rest',
-    'Start wherever you are',
-    'You don\'t need to be ready',
-    'Trust your own rhythm',
-    'It\'s okay to adjust as you go',
-    'Gentle is good enough',
-    'Small acts of care matter',
-    'You\'re doing more than you think',
+  static List<String> _getDailyMessages(AppLocalizations l10n) => [
+    l10n.dailyMessage1, l10n.dailyMessage2, l10n.dailyMessage3,
+    l10n.dailyMessage4, l10n.dailyMessage5, l10n.dailyMessage6,
+    l10n.dailyMessage7, l10n.dailyMessage8, l10n.dailyMessage9,
+    l10n.dailyMessage10, l10n.dailyMessage11, l10n.dailyMessage12,
+    l10n.dailyMessage13, l10n.dailyMessage14, l10n.dailyMessage15,
+    l10n.dailyMessage16, l10n.dailyMessage17, l10n.dailyMessage18,
+    l10n.dailyMessage19, l10n.dailyMessage20, l10n.dailyMessage21,
+    l10n.dailyMessage22, l10n.dailyMessage23, l10n.dailyMessage24,
+    l10n.dailyMessage25,
   ];
 
-  String _getTodaysMessage() {
+  String _getTodaysMessage(AppLocalizations l10n) {
+    final messages = _getDailyMessages(l10n);
     final now = DateTime.now();
     final dayOfYear = now.difference(DateTime(now.year, 1, 1)).inDays;
-    return _dailyMessages[dayOfYear % _dailyMessages.length];
+    return messages[dayOfYear % messages.length];
   }
 
   Future<void> _checkAndTriggerCardAnimations() async {
@@ -962,9 +981,10 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
   }
 
   void _showBrowseHabits(BuildContext context) {
+    final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
     showCupertinoModalPopup(
       context: context,
-      barrierColor: const Color(0xFF3C342A).withOpacity(0.08),
+      barrierColor: colors.textPrimary.withOpacity(0.08),
       builder: (context) => const BrowseHabitsSheet(),
     );
   }
@@ -1011,13 +1031,15 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
   }
 
   void _createCustomHabit(BuildContext context) {
+    final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
     final onboardingState = context.read<OnboardingState>();
     
     if (!onboardingState.canAddCustomHabit()) {
-      showKindliModal(
+      final l10n = AppLocalizations.of(context);
+      showIntendedModal(
         context: context,
-        title: 'Create more habits?',
-        subtitle: 'Intended: 2 custom habits\nIntended+: Unlimited custom habits',
+        title: l10n.customHabitLimitTitle,
+        subtitle: l10n.customHabitLimitMessage,
         actions: [
           SizedBox(
             width: double.infinity,
@@ -1031,11 +1053,11 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
                   builder: (context) => const PaywallScreen(),
                 );
               },
-              color: const Color(0xFF6B5B4A),
+              color: colors.buttonDark,
               borderRadius: BorderRadius.circular(ComponentSizes.buttonRadius),
               padding: const EdgeInsets.symmetric(vertical: 16),
               child: Text(
-                'Unlock Intended+',
+                l10n.appUnlockPlus,
                 style: AppTextStyles.buttonPrimary(context),
               ),
             ),
@@ -1045,7 +1067,7 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
             padding: EdgeInsets.zero,
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Not now',
+              l10n.commonNotNow,
               style: AppTextStyles.buttonSecondary(context),
             ),
           ),
@@ -1069,7 +1091,9 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     Responsive.init(context);
+    final colors = context.watch<ThemeProvider>().colors;
     final onboardingState = context.watch<OnboardingState>();
+    final l10n = AppLocalizations.of(context);
     final allHabits = onboardingState.userHabits;
     final pinnedHabit = onboardingState.pinnedHabit;
 
@@ -1084,7 +1108,7 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
     final unpinned = [...unpinnedCustom, ...unpinnedStandard];
 
     final now = DateTime.now();
-    final dateStr = '${_getDayName(now.weekday)}, ${_getMonthName(now.month)} ${now.day}';
+    final dateStr = '${_getDayName(now.weekday, l10n)}, ${_getMonthName(now.month, l10n)} ${now.day}';
 
     return CupertinoPageScaffold(
       backgroundColor: Colors.transparent,
@@ -1109,21 +1133,21 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _getTodaysMessage(),
-                          style: const TextStyle(
+                          _getTodaysMessage(l10n),
+                          style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF3C342A),
+                            color: colors.textPrimary,
                             fontFamily: 'Sora',
                           ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           dateStr,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
-                            color: Color(0xFF7A6A58),
+                            color: colors.checkmarkFill,
                             fontFamily: 'Sora',
                           ),
                         ),
@@ -1152,21 +1176,21 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
                               child: Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFF5EDE3).withOpacity(0.75),
+                                  color: colors.modalBg1.withOpacity(0.75),
                                   borderRadius: BorderRadius.circular(14),
                                   border: Border.all(
                                     color: Colors.white.withOpacity(0.35),
                                     width: 0.8,
                                   ),
                                 ),
-                                child: const Text(
-                                  'Hold for options',
+                                child: Text(
+                                  l10n.habitsHoldForOptions,
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontFamily: 'Sora',
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500,
-                                    color: Color(0xFF8B7563),
+                                    color: colors.ctaPrimary,
                                     letterSpacing: -0.1,
                                   ),
                                 ),
@@ -1184,7 +1208,7 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
                 Expanded(
                   child: Center(
                     child: Text(
-                      'Complete onboarding to get started',
+                      l10n.habitsCompleteOnboarding,
                       style: AppTextStyles.buttonSecondary(context),
                     ),
                   ),
@@ -1208,12 +1232,12 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
                       children: [
                         Padding(
                           padding: const EdgeInsets.only(left: 16),
-                          child: const Text(
-                            'PINNED',
+                          child: Text(
+                            l10n.habitsPinned,
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFF8B7563),
+                              color: colors.ctaPrimary,
                               letterSpacing: 1.0,
                               fontFamily: 'Sora',
                             ),
@@ -1228,7 +1252,7 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
                               key: ValueKey(habit),
                               habitTitle: habit,
                               isPinned: true,
-                              accentColor: const Color(0xFFD96766),  // Terracotta
+                              accentColor: colors.accentPinned,  // Terracotta
                             ),
                             index,
                           );
@@ -1236,7 +1260,7 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
                         const SizedBox(height: 24),
                         Container(
                           height: 1,
-                          color: const Color(0xFFE8E3DB),
+                          color: colors.borderWarm,
                         ),
                       ],
                     ),
@@ -1255,12 +1279,12 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
                       if (unpinned.isNotEmpty) ...[
                         Padding(
                           padding: const EdgeInsets.only(left: 16),
-                          child: const Text(
-                            'SUGGESTIONS',
+                          child: Text(
+                            l10n.habitsSuggestions,
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFF8B7563),
+                              color: colors.ctaPrimary,
                               letterSpacing: 1.0,
                               fontFamily: 'Sora',
                             ),
@@ -1275,7 +1299,7 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
                             _HabitCard(
                               key: ValueKey(habit),
                               habitTitle: habit,
-                              accentColor: const Color(0xFFC19E8B),  // Warm taupe
+                              accentColor: colors.accentRegular,  // Warm taupe
                             ),
                             animationIndex,
                           );
@@ -1302,7 +1326,7 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
                                     borderType: BorderType.RRect,
                                     radius: const Radius.circular(24),
                                     dashPattern: const [8, 4],
-                                    color: const Color(0xFF8C6652).withOpacity(0.20),
+                                    color: colors.ctaPrimary.withOpacity(0.20),
                                     strokeWidth: 2,
                                     child: Container(
                                       width: double.infinity,
@@ -1312,8 +1336,8 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
                                           begin: Alignment.topLeft,
                                           end: Alignment.bottomRight,
                                           colors: [
-                                            const Color(0xFFF0E5DE).withOpacity(0.40),
-                                            const Color(0xFFF4DBD0).withOpacity(0.20),
+                                            colors.modalBg1.withOpacity(0.40),
+                                            colors.modalBg1.withOpacity(0.20),
                                           ],
                                         ),
                                         borderRadius: BorderRadius.circular(24),
@@ -1328,19 +1352,19 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
                                               shape: BoxShape.circle,
                                               color: const Color(0xFFFFFFFF).withOpacity(0.50),
                                             ),
-                                            child: const Icon(
+                                            child: Icon(
                                               CupertinoIcons.add,
                                               size: 18,
-                                              color: Color(0xFF8A6B5E),
+                                              color: colors.ctaPrimary,
                                             ),
                                           ),
                                           const SizedBox(height: 8),
-                                          const Text(
-                                            'Create custom habit',
+                                          Text(
+                                            l10n.habitsCreateCustom,
                                             style: TextStyle(
                                               fontSize: 15,
                                               fontWeight: FontWeight.w600,
-                                              color: Color(0xFF8A6B5E),
+                                              color: colors.ctaPrimary,
                                               fontFamily: 'Sora',
                                             ),
                                           ),
@@ -1369,7 +1393,7 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(24),
                                 border: Border.all(
-                                  color: const Color(0xFF8C6652).withOpacity(0.10),
+                                  color: colors.ctaPrimary.withOpacity(0.10),
                                   width: 1,
                                 ),
                               ),
@@ -1385,8 +1409,8 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
                                         begin: Alignment.topLeft,
                                         end: Alignment.bottomRight,
                                         colors: [
-                                          const Color(0xFFF0E5DE).withOpacity(0.9),
-                                          const Color(0xFFF4DBD0).withOpacity(0.7),
+                                          colors.modalBg1.withOpacity(0.9),
+                                          colors.modalBg1.withOpacity(0.7),
                                         ],
                                       ),
                                       borderRadius: BorderRadius.circular(24),
@@ -1396,11 +1420,11 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
                                       ),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: const Color(0xFF8C6652).withOpacity(0.10),
+                                          color: colors.ctaPrimary.withOpacity(0.10),
                                           blurRadius: 32,
                                         ),
                                         BoxShadow(
-                                          color: const Color(0xFF8C6652).withOpacity(0.10),
+                                          color: colors.ctaPrimary.withOpacity(0.10),
                                           blurRadius: 0,
                                           spreadRadius: 1,
                                         ),
@@ -1419,8 +1443,8 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
                                               shape: BoxShape.circle,
                                               gradient: RadialGradient(
                                                 colors: [
-                                                  const Color(0xFF8C6652).withOpacity(0.10),
-                                                  const Color(0xFF8C6652).withOpacity(0.0),
+                                                  colors.ctaPrimary.withOpacity(0.10),
+                                                  colors.ctaPrimary.withOpacity(0.0),
                                                 ],
                                               ),
                                             ),
@@ -1437,19 +1461,19 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
                                                   shape: BoxShape.circle,
                                                   color: const Color(0xFFFFFFFF).withOpacity(0.5),
                                                 ),
-                                                child: const Icon(
+                                                child: Icon(
                                                   CupertinoIcons.lock,
                                                   size: 16,
-                                                  color: Color(0xFF8A6B5E),
+                                                  color: colors.ctaPrimary,
                                                 ),
                                               ),
                                               const SizedBox(height: 6),
                                               Text(
-                                                'Create custom habit',
+                                                l10n.habitsCreateCustom,
                                                 style: TextStyle(
                                                   fontSize: 15,
                                                   fontWeight: FontWeight.w600,
-                                                  color: const Color(0xFF3D2820).withOpacity(0.60),
+                                                  color: colors.textPrimary.withOpacity(0.60),
                                                   fontFamily: 'Sora',
                                                 ),
                                               ),
@@ -1480,7 +1504,7 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
                               child: Container(
                                 padding: const EdgeInsets.all(20),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFFFFFFF).withOpacity(0.40),
+                                  color: colors.cardBrowse.withOpacity(colors.cardBrowseOpacity),
                                   borderRadius: BorderRadius.circular(16),
                                   border: Border.all(
                                     color: const Color(0xFFFFFFFF).withOpacity(0.20),
@@ -1488,7 +1512,7 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: const Color(0xFF3C342A).withOpacity(0.04),
+                                      color: colors.textPrimary.withOpacity(0.04),
                                       blurRadius: 16,
                                       offset: const Offset(0, 2),
                                     ),
@@ -1500,31 +1524,31 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
                                     Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        const Text(
-                                          'Browse all habits',
+                                        Text(
+                                          l10n.habitsBrowseAll,
                                           style: TextStyle(
                                             fontSize: 15,
                                             fontWeight: FontWeight.w600,
-                                            color: Color(0xFF3C342A),
+                                            color: colors.textPrimary,
                                             fontFamily: 'Sora',
                                           ),
                                         ),
                                         const SizedBox(height: 2),
                                         Text(
-                                          '${_getAvailableHabitsCount(context)} more available',
-                                          style: const TextStyle(
+                                          l10n.habitsMoreAvailable(_getAvailableHabitsCount(context)),
+                                          style: TextStyle(
                                             fontSize: 12,
                                             fontWeight: FontWeight.w500,
-                                            color: Color(0xFF9A8A78),
+                                            color: colors.textSecondary,
                                             fontFamily: 'Sora',
                                           ),
                                         ),
                                       ],
                                     ),
-                                    const Icon(
+                                    Icon(
                                       CupertinoIcons.chevron_right,
                                       size: 18,
-                                      color: Color(0xFF9A8A78),
+                                      color: colors.textSecondary,
                                     ),
                                   ],
                                 ),
@@ -1545,15 +1569,15 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
     );
   }
 
-  String _getDayName(int weekday) {
-    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  String _getDayName(int weekday, AppLocalizations l10n) {
+    final days = [l10n.dayMonday, l10n.dayTuesday, l10n.dayWednesday, l10n.dayThursday, l10n.dayFriday, l10n.daySaturday, l10n.daySunday];
     return days[weekday - 1];
   }
 
-  String _getMonthName(int month) {
-    const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+  String _getMonthName(int month, AppLocalizations l10n) {
+    final months = [
+      l10n.monthJanuary, l10n.monthFebruary, l10n.monthMarch, l10n.monthApril, l10n.monthMay, l10n.monthJune,
+      l10n.monthJuly, l10n.monthAugust, l10n.monthSeptember, l10n.monthOctober, l10n.monthNovember, l10n.monthDecember,
     ];
     return months[month - 1];
   }
@@ -1603,25 +1627,26 @@ class _CreateCustomHabitScreenState extends State<_CreateCustomHabitScreen> {
 
     await Future.delayed(const Duration(milliseconds: 100));
 
+    final l10nNav = AppLocalizations.of(navContext);
     showStyledPopup(
       context: navContext,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Habit created',
+            l10nNav.customHabitCreatedTitle,
             style: AppTextStyles.h2(navContext),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 12),
           Text(
-            '"$habitTitle" has been added to your habits.',
+            l10nNav.customHabitCreatedMessage(habitTitle),
             style: AppTextStyles.body(navContext),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
           styledPrimaryButton(
-            label: 'Great!',
+            label: '${l10nNav.commonGreat}!',
             onPressed: () => Navigator.pop(navContext),
           ),
         ],
@@ -1632,7 +1657,9 @@ class _CreateCustomHabitScreenState extends State<_CreateCustomHabitScreen> {
   @override
   Widget build(BuildContext context) {
     Responsive.init(context);
-    
+    final colors = context.watch<ThemeProvider>().colors;
+    final l10n = AppLocalizations.of(context);
+
     return CupertinoPageScaffold(
       // Use AppBackground for consistent warm background
       child: AppBackground(
@@ -1651,23 +1678,23 @@ class _CreateCustomHabitScreenState extends State<_CreateCustomHabitScreen> {
                     CupertinoButton(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       onPressed: () => Navigator.pop(context),
-                      child: const Text(
-                        'Cancel',
+                      child: Text(
+                        l10n.commonCancel,
                         style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w400,
-                          color: Color(0xFF6B5B4A),
+                          color: colors.buttonDark,
                           fontFamily: 'Sora',
                         ),
                       ),
                     ),
                     // Title
-                    const Text(
-                      'Create custom habit',
+                    Text(
+                      l10n.customHabitTitle,
                       style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF3C342A),
+                        color: colors.textPrimary,
                         fontFamily: 'Sora',
                       ),
                     ),
@@ -1687,26 +1714,26 @@ class _CreateCustomHabitScreenState extends State<_CreateCustomHabitScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Title
-                      const Text(
-                        'What small action would you like to take?',
+                      Text(
+                        l10n.customHabitPrompt,
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF3C342A),
+                          color: colors.textPrimary,
                           fontFamily: 'Sora',
                           height: 1.3,
                         ),
                       ),
-                      
+
                       const SizedBox(height: 8),
-                      
+
                       // Subtitle
-                      const Text(
-                        'Keep it simple and specific.',
+                      Text(
+                        l10n.customHabitHint,
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w400,
-                          color: Color(0xFF9A8A78),
+                          color: colors.textSecondary,
                           fontFamily: 'Sora',
                         ),
                       ),
@@ -1722,18 +1749,18 @@ class _CreateCustomHabitScreenState extends State<_CreateCustomHabitScreen> {
                           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                           child: CupertinoTextField(
                             controller: _controller,
-                            placeholder: 'e.g., Take a 5-minute walk',
+                            placeholder: l10n.customHabitPlaceholder,
                             autofocus: true,
                             maxLength: 50,
                             onChanged: (_) => setState(() {}),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 17,
-                              color: Color(0xFF3C342A),
+                              color: colors.textPrimary,
                               fontFamily: 'Sora',
                             ),
-                            placeholderStyle: const TextStyle(
+                            placeholderStyle: TextStyle(
                               fontSize: 17,
-                              color: Color(0xFF9A8A78),
+                              color: colors.textSecondary,
                               fontFamily: 'Sora',
                             ),
                             padding: const EdgeInsets.all(16),
@@ -1741,7 +1768,7 @@ class _CreateCustomHabitScreenState extends State<_CreateCustomHabitScreen> {
                               color: const Color(0xFFFFFFFF).withOpacity(0.5),
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: const Color(0xFF6B5B4A).withOpacity(0.12),
+                                color: colors.buttonDark.withOpacity(0.12),
                                 width: 1,
                               ),
                             ),
@@ -1753,11 +1780,11 @@ class _CreateCustomHabitScreenState extends State<_CreateCustomHabitScreen> {
 
                       // Character count
                       Text(
-                        '${_controller.text.length}/50 characters',
-                        style: const TextStyle(
+                        l10n.customHabitCharCount(_controller.text.length),
+                        style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
-                          color: Color(0xFF9A8A78),
+                          color: colors.textSecondary,
                           fontFamily: 'Sora',
                         ),
                       ),
@@ -1776,18 +1803,18 @@ class _CreateCustomHabitScreenState extends State<_CreateCustomHabitScreen> {
                             child: CupertinoButton(
                               onPressed: _canSave ? _saveHabit : null,
                               padding: const EdgeInsets.symmetric(vertical: 18),
-                              color: _canSave 
-                                  ? const Color(0xFF6B5B4A)
+                              color: _canSave
+                                  ? colors.buttonDark
                                   : const Color(0xFFFFFFFF).withOpacity(0.4),
                               borderRadius: BorderRadius.circular(16),
                               child: Text(
-                                'Add to my habits',
+                                l10n.customHabitSubmit,
                                 style: TextStyle(
                                   fontSize: 17,
                                   fontWeight: FontWeight.w600,
-                                  color: _canSave 
-                                      ? const Color(0xFFFAF7F2)
-                                      : const Color(0xFF9A8A78),
+                                  color: _canSave
+                                      ? colors.surfaceLightest
+                                      : colors.textSecondary,
                                   fontFamily: 'Sora',
                                 ),
                               ),
@@ -1810,20 +1837,23 @@ class _CreateCustomHabitScreenState extends State<_CreateCustomHabitScreen> {
 class _HabitCard extends StatefulWidget {
   final String habitTitle;
   final bool isPinned;
-  final Color accentColor;
+  final Color? accentColor;
 
   const _HabitCard({
     super.key,
     required this.habitTitle,
     this.isPinned = false,
-    this.accentColor = const Color(0xFFA89181), // Default: muted brown for suggestions
+    this.accentColor, // Default resolved from theme in build
   });
 
   @override
   State<_HabitCard> createState() => _HabitCardState();
 }
 
-class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
+class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   bool _isDoneToday = false;
   bool _isAnimating = false;
   late AnimationController _scaleController;
@@ -1881,6 +1911,9 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
       setState(() {
         _isDoneToday = done;
       });
+      if (done) {
+        _checkmarkController.forward();
+      }
     }
   }
 
@@ -1923,10 +1956,12 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
     final isPinned = onboardingState.pinnedHabit == widget.habitTitle;
     final isCustom = onboardingState.isCustomHabit(widget.habitTitle);
     final category = onboardingState.getCategoryForHabit(widget.habitTitle);
+    final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
+    final l10n = AppLocalizations.of(context);
 
     showCupertinoModalPopup(
       context: context,
-      barrierColor: const Color(0xFF504638).withOpacity(0.28),
+      barrierColor: colors.barrierColor.withOpacity(0.28),
       builder: (context) => Container(
         color: Colors.transparent,
         child: BackdropFilter(
@@ -1947,9 +1982,9 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                           begin: const Alignment(-0.3, -0.5),
                           end: const Alignment(0.3, 0.5),
                           colors: [
-                            const Color(0xFFF5ECE0).withOpacity(0.96),
-                            const Color(0xFFEDE4D8).withOpacity(0.93),
-                            const Color(0xFFE6DDD1).withOpacity(0.95),
+                            colors.modalBg1.withOpacity(0.96),
+                            colors.modalBg2.withOpacity(0.93),
+                            colors.modalBg3.withOpacity(0.95),
                           ],
                           stops: const [0.0, 0.5, 1.0],
                         ),
@@ -1965,7 +2000,7 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                           // Pin / Unpin
                           _buildActionRow(
                             icon: isPinned ? CupertinoIcons.pin_slash : CupertinoIcons.pin,
-                            label: isPinned ? 'Unpin' : 'Pin to top',
+                            label: isPinned ? l10n.menuUnpin : l10n.menuPinToTop,
                             onTap: () {
                               Navigator.pop(context);
                               _handlePinToggle();
@@ -1976,7 +2011,7 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                           if (category != null)
                             _buildActionRow(
                               icon: CupertinoIcons.arrow_2_squarepath,
-                              label: 'Swap for another',
+                              label: l10n.menuSwap,
                               onTap: () {
                                 Navigator.pop(context);
                                 _handleSwap();
@@ -1988,7 +2023,7 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                           if (isCustom)
                             _buildActionRow(
                               icon: CupertinoIcons.trash,
-                              label: 'Delete',
+                              label: l10n.commonDelete,
                               isDestructive: true,
                               onTap: () {
                                 Navigator.pop(context);
@@ -2017,8 +2052,8 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                           begin: const Alignment(-0.3, -0.5),
                           end: const Alignment(0.3, 0.5),
                           colors: [
-                            const Color(0xFFF5ECE0).withOpacity(0.97),
-                            const Color(0xFFEDE4D8).withOpacity(0.95),
+                            colors.modalBg1.withOpacity(0.97),
+                            colors.modalBg2.withOpacity(0.95),
                           ],
                         ),
                         borderRadius: BorderRadius.circular(20),
@@ -2030,13 +2065,13 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                       child: CupertinoButton(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         onPressed: () => Navigator.pop(context),
-                        child: const Text(
-                          'Cancel',
+                        child: Text(
+                          l10n.commonCancel,
                           style: TextStyle(
                             fontFamily: 'Sora',
                             fontSize: 17,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF3C342A),
+                            color: colors.textPrimary,
                           ),
                         ),
                       ),
@@ -2058,8 +2093,9 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
     bool isDestructive = false,
     bool showDivider = false,
   }) {
-    final iconColor = isDestructive ? const Color(0xFFC44B3F) : const Color(0xFF8B7563);
-    final textColor = isDestructive ? const Color(0xFFC44B3F) : const Color(0xFF3C342A);
+    final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
+    final iconColor = isDestructive ? colors.destructive : colors.ctaPrimary;
+    final textColor = isDestructive ? colors.destructive : colors.textPrimary;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -2068,7 +2104,7 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Container(
               height: 0.5,
-              color: const Color(0xFFD6CFC5).withOpacity(0.6),
+              color: colors.borderMedium.withOpacity(0.6),
             ),
           ),
         CupertinoButton(
@@ -2162,10 +2198,12 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
   Future<void> _showReplacePinConfirmation() async {
     final onboardingState = context.read<OnboardingState>();
     final currentPinned = onboardingState.pinnedHabit;
+    final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
+    final l10n = AppLocalizations.of(context);
 
     final confirmed = await showCupertinoModalPopup<bool>(
       context: context,
-      barrierColor: const Color(0xFF504638).withOpacity(0.28),
+      barrierColor: colors.barrierColor.withOpacity(0.28),
       builder: (context) => Container(
         color: Colors.transparent,
         child: BackdropFilter(
@@ -2181,15 +2219,15 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                   child: Container(
                     padding: const EdgeInsets.fromLTRB(28, 32, 28, 36),
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        begin: Alignment(0.0, 2.41),
-                        end: Alignment(0.0, -2.41),
+                      gradient: LinearGradient(
+                        begin: const Alignment(0.0, 2.41),
+                        end: const Alignment(0.0, -2.41),
                         colors: [
-                          Color.fromRGBO(245, 236, 224, 0.96),
-                          Color.fromRGBO(237, 228, 216, 0.93),
-                          Color.fromRGBO(230, 221, 209, 0.95),
+                          colors.modalBg1.withOpacity(0.96),
+                          colors.modalBg2.withOpacity(0.93),
+                          colors.modalBg3.withOpacity(0.95),
                         ],
-                        stops: [0.0, 0.5, 1.0],
+                        stops: const [0.0, 0.5, 1.0],
                       ),
                       borderRadius: BorderRadius.circular(32),
                       border: Border.all(
@@ -2198,7 +2236,7 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF32281E).withOpacity(0.4),
+                          color: colors.modalShadow.withOpacity(0.4),
                           blurRadius: 70,
                           offset: const Offset(0, 25),
                         ),
@@ -2215,14 +2253,14 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         // Title
-                        const Text(
-                          'Replace pin?',
+                        Text(
+                          l10n.replacePinTitle,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontFamily: 'Sora',
                             fontSize: 27,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF3C342A),
+                            color: colors.textPrimary,
                             letterSpacing: -0.4,
                             height: 1.25,
                           ),
@@ -2230,13 +2268,13 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                         const SizedBox(height: 12),
 
                         Text(
-                          'Current: $currentPinned\nNew: ${widget.habitTitle}',
+                          l10n.replacePinDescription(currentPinned!, widget.habitTitle),
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: 'DM Sans',
                             fontSize: 16,
                             fontWeight: FontWeight.w400,
-                            color: Color(0xFF8B7563),
+                            color: colors.ctaPrimary,
                             height: 1.5,
                           ),
                         ),
@@ -2252,14 +2290,14 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                               colors: [
-                                const Color(0xFF8B7563).withOpacity(0.92),
-                                const Color(0xFF7A6B5F).withOpacity(0.88),
+                                colors.ctaPrimary.withOpacity(0.92),
+                                colors.ctaSecondary.withOpacity(0.88),
                               ],
                             ),
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF3C342A).withOpacity(0.25),
+                                color: colors.textPrimary.withOpacity(0.25),
                                 blurRadius: 12,
                                 offset: const Offset(0, 4),
                               ),
@@ -2268,8 +2306,8 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                           child: CupertinoButton(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             onPressed: () => Navigator.pop(context, true),
-                            child: const Text(
-                              'Replace pin',
+                            child: Text(
+                              l10n.replacePinConfirm,
                               style: TextStyle(
                                 fontFamily: 'Sora',
                                 fontSize: 17,
@@ -2284,13 +2322,13 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                         CupertinoButton(
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           onPressed: () => Navigator.pop(context, false),
-                          child: const Text(
-                            'Cancel',
+                          child: Text(
+                            l10n.commonCancel,
                             style: TextStyle(
                               fontFamily: 'Sora',
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
-                              color: Color(0xFF9B8A7A),
+                              color: colors.textTertiary,
                             ),
                           ),
                         ),
@@ -2316,22 +2354,28 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
 
     if (category == null) {
       if (mounted) {
-        showKindliModal(
+        final l10n = AppLocalizations.of(context);
+        showIntendedModal(
           context: context,
-          title: 'Can\'t swap this habit',
-          subtitle: 'Custom habits can\'t be swapped. You can delete it and add a new one instead.',
+          title: l10n.swapCantTitle,
+          subtitle: l10n.swapCantMessage,
           actions: [
             CupertinoButton(
               padding: const EdgeInsets.symmetric(vertical: 12),
               onPressed: () => Navigator.pop(context),
-              child: const Text(
-                'OK',
-                style: TextStyle(
-                  fontFamily: 'Sora',
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF8B7563),
-                ),
+              child: Builder(
+                builder: (ctx) {
+                  final clr = Provider.of<ThemeProvider>(ctx, listen: false).colors;
+                  return Text(
+                    l10n.commonOk,
+                    style: TextStyle(
+                      fontFamily: 'Sora',
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      color: clr.ctaPrimary,
+                    ),
+                  );
+                },
               ),
             ),
           ],
@@ -2360,10 +2404,12 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
     final onboardingState = context.read<OnboardingState>();
     final isPremium = context.read<UserState>().hasSubscription;
     final remaining = onboardingState.getRemainingSwaps(category);
+    final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
+    final l10n = AppLocalizations.of(context);
 
     showCupertinoModalPopup(
       context: context,
-      barrierColor: const Color(0xFF504638).withOpacity(0.28),
+      barrierColor: colors.barrierColor.withOpacity(0.28),
       builder: (context) => Container(
         color: Colors.transparent,
         child: BackdropFilter(
@@ -2379,15 +2425,15 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                   child: Container(
                     padding: const EdgeInsets.fromLTRB(28, 32, 28, 36),
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        begin: Alignment(0.0, 2.41),
-                        end: Alignment(0.0, -2.41),
+                      gradient: LinearGradient(
+                        begin: const Alignment(0.0, 2.41),
+                        end: const Alignment(0.0, -2.41),
                         colors: [
-                          Color.fromRGBO(245, 236, 224, 0.96),
-                          Color.fromRGBO(237, 228, 216, 0.93),
-                          Color.fromRGBO(230, 221, 209, 0.95),
+                          colors.modalBg1.withOpacity(0.96),
+                          colors.modalBg2.withOpacity(0.93),
+                          colors.modalBg3.withOpacity(0.95),
                         ],
-                        stops: [0.0, 0.5, 1.0],
+                        stops: const [0.0, 0.5, 1.0],
                       ),
                       borderRadius: BorderRadius.circular(32),
                       border: Border.all(
@@ -2396,7 +2442,7 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF32281E).withOpacity(0.4),
+                          color: colors.modalShadow.withOpacity(0.4),
                           blurRadius: 70,
                           offset: const Offset(0, 25),
                         ),
@@ -2414,13 +2460,13 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                       children: [
                         // Title
                         Text(
-                          'Swap "${widget.habitTitle}"?',
+                          l10n.swapTitle(widget.habitTitle),
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: 'Sora',
                             fontSize: 25,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF3C342A),
+                            color: colors.textPrimary,
                             letterSpacing: -0.3,
                             height: 1.3,
                           ),
@@ -2429,13 +2475,13 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
 
                         // Description (REVERTED to DM Sans)
                         Text(
-                          'More $category habits:',
+                          l10n.swapCategoryHabits(category),
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: 'DM Sans',
                             fontSize: 16,
                             fontWeight: FontWeight.w400,
-                            color: Color(0xFF8B7563),
+                            color: colors.ctaPrimary,
                             height: 1.5,
                           ),
                         ),
@@ -2452,7 +2498,7 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                                 borderRadius: BorderRadius.circular(18),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFF645541).withOpacity(0.1),
+                                    color: colors.buttonDark.withOpacity(0.1),
                                     blurRadius: 12,
                                     offset: const Offset(0, 3),
                                   ),
@@ -2469,7 +2515,7 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                                         end: Alignment.bottomRight,
                                         colors: [
                                           Colors.white.withOpacity(0.65),
-                                          const Color(0xFFF8F5F2).withOpacity(0.50),
+                                          colors.surfaceLight.withOpacity(0.50),
                                         ],
                                       ),
                                       border: Border(
@@ -2500,11 +2546,11 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                                       borderRadius: BorderRadius.circular(18),
                                       child: Text(
                                         habit,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontFamily: 'Sora',
                                           fontSize: 15,
                                           fontWeight: FontWeight.w500,
-                                          color: Color(0xFF3C342A),
+                                          color: colors.textPrimary,
                                         ),
                                         textAlign: TextAlign.center,
                                       ),
@@ -2521,12 +2567,12 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                         // Free swaps remaining (hide for premium)
                         if (!isPremium)
                           Text(
-                            'Free swaps left: $remaining',
-                            style: const TextStyle(
+                            l10n.swapFreeRemaining(remaining),
+                            style: TextStyle(
                               fontFamily: 'DM Sans',
                               fontSize: 13,
                               fontWeight: FontWeight.w400,
-                              color: Color(0xFF9A8A78),
+                              color: colors.textSecondary,
                             ),
                           ),
 
@@ -2538,13 +2584,13 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                           child: CupertinoButton(
                             onPressed: () => Navigator.pop(context),
                             padding: const EdgeInsets.symmetric(vertical: 12),
-                            child: const Text(
-                              'Cancel',
+                            child: Text(
+                              l10n.commonCancel,
                               style: TextStyle(
                                 fontFamily: 'Sora',
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
-                                color: Color(0xFF9B8A7A),
+                                color: colors.textTertiary,
                               ),
                             ),
                           ),
@@ -2568,12 +2614,14 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
 
     if (success && mounted) {
       HapticFeedback.mediumImpact();
+      final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
+      final l10n = AppLocalizations.of(context);
 
       showCupertinoDialog(
         context: context,
         barrierDismissible: true,
         builder: (context) => Container(
-          color: const Color(0xFF504638).withOpacity(0.28),
+          color: colors.barrierColor.withOpacity(0.28),
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
             child: Center(
@@ -2584,7 +2632,7 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                   borderRadius: BorderRadius.circular(32),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF32281E).withOpacity(0.4),
+                      color: colors.modalShadow.withOpacity(0.4),
                       blurRadius: 70,
                       offset: const Offset(0, 25),
                     ),
@@ -2600,9 +2648,9 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                           begin: const Alignment(-0.3, -0.5),
                           end: const Alignment(0.3, 0.5),
                           colors: [
-                            const Color(0xFFF5ECE0).withOpacity(0.96),
-                            const Color(0xFFEDE4D8).withOpacity(0.93),
-                            const Color(0xFFE6DDD1).withOpacity(0.95),
+                            colors.modalBg1.withOpacity(0.96),
+                            colors.modalBg2.withOpacity(0.93),
+                            colors.modalBg3.withOpacity(0.95),
                           ],
                           stops: const [0.0, 0.5, 1.0],
                         ),
@@ -2618,14 +2666,14 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             // Title
-                            const Text(
-                              'Habit swapped',
+                            Text(
+                              l10n.swapSuccessTitle,
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontFamily: 'Sora',
                                 fontSize: 27,
                                 fontWeight: FontWeight.w600,
-                                color: Color(0xFF3C342A),
+                                color: colors.textPrimary,
                                 letterSpacing: -0.4,
                                 height: 1.25,
                               ),
@@ -2634,13 +2682,13 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
 
                             // Description
                             Text(
-                              'Replaced with "$newHabit"',
+                              l10n.swapSuccessMessage(newHabit),
                               textAlign: TextAlign.center,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontFamily: 'Sora',
                                 fontSize: 15,
                                 fontWeight: FontWeight.w500,
-                                color: Color(0xFF6B5D52),
+                                color: colors.textSubtitle,
                                 height: 1.45,
                               ),
                             ),
@@ -2656,14 +2704,14 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                   colors: [
-                                    const Color(0xFF8B7563).withOpacity(0.92),
-                                    const Color(0xFF7A6B5F).withOpacity(0.88),
+                                    colors.ctaPrimary.withOpacity(0.92),
+                                    colors.ctaSecondary.withOpacity(0.88),
                                   ],
                                 ),
                                 borderRadius: BorderRadius.circular(20),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFF3C342A).withOpacity(0.25),
+                                    color: colors.textPrimary.withOpacity(0.25),
                                     blurRadius: 12,
                                     offset: const Offset(0, 4),
                                   ),
@@ -2672,9 +2720,9 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                               child: CupertinoButton(
                                 padding: const EdgeInsets.symmetric(vertical: 16),
                                 onPressed: () => Navigator.pop(context),
-                                child: const Text(
-                                  'Great',
-                                  style: TextStyle(
+                                child: Text(
+                                  l10n.commonGreat,
+                                  style: const TextStyle(
                                     fontFamily: 'Sora',
                                     fontSize: 17,
                                     fontWeight: FontWeight.w600,
@@ -2695,22 +2743,28 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
         ),
       );
     } else if (mounted) {
-      showKindliModal(
+      final l10n = AppLocalizations.of(context);
+      showIntendedModal(
         context: context,
-        title: 'Something went wrong',
-        subtitle: 'We couldn\'t swap this habit. Please try again.',
+        title: l10n.swapErrorTitle,
+        subtitle: l10n.swapErrorMessage,
         actions: [
           CupertinoButton(
             padding: const EdgeInsets.symmetric(vertical: 12),
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'OK',
-              style: TextStyle(
-                fontFamily: 'Sora',
-                fontSize: 17,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF8B7563),
-              ),
+            child: Builder(
+              builder: (ctx) {
+                final clr = Provider.of<ThemeProvider>(ctx, listen: false).colors;
+                return Text(
+                  l10n.commonOk,
+                  style: TextStyle(
+                    fontFamily: 'Sora',
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    color: clr.ctaPrimary,
+                  ),
+                );
+              },
             ),
           ),
         ],
@@ -2719,9 +2773,11 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
   }
 
   void _showSwapLimitDialog(String category) {
+    final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
+    final l10n = AppLocalizations.of(context);
     showCupertinoModalPopup(
       context: context,
-      barrierColor: const Color(0xFF504638).withOpacity(0.28),
+      barrierColor: colors.barrierColor.withOpacity(0.28),
       builder: (context) => Container(
         color: Colors.transparent,
         child: BackdropFilter(
@@ -2737,15 +2793,15 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                   child: Container(
                     padding: const EdgeInsets.fromLTRB(28, 32, 28, 36),
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        begin: Alignment(0.0, 2.41),
-                        end: Alignment(0.0, -2.41),
+                      gradient: LinearGradient(
+                        begin: const Alignment(0.0, 2.41),
+                        end: const Alignment(0.0, -2.41),
                         colors: [
-                          Color.fromRGBO(245, 236, 224, 0.96),
-                          Color.fromRGBO(237, 228, 216, 0.93),
-                          Color.fromRGBO(230, 221, 209, 0.95),
+                          colors.modalBg1.withOpacity(0.96),
+                          colors.modalBg2.withOpacity(0.93),
+                          colors.modalBg3.withOpacity(0.95),
                         ],
-                        stops: [0.0, 0.5, 1.0],
+                        stops: const [0.0, 0.5, 1.0],
                       ),
                       borderRadius: BorderRadius.circular(32),
                       border: Border.all(
@@ -2754,7 +2810,7 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF32281E).withOpacity(0.4),
+                          color: colors.modalShadow.withOpacity(0.4),
                           blurRadius: 70,
                           offset: const Offset(0, 25),
                         ),
@@ -2771,14 +2827,14 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         // Title
-                        const Text(
-                          'Swap this habit?',
+                        Text(
+                          l10n.swapLimitTitle,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontFamily: 'Sora',
                             fontSize: 27,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF3C342A),
+                            color: colors.textPrimary,
                             letterSpacing: -0.4,
                             height: 1.25,
                           ),
@@ -2787,13 +2843,13 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
 
                         // Description (DM Sans)
                         Text(
-                          'You\'ve used your 2 free swaps this month.\n\nIntended+: Unlimited swaps',
+                          l10n.swapLimitMessage,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: 'DM Sans',
                             fontSize: 16,
                             fontWeight: FontWeight.w400,
-                            color: Color(0xFF8B7563),
+                            color: colors.ctaPrimary,
                             height: 1.5,
                           ),
                         ),
@@ -2809,14 +2865,14 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                               colors: [
-                                const Color(0xFF8B7563).withOpacity(0.92),
-                                const Color(0xFF7A6B5F).withOpacity(0.88),
+                                colors.ctaPrimary.withOpacity(0.92),
+                                colors.ctaSecondary.withOpacity(0.88),
                               ],
                             ),
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF3C342A).withOpacity(0.25),
+                                color: colors.textPrimary.withOpacity(0.25),
                                 blurRadius: 12,
                                 offset: const Offset(0, 4),
                               ),
@@ -2828,9 +2884,9 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                               Navigator.pop(context);
                               _showUpgradeScreen();
                             },
-                            child: const Text(
-                              'Unlock Intended+',
-                              style: TextStyle(
+                            child: Text(
+                              l10n.appUnlockPlus,
+                              style: const TextStyle(
                                 fontFamily: 'Sora',
                                 fontSize: 17,
                                 fontWeight: FontWeight.w600,
@@ -2844,13 +2900,13 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                         CupertinoButton(
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           onPressed: () => Navigator.pop(context),
-                          child: const Text(
-                            'Cancel',
+                          child: Text(
+                            l10n.commonCancel,
                             style: TextStyle(
                               fontFamily: 'Sora',
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
-                              color: Color(0xFF9B8A7A),
+                              color: colors.textTertiary,
                             ),
                           ),
                         ),
@@ -2867,14 +2923,15 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
   }
 
   void _showNoAlternativesDialog() {
-    showKindliDialog(
+    final l10n = AppLocalizations.of(context);
+    showIntendedDialog(
       context: context,
-      title: 'No alternatives',
-      subtitle: 'You\'re already using all available habits from this category.',
+      title: l10n.swapNoAltTitle,
+      subtitle: l10n.swapNoAltMessage,
       actions: [
         CupertinoDialogAction(
           onPressed: () => Navigator.pop(context),
-          child: const Text('OK'),
+          child: Text(l10n.commonOk),
         ),
       ],
     );
@@ -2891,7 +2948,9 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
 
   void _showDeleteConfirmation() {
     final onboardingState = context.read<OnboardingState>();
-    
+    final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
+    final l10n = AppLocalizations.of(context);
+
     showCupertinoModalPopup(
       context: context,
       barrierColor: Colors.black.withOpacity(0.5),
@@ -2904,7 +2963,7 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
             borderRadius: BorderRadius.circular(32),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF32281E).withOpacity(0.4),
+                color: colors.modalShadow.withOpacity(0.4),
                 blurRadius: 70,
                 offset: const Offset(0, 25),
               ),
@@ -2920,9 +2979,9 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                     begin: const Alignment(-0.3, -0.5),
                     end: const Alignment(0.3, 0.5),
                     colors: [
-                      const Color(0xFFF5ECE0).withOpacity(0.96),
-                      const Color(0xFFEDE4D8).withOpacity(0.93),
-                      const Color(0xFFE6DDD1).withOpacity(0.95),
+                      colors.modalBg1.withOpacity(0.96),
+                      colors.modalBg2.withOpacity(0.93),
+                      colors.modalBg3.withOpacity(0.95),
                     ],
                     stops: const [0.0, 0.5, 1.0],
                   ),
@@ -2938,14 +2997,14 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       // Title
-                      const Text(
-                        'Delete habit?',
+                      Text(
+                        l10n.deleteHabitTitle,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontFamily: 'Sora',
                           fontSize: 27,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF3C342A),
+                          color: colors.textPrimary,
                           letterSpacing: -0.4,
                           height: 1.25,
                         ),
@@ -2954,13 +3013,13 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
 
                       // Description
                       Text(
-                        '"${widget.habitTitle}" will be removed and any progress lost.',
+                        l10n.deleteHabitMessage(widget.habitTitle),
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: 'Sora',
                           fontSize: 15,
                           fontWeight: FontWeight.w500,
-                          color: Color(0xFF6B5D52),
+                          color: colors.textSubtitle,
                           height: 1.45,
                         ),
                       ),
@@ -2976,14 +3035,14 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
-                              const Color(0xFFC4605A).withOpacity(0.92),
-                              const Color(0xFFB5524D).withOpacity(0.88),
+                              colors.destructive.withOpacity(0.92),
+                              colors.destructiveDark.withOpacity(0.88),
                             ],
                           ),
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFFB5524D).withOpacity(0.3),
+                              color: colors.destructiveDark.withOpacity(0.3),
                               blurRadius: 12,
                               offset: const Offset(0, 4),
                             ),
@@ -2995,9 +3054,9 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                             Navigator.pop(context);
                             await onboardingState.removeCustomHabit(widget.habitTitle);
                           },
-                          child: const Text(
-                            'Delete',
-                            style: TextStyle(
+                          child: Text(
+                            l10n.commonDelete,
+                            style: const TextStyle(
                               fontFamily: 'Sora',
                               fontSize: 17,
                               fontWeight: FontWeight.w600,
@@ -3016,7 +3075,7 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF645541).withOpacity(0.12),
+                                color: colors.buttonDark.withOpacity(0.12),
                                 blurRadius: 16,
                                 offset: const Offset(0, 4),
                               ),
@@ -3034,7 +3093,7 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                                     end: Alignment.bottomRight,
                                     colors: [
                                       Colors.white.withOpacity(0.5),
-                                      const Color(0xFFF8F5F2).withOpacity(0.35),
+                                      colors.surfaceLight.withOpacity(0.35),
                                     ],
                                   ),
                                   borderRadius: BorderRadius.circular(20),
@@ -3043,14 +3102,14 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                                     width: 1.5,
                                   ),
                                 ),
-                                child: const Text(
-                                  'Cancel',
+                                child: Text(
+                                  l10n.commonCancel,
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontFamily: 'Sora',
                                     fontSize: 17,
                                     fontWeight: FontWeight.w600,
-                                    color: Color(0xFF3C342A),
+                                    color: colors.textPrimary,
                                   ),
                                 ),
                               ),
@@ -3071,16 +3130,18 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required by AutomaticKeepAliveClientMixin
+    final colors = context.watch<ThemeProvider>().colors;
     final isCustom = context.read<OnboardingState>().isCustomHabit(widget.habitTitle);
 
     // Determine accent color based on state
     final Color effectiveAccentColor;
     if (isCustom) {
-      effectiveAccentColor = const Color(0xFFC49989);  // Dusty rose
+      effectiveAccentColor = colors.accentCustom;  // Dusty rose
     } else if (widget.isPinned) {
-      effectiveAccentColor = const Color(0xFFD96766);  // Terracotta
+      effectiveAccentColor = colors.accentPinned;  // Terracotta
     } else {
-      effectiveAccentColor = const Color(0xFFC19E8B);  // Warm taupe
+      effectiveAccentColor = widget.accentColor ?? colors.accentRegular;  // Warm taupe
     }
 
     Widget card = Hero(
@@ -3102,7 +3163,7 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF3C342A).withOpacity(
+                      color: colors.textPrimary.withOpacity(
                         0.04 + (0.12 * animation.value),
                       ),
                       blurRadius: 16 + (20 * animation.value),
@@ -3159,21 +3220,21 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                         decoration: BoxDecoration(
                           // Glassmorphism background (pinned = lighter/cooler, regular = warmer)
                           color: _isDoneToday
-                              ? const Color(0xFFFFFFFF).withOpacity(0.22)
+                              ? colors.cardDone.withOpacity(colors.cardDoneOpacity)
                               : widget.isPinned
-                                  ? const Color(0xFFFCF5EF).withOpacity(0.78)
-                                  : const Color(0xFFF9EBE0).withOpacity(0.82),
+                                  ? colors.cardPinned.withOpacity(0.78)
+                                  : colors.cardBackground.withOpacity(0.82),
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
                             color: _isDoneToday
                                 ? const Color(0xFFFFFFFF).withOpacity(0.10)
-                                : const Color(0xFFFFFFFF).withOpacity(0.18),
+                                : colors.borderCard.withOpacity(colors.borderCardOpacity),
                             width: 0.5,
                           ),
                           boxShadow: [
                             // Outer shadow for depth
                             BoxShadow(
-                              color: const Color(0xFF3C342A).withOpacity(
+                              color: colors.textPrimary.withOpacity(
                                 _isDoneToday ? 0.02 : widget.isPinned ? 0.06 : 0.04,
                               ),
                               blurRadius: _isDoneToday ? 8 : widget.isPinned ? 20 : 16,
@@ -3190,7 +3251,7 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                             // Bottom-edge bevel: warm dark lip
                             if (!_isDoneToday)
                               BoxShadow(
-                                color: const Color(0xFFC4B0A0).withOpacity(0.25),
+                                color: colors.tabBarFade.withOpacity(0.25),
                                 blurRadius: 1,
                                 offset: const Offset(0, -1),
                                 blurStyle: BlurStyle.inner,
@@ -3210,12 +3271,12 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                                     height: 20,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color: const Color(0xFFD9CFC6).withOpacity(0.40),
+                                      color: colors.checkmarkBackground.withOpacity(0.40),
                                     ),
-                                    child: const Icon(
+                                    child: Icon(
                                       CupertinoIcons.checkmark,
                                       size: 12,
-                                      color: Color(0xFF7A6A58),
+                                      color: colors.checkmarkFill,
                                     ),
                                   ),
                                 ),
@@ -3236,13 +3297,13 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                                         fontSize: _isDoneToday ? 15 : 16,
                                         fontWeight: FontWeight.w500,
                                         color: _isDoneToday
-                                            ? const Color(0xFF9A8A78)
-                                            : const Color(0xFF3C342A),
+                                            ? colors.textSecondary
+                                            : colors.textPrimary,
                                         fontFamily: 'Sora',
                                         decoration: _isDoneToday
                                             ? TextDecoration.lineThrough
                                             : TextDecoration.none,
-                                        decorationColor: const Color(0xFF9A8A78),
+                                        decorationColor: colors.textSecondary,
                                       ),
                                     ),
                                   );
@@ -3276,12 +3337,12 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin {
                 alignment: Alignment.centerRight,
                 padding: const EdgeInsets.only(right: 20),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFD84315).withOpacity(0.15),
+                  color: colors.error.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Icon(
+                child: Icon(
                   CupertinoIcons.trash,
-                  color: Color(0xFFD84315),
+                  color: colors.error,
                   size: 22,
                 ),
               ),
@@ -3309,16 +3370,16 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
-  // Category accent colors from Figma
+  // Category accent colors — static theme-independent
   static const Map<String, Color> categoryColors = {
-    'Health': Color(0xFFD96766),                 // Terracotta
-    'Mood': Color(0xFF9B8299),                   // Dusty Plum
-    'Productivity': Color(0xFF8B9A6B),           // Dusty Olive
-    'Home & organization': Color(0xFF7B9E8A),    // Warm Sage
-    'Relationships': Color(0xFFC4856E),          // Soft Clay
-    'Creativity': Color(0xFFB48BA3),             // Dusty Mauve
-    'Finances': Color(0xFFC49B5A),               // Warm Amber
-    'Self-care': Color(0xFFB8A089),              // Warm Sand
+    'Health': AppColors.catHealth,                 // Terracotta
+    'Mood': AppColors.catMood,                     // Dusty Plum
+    'Productivity': AppColors.catProductivity,     // Dusty Olive
+    'Home & organization': AppColors.catHome,      // Warm Sage
+    'Relationships': AppColors.catRelationships,   // Soft Clay
+    'Creativity': AppColors.catCreativity,         // Dusty Mauve
+    'Finances': AppColors.catFinances,             // Warm Amber
+    'Self-care': AppColors.catSelfCare,            // Warm Sand
   };
 
   @override
@@ -3329,6 +3390,7 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
 
   void _addHabit(String habit) {
     final onboardingState = context.read<OnboardingState>();
+    final l10n = AppLocalizations.of(context);
 
     // Check if habit is already in user's list
     if (onboardingState.userHabits.contains(habit)) {
@@ -3339,19 +3401,19 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Already added',
+              l10n.browseAlreadyAddedTitle,
               style: AppTextStyles.h2(context),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
             Text(
-              '"$habit" is already in your habits.',
+              l10n.browseAlreadyAddedMessage(habit),
               style: AppTextStyles.body(context),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
             styledPrimaryButton(
-              label: 'OK',
+              label: l10n.commonOk,
               onPressed: () => Navigator.pop(context),
             ),
           ],
@@ -3369,6 +3431,7 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
     final isPremium = context.read<UserState>().hasSubscription;
     final canSwap = isPremium || onboardingState.canSwapFromBrowse();
     final remainingSwaps = onboardingState.getRemainingBrowseSwaps();
+    final l10n = AppLocalizations.of(context);
 
     if (!canSwap) {
       // Show upgrade modal when limit reached
@@ -3378,19 +3441,19 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Swap limit reached',
+              l10n.browseSwapLimitTitle,
               style: AppTextStyles.h2(context),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
             Text(
-              'You\'ve used your 2 free swaps this month.\n\nIntended+: Unlimited swaps',
+              l10n.swapLimitMessage,
               style: AppTextStyles.body(context),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
             styledPrimaryButton(
-              label: 'Unlock Intended+',
+              label: l10n.appUnlockPlus,
               onPressed: () {
                 Navigator.pop(context);
                 _showUpgradeScreen();
@@ -3400,13 +3463,18 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
             CupertinoButton(
               padding: EdgeInsets.zero,
               onPressed: () => Navigator.pop(context),
-              child: const Text(
-                'Cancel',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Color(0xFF8B7563),
-                  fontFamily: 'Sora',
-                ),
+              child: Builder(
+                builder: (ctx) {
+                  final clr = Provider.of<ThemeProvider>(ctx, listen: false).colors;
+                  return Text(
+                    l10n.commonCancel,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: clr.ctaPrimary,
+                      fontFamily: 'Sora',
+                    ),
+                  );
+                },
               ),
             ),
           ],
@@ -3421,21 +3489,21 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Swap an existing habit?',
+            l10n.browseSwapConfirmTitle,
             style: AppTextStyles.h2(context),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 12),
           Text(
             isPremium
-                ? 'Replace one of your current habits with "$newHabit".'
-                : 'Replace one of your current habits with "$newHabit".\n\nYou have $remainingSwaps swap${remainingSwaps == 1 ? '' : 's'} remaining this month.',
+                ? l10n.browseSwapConfirmMessage(newHabit)
+                : '${l10n.browseSwapConfirmMessage(newHabit)}\n\n${l10n.browseSwapRemainingCount(remainingSwaps)}',
             style: AppTextStyles.body(context),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
           styledPrimaryButton(
-            label: 'Choose habit to swap',
+            label: l10n.browseChooseHabitToSwap,
             onPressed: () {
               Navigator.pop(context);
               _showHabitSelection(newHabit);
@@ -3445,13 +3513,18 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
           CupertinoButton(
             padding: EdgeInsets.zero,
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(
-                fontSize: 16,
-                color: Color(0xFF8B7563),
-                fontFamily: 'Sora',
-              ),
+            child: Builder(
+              builder: (ctx) {
+                final clr = Provider.of<ThemeProvider>(ctx, listen: false).colors;
+                return Text(
+                  l10n.commonCancel,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: clr.ctaPrimary,
+                    fontFamily: 'Sora',
+                  ),
+                );
+              },
             ),
           ),
         ],
@@ -3462,6 +3535,8 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
   void _showHabitSelection(String newHabit) {
     final onboardingState = context.read<OnboardingState>();
     final currentHabits = onboardingState.userHabits;
+    final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
+    final l10n = AppLocalizations.of(context);
 
     showStyledPopup(
       context: context,
@@ -3469,13 +3544,13 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Which habit to replace?',
+            l10n.browseWhichToReplace,
             style: AppTextStyles.h2(context),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 12),
           Text(
-            'Choose one of your current habits to replace with "$newHabit"',
+            l10n.browseChooseToReplaceMessage(newHabit),
             style: AppTextStyles.body(context),
             textAlign: TextAlign.center,
           ),
@@ -3502,11 +3577,11 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
                 child: Text(
                   oldHabit,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Sora',
                     fontSize: 17,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF3C342A),
+                    color: colors.textPrimary,
                   ),
                 ),
               ),
@@ -3516,11 +3591,11 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
           CupertinoButton(
             padding: EdgeInsets.zero,
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
+            child: Text(
+              l10n.commonCancel,
               style: TextStyle(
                 fontSize: 16,
-                color: Color(0xFF8B7563),
+                color: colors.ctaPrimary,
                 fontFamily: 'Sora',
               ),
             ),
@@ -3537,12 +3612,14 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
 
     if (success && mounted) {
       HapticFeedback.mediumImpact();
+      final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
+      final l10n = AppLocalizations.of(context);
 
       showCupertinoDialog(
         context: context,
         barrierDismissible: true,
         builder: (context) => Container(
-          color: const Color(0xFF504638).withOpacity(0.28),
+          color: colors.barrierColor.withOpacity(0.28),
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
             child: Center(
@@ -3556,15 +3633,15 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
                     child: Container(
                       padding: const EdgeInsets.fromLTRB(28, 32, 28, 36),
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          begin: Alignment(0.0, 2.41),
-                          end: Alignment(0.0, -2.41),
+                        gradient: LinearGradient(
+                          begin: const Alignment(0.0, 2.41),
+                          end: const Alignment(0.0, -2.41),
                           colors: [
-                            Color.fromRGBO(245, 236, 224, 0.96),
-                            Color.fromRGBO(237, 228, 216, 0.93),
-                            Color.fromRGBO(230, 221, 209, 0.95),
+                            colors.modalBg1.withOpacity(0.96),
+                            colors.modalBg2.withOpacity(0.93),
+                            colors.modalBg3.withOpacity(0.95),
                           ],
-                          stops: [0.0, 0.5, 1.0],
+                          stops: const [0.0, 0.5, 1.0],
                         ),
                         borderRadius: BorderRadius.circular(32),
                         border: Border.all(
@@ -3573,7 +3650,7 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF32281E).withOpacity(0.4),
+                            color: colors.modalShadow.withOpacity(0.4),
                             blurRadius: 70,
                             offset: const Offset(0, 25),
                           ),
@@ -3590,14 +3667,14 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           // Title
-                          const Text(
-                            'Habit swapped',
+                          Text(
+                            l10n.swapSuccessTitle,
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontFamily: 'Sora',
                               fontSize: 27,
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFF3C342A),
+                              color: colors.textPrimary,
                               letterSpacing: -0.4,
                               height: 1.25,
                             ),
@@ -3606,13 +3683,13 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
 
                           // Description (Sora to match Unpin modal)
                           Text(
-                            'Replaced with "$newHabit"',
+                            l10n.swapSuccessMessage(newHabit),
                             textAlign: TextAlign.center,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontFamily: 'Sora',
                               fontSize: 15,
                               fontWeight: FontWeight.w500,
-                              color: Color(0xFF6B5D52),
+                              color: colors.textSubtitle,
                               height: 1.45,
                             ),
                           ),
@@ -3628,22 +3705,22 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
                                 filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
                                 child: Container(
                                   decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
+                                    gradient: LinearGradient(
                                       begin: Alignment.topLeft,
                                       end: Alignment.bottomRight,
                                       colors: [
-                                        Color.fromRGBO(139, 117, 99, 0.92),
-                                        Color.fromRGBO(122, 107, 95, 0.88),
+                                        colors.ctaPrimary.withOpacity(0.92),
+                                        colors.ctaSecondary.withOpacity(0.88),
                                       ],
                                     ),
                                     borderRadius: BorderRadius.circular(20),
                                     border: Border.all(
-                                      color: const Color(0xFF8B7563).withOpacity(0.4),
+                                      color: colors.ctaPrimary.withOpacity(0.4),
                                       width: 1,
                                     ),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: const Color(0xFF3C342A).withOpacity(0.3),
+                                        color: colors.textPrimary.withOpacity(0.3),
                                         blurRadius: 24,
                                         offset: const Offset(0, 6),
                                       ),
@@ -3660,9 +3737,9 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
                                     onPressed: () => Navigator.pop(context),
                                     padding: const EdgeInsets.symmetric(vertical: 16),
                                     borderRadius: BorderRadius.circular(20),
-                                    child: const Text(
-                                      'Great',
-                                      style: TextStyle(
+                                    child: Text(
+                                      l10n.commonGreat,
+                                      style: const TextStyle(
                                         fontFamily: 'Sora',
                                         fontSize: 17,
                                         fontWeight: FontWeight.w600,
@@ -3685,25 +3762,26 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
         ),
       );
     } else if (mounted) {
+      final l10nErr = AppLocalizations.of(context);
       showStyledPopup(
         context: context,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Something went wrong',
+              l10nErr.swapErrorTitle,
               style: AppTextStyles.h2(context),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
             Text(
-              'We couldn\'t swap this habit. Please try again.',
+              l10nErr.swapErrorMessage,
               style: AppTextStyles.body(context),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
             styledPrimaryButton(
-              label: 'OK',
+              label: l10nErr.commonOk,
               onPressed: () => Navigator.pop(context),
             ),
           ],
@@ -3722,25 +3800,26 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
 
     Future.delayed(const Duration(milliseconds: 100), () {
       if (!mounted) return;
+      final l10n = AppLocalizations.of(context);
       showStyledPopup(
         context: context,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Habit added',
+              l10n.browseHabitAddedTitle,
               style: AppTextStyles.h2(context),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
             Text(
-              '"$habit" has been added to your habits.',
+              l10n.browseHabitAddedMessage(habit),
               style: AppTextStyles.body(context),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
             styledPrimaryButton(
-              label: 'Great!',
+              label: l10n.browseHabitAddedConfirm,
               onPressed: () => Navigator.pop(context),
             ),
           ],
@@ -3760,8 +3839,10 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.watch<ThemeProvider>().colors;
     final onboardingState = context.watch<OnboardingState>();
-    
+    final l10n = AppLocalizations.of(context);
+
     // Get habits organized by category
     // Adjust this based on your actual data model
     final Map<String, List<String>> habitsByCategory = _getHabitsByCategory(onboardingState);
@@ -3785,13 +3866,13 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.8,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Color(0xFFF8F4EF),  // Sheet top
-            Color(0xFFF0EBE3),  // Sheet bottom
+            colors.surfaceLight,  // Sheet top
+            colors.modalBg2,  // Sheet bottom
           ],
         ),
         borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
@@ -3814,7 +3895,7 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: const Color(0xFF6B5B4A).withOpacity(0.25),
+                color: colors.buttonDark.withOpacity(0.25),
                 borderRadius: BorderRadius.circular(9999),
               ),
             ),
@@ -3832,23 +3913,23 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Browse Habits',
+                    Text(
+                      l10n.browseHabitsTitle,
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF8B7563),
+                        color: colors.ctaPrimary,
                         letterSpacing: -0.5,
                         fontFamily: 'Sora',
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '$totalHabits habits available',
-                      style: const TextStyle(
+                      l10n.browseHabitsAvailable(totalHabits),
+                      style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w500,
-                        color: Color(0xFF9A8A78),
+                        color: colors.textSecondary,
                         fontFamily: 'DMSans',
                       ),
                     ),
@@ -3857,12 +3938,12 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
                 CupertinoButton(
                   padding: EdgeInsets.zero,
                   onPressed: () => Navigator.pop(context),
-                  child: const Text(
-                    'Close',
+                  child: Text(
+                    l10n.commonClose,
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF9A8A78),
+                      color: colors.textSecondary,
                       fontFamily: 'DMSans',
                     ),
                   ),
@@ -3886,12 +3967,12 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
                     color: const Color(0xFFFFFFFF).withOpacity(0.5),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: const Color(0xFF6B5B4A).withOpacity(0.12),
+                      color: colors.buttonDark.withOpacity(0.12),
                       width: 1,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF3C342A).withOpacity(0.04),
+                        color: colors.textPrimary.withOpacity(0.04),
                         blurRadius: 3,
                         offset: const Offset(0, 1),
                       ),
@@ -3902,27 +3983,27 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
                       Icon(
                         CupertinoIcons.search,
                         size: 18,
-                        color: const Color(0xFF9A8A78).withOpacity(0.6),
+                        color: colors.textSecondary.withOpacity(0.6),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: CupertinoTextField(
                           controller: _searchController,
-                          placeholder: 'Search habits...',
+                          placeholder: l10n.browseHabitsSearch,
                           padding: EdgeInsets.zero,
                           decoration: const BoxDecoration(
                             color: Colors.transparent,
                           ),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w500,
-                            color: Color(0xFF3C342A),
+                            color: colors.textPrimary,
                             fontFamily: 'DMSans',
                           ),
                           placeholderStyle: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w500,
-                            color: const Color(0xFF9A8A78).withOpacity(0.6),
+                            color: colors.textSecondary.withOpacity(0.6),
                             fontFamily: 'DMSans',
                           ),
                           onChanged: (value) {
@@ -3949,7 +4030,7 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
               itemBuilder: (context, categoryIndex) {
                 final category = filteredCategories.keys.elementAt(categoryIndex);
                 final habits = filteredCategories[category]!;
-                final accentColor = categoryColors[category] ?? const Color(0xFFA89181);
+                final accentColor = categoryColors[category] ?? colors.accentMuted;
 
                 return Padding(
                   padding: EdgeInsets.only(
@@ -3963,10 +4044,10 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
                         padding: const EdgeInsets.only(left: 4, bottom: 14),
                         child: Text(
                           category.toUpperCase(),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF6B5B4A),
+                            color: colors.buttonDark,
                             letterSpacing: 0.5,
                             fontFamily: 'Sora',
                           ),
@@ -4036,6 +4117,7 @@ class _BrowseHabitCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.watch<ThemeProvider>().colors;
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
@@ -4045,7 +4127,7 @@ class _BrowseHabitCard extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF3C342A).withOpacity(0.08),
+            color: colors.textPrimary.withOpacity(0.08),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -4082,10 +4164,10 @@ class _BrowseHabitCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         habitTitle,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
-                          color: Color(0xFF3C342A),
+                          color: colors.textPrimary,
                           height: 1.5,
                           fontFamily: 'DMSans',
                         ),
@@ -4102,11 +4184,11 @@ class _BrowseHabitCard extends StatelessWidget {
                         width: 42,
                         height: 42,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF8B7563),  // Sage green
+                          color: colors.ctaPrimary,
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF8B7563).withOpacity(0.3),
+                              color: colors.ctaPrimary.withOpacity(0.3),
                               blurRadius: 8,
                               offset: const Offset(0, 2),
                             ),
@@ -4189,17 +4271,18 @@ class _HabitActionScreenState extends State<HabitActionScreen> {
   @override
   Widget build(BuildContext context) {
     Responsive.init(context);
+    final colors = context.watch<ThemeProvider>().colors;
     return CupertinoPageScaffold(
-      backgroundColor: const Color(0xFFF3F4EF), // Match app background
+      backgroundColor: colors.surfaceLightest, // Match app background
       child: SafeArea(
         child: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Color(0xFFF3F4EF),
-                Color(0xFFEDE8E2),
+                colors.surfaceLightest,
+                colors.modalBg2,
               ],
             ),
           ),
@@ -4210,25 +4293,25 @@ class _HabitActionScreenState extends State<HabitActionScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const Text(
+                  Text(
                     'Did you do this today?',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w600,
                       fontFamily: 'Sora',
-                      color: Color(0xFF2F2E2A),
+                      color: colors.textPrimary,
                     ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
-                  
+
                   AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
                     curve: Curves.easeOut,
                     child: CupertinoButton(
                       color: _isDone
-                          ? const Color(0xFF6A8B6F)
-                          : primaryBrown,
+                          ? colors.success
+                          : colors.buttonDark,
                       borderRadius: BorderRadius.circular(ComponentSizes.buttonRadius),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 32,
@@ -4246,8 +4329,8 @@ class _HabitActionScreenState extends State<HabitActionScreen> {
                                 const SizedBox(height: 8),
                                 Text(
                                   _supportWord,
-                                  style: const TextStyle(
-                                    color: Color(0xFFF6F5F1),
+                                  style: TextStyle(
+                                    color: colors.surfaceLightest,
                                     fontSize: 20,
                                     fontWeight: FontWeight.w600,
                                     letterSpacing: 0.5,
@@ -4262,18 +4345,18 @@ class _HabitActionScreenState extends State<HabitActionScreen> {
                             ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 14),
-                  
+
                   if (!_isDone)
                     CupertinoButton(
-                      color: lightBrown,
+                      color: colors.surfaceLightest,
                       borderRadius: BorderRadius.circular(ComponentSizes.buttonRadius),
                       onPressed: _skipForToday,
-                      child: const Text(
+                      child: Text(
                         'Not today',
                         style: TextStyle(
-                          color: primaryBrown,
+                          color: colors.buttonDark,
                           fontFamily: 'Sora',
                         ),
                       ),

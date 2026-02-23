@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 
-/// Responsive utility class for Kindli
+/// Responsive utility class for Intended
 /// 
 /// Initialize once at the top of your screen's build method:
 /// ```dart
@@ -159,48 +159,4 @@ class ComponentSizes {
   
   // Input fields
   static double get inputHeight => Responsive.w(52);
-}
-
-/// Kindli color palette
-class AppColors {
-  // Text colors
-  static const Color textPrimary = Color(0xFF3C342A);
-  static const Color textHeading = Color(0xFF3C342A);
-  static const Color textSecondary = Color(0xFF8B7563);
-  static const Color textMuted = Color(0xFFB5A89A);
-  static const Color textLight = Color(0xFF9A8A78);
-  static const Color textDisabled = Color(0xFFB5A89A);
-  
-  // Button colors
-  static const Color buttonPrimary = Color(0xFF6B5B4A);
-  static const Color buttonSecondary = Color(0xFFD8D2C8);
-  static const Color buttonDisabled = Color(0xFFBEB6AA);
-  static const Color buttonText = Color(0xFFF6F5F1);
-  
-  // Card & background colors
-  static const Color cardBackground = Color(0xFFFAF9F6);
-  static const Color pageBackground = Color(0xFFF3F4EF);
-  static const Color modalBackground = Color(0xFFE8DDD0);
-  
-  // Border colors
-  static const Color border = Color(0xFFE8E3DB);
-  static const Color borderLight = Color(0xFFD8D2C8);
-  
-  // Accent colors
-  static const Color success = Color(0xFF8B7563);
-  static const Color successLight = Color(0xFFB5BAA3);
-  static const Color error = Color(0xFFD84315);
-  
-  // Gradients
-  static const List<Color> modalGradient = [
-    Color(0xFFE8DDD0),
-    Color(0xFFF0E5D8),
-    Color(0xFFE3D6C7),
-  ];
-  
-  static const List<Color> pageGradient = [
-    Color(0xFFEDE8E2),
-    Color(0xFFF3F4EF),
-    Color(0xFFE8E3DB),
-  ];
 }

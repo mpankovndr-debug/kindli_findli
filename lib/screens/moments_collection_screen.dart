@@ -1,8 +1,12 @@
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
+import '../l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../models/moment.dart';
 import '../services/moments_service.dart';
+import '../theme/app_colors.dart';
+import '../theme/theme_provider.dart';
 
 class MomentsCollectionScreen extends StatefulWidget {
   const MomentsCollectionScreen({super.key});
@@ -15,15 +19,20 @@ class MomentsCollectionScreen extends StatefulWidget {
 class _MomentsCollectionScreenState extends State<MomentsCollectionScreen> {
   Map<String, List<Moment>> _grouped = {};
   bool _loading = true;
+  bool _didLoad = false;
 
   @override
-  void initState() {
-    super.initState();
-    _load();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_didLoad) {
+      _didLoad = true;
+      _load();
+    }
   }
 
   Future<void> _load() async {
-    final grouped = await MomentsService.getGroupedByMonth();
+    final l10n = AppLocalizations.of(context);
+    final grouped = await MomentsService.getGroupedByMonth(l10n);
     if (mounted) {
       setState(() {
         _grouped = grouped;
@@ -34,8 +43,10 @@ class _MomentsCollectionScreenState extends State<MomentsCollectionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.watch<ThemeProvider>().colors;
+
     return CupertinoPageScaffold(
-      backgroundColor: const Color(0xFFE8DFD3),
+      backgroundColor: colors.modalBg2,
       child: Stack(
         fit: StackFit.expand,
         children: [
@@ -44,7 +55,7 @@ class _MomentsCollectionScreenState extends State<MomentsCollectionScreen> {
             child: ImageFiltered(
               imageFilter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
               child: Image.asset(
-                'assets/images/background_ms.png',
+                colors.backgroundMs,
                 fit: BoxFit.cover,
               ),
             ),
@@ -59,9 +70,9 @@ class _MomentsCollectionScreenState extends State<MomentsCollectionScreen> {
                   end: Alignment.bottomCenter,
                   stops: const [0.0, 0.45, 1.0],
                   colors: [
-                    const Color(0xFFF2D4B0).withOpacity(0.15),
-                    const Color(0xFFE8BFA0).withOpacity(0.38),
-                    const Color(0xFFD4A888).withOpacity(0.55),
+                    colors.bgGradientTop.withOpacity(colors.bgGradientTopOpacity),
+                    colors.bgGradientMid.withOpacity(colors.bgGradientMidOpacity),
+                    colors.bgGradientBottom.withOpacity(colors.bgGradientBottomOpacity),
                   ],
                 ),
               ),
@@ -72,8 +83,8 @@ class _MomentsCollectionScreenState extends State<MomentsCollectionScreen> {
           _loading
               ? const Center(child: CupertinoActivityIndicator())
               : _grouped.isEmpty
-                  ? _buildEmptyState()
-                  : _buildList(),
+                  ? _buildEmptyState(colors)
+                  : _buildList(colors),
 
           // Bottom fade above tab bar
           Positioned(
@@ -88,9 +99,9 @@ class _MomentsCollectionScreenState extends State<MomentsCollectionScreen> {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      const Color(0xFFC4B0A0).withOpacity(0.0),
-                      const Color(0xFFC4B0A0).withOpacity(0.85),
-                      const Color(0xFFC4B0A0).withOpacity(0.95),
+                      colors.tabBarFade.withOpacity(0.0),
+                      colors.tabBarFade.withOpacity(0.85),
+                      colors.tabBarFade.withOpacity(0.95),
                     ],
                     stops: const [0.0, 0.6, 1.0],
                   ),
@@ -103,7 +114,7 @@ class _MomentsCollectionScreenState extends State<MomentsCollectionScreen> {
     );
   }
 
-  Widget _buildList() {
+  Widget _buildList(AppColorScheme colors) {
     final months = _grouped.keys.toList();
 
     return CustomScrollView(
@@ -124,11 +135,11 @@ class _MomentsCollectionScreenState extends State<MomentsCollectionScreen> {
               padding: const EdgeInsets.fromLTRB(24, 28, 24, 10),
               child: Text(
                 month.toUpperCase(),
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Sora',
                   fontSize: 11,
                   fontWeight: FontWeight.w500,
-                  color: Color(0xFF8B7563),
+                  color: colors.ctaPrimary,
                   letterSpacing: 1.0,
                 ),
               ),
@@ -150,7 +161,8 @@ class _MomentsCollectionScreenState extends State<MomentsCollectionScreen> {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(AppColorScheme colors) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       children: [
         // Back button row — matches _MomentsHeaderDelegate style
@@ -174,10 +186,10 @@ class _MomentsCollectionScreenState extends State<MomentsCollectionScreen> {
                           color: const Color(0xFFFFFFFF).withOpacity(0.3),
                         ),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         CupertinoIcons.chevron_back,
                         size: 20,
-                        color: Color(0xFF6B5D52),
+                        color: colors.textSubtitle,
                       ),
                     ),
                   ),
@@ -198,30 +210,30 @@ class _MomentsCollectionScreenState extends State<MomentsCollectionScreen> {
                     '✦',
                     style: TextStyle(
                       fontSize: 36,
-                      color: const Color(0xFF8B7563).withOpacity(0.35),
+                      color: colors.ctaPrimary.withOpacity(0.35),
                     ),
                   ),
                   const SizedBox(height: 20),
-                  const Text(
-                    'Your moments will appear here.',
+                  Text(
+                    l10n.momentsEmptyTitle,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontFamily: 'Sora',
                       fontSize: 17,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFF8B7563),
+                      color: colors.ctaPrimary,
                       height: 1.5,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'Every habit you complete becomes part of your collection — permanently.',
+                  Text(
+                    l10n.momentsEmptyMessage,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontFamily: 'Sora',
                       fontSize: 14,
                       fontWeight: FontWeight.w400,
-                      color: Color(0xFFA89880),
+                      color: colors.accentMuted,
                       height: 1.6,
                     ),
                   ),
@@ -255,6 +267,9 @@ class _MomentsHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    final colors = context.watch<ThemeProvider>().colors;
+    final l10n = AppLocalizations.of(context);
+
     return ClipRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(
@@ -263,7 +278,7 @@ class _MomentsHeaderDelegate extends SliverPersistentHeaderDelegate {
         ),
         child: Container(
           color: shrinkOffset > 0
-              ? const Color(0xFFE8DFD3).withOpacity(0.85)
+              ? colors.modalBg2.withOpacity(0.85)
               : const Color(0x00000000),
           padding: EdgeInsets.fromLTRB(24, topPadding + 16, 24, 8),
           child: Row(
@@ -284,37 +299,37 @@ class _MomentsHeaderDelegate extends SliverPersistentHeaderDelegate {
                           color: const Color(0xFFFFFFFF).withOpacity(0.3),
                         ),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         CupertinoIcons.chevron_back,
                         size: 20,
-                        color: Color(0xFF6B5D52),
+                        color: colors.textSubtitle,
                       ),
                     ),
                   ),
                 ),
               ),
               const SizedBox(width: 16),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Your moments',
+                      l10n.momentsTitle,
                       style: TextStyle(
                         fontFamily: 'Sora',
                         fontSize: 32,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF3C342A),
+                        color: colors.textPrimary,
                       ),
                     ),
                     Text(
-                      'Every habit you completed, kept forever.',
+                      l10n.momentsSubtitle,
                       style: TextStyle(
                         fontFamily: 'Sora',
                         fontSize: 13,
                         fontWeight: FontWeight.w400,
-                        color: Color(0xFF9A8A78),
+                        color: colors.textSecondary,
                       ),
                     ),
                   ],
@@ -335,6 +350,9 @@ class _MomentRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.watch<ThemeProvider>().colors;
+    final l10n = AppLocalizations.of(context);
+
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final momentDay = DateTime(
@@ -345,9 +363,9 @@ class _MomentRow extends StatelessWidget {
 
     final String dateStr;
     if (momentDay == today) {
-      dateStr = 'Today · ${DateFormat('h:mm a').format(moment.completedAt)}';
+      dateStr = '${l10n.momentsToday} · ${DateFormat('h:mm a').format(moment.completedAt)}';
     } else if (momentDay == today.subtract(const Duration(days: 1))) {
-      dateStr = 'Yesterday · ${DateFormat('h:mm a').format(moment.completedAt)}';
+      dateStr = '${l10n.momentsYesterday} · ${DateFormat('h:mm a').format(moment.completedAt)}';
     } else {
       dateStr = DateFormat('MMM d · h:mm a').format(moment.completedAt);
     }
@@ -375,7 +393,7 @@ class _MomentRow extends StatelessWidget {
                   moment.habitEmoji,
                   style: TextStyle(
                     fontSize: 18,
-                    color: const Color(0xFF8B7563).withOpacity(0.7),
+                    color: colors.ctaPrimary.withOpacity(0.7),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -386,21 +404,21 @@ class _MomentRow extends StatelessWidget {
                     children: [
                       Text(
                         moment.habitName,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: 'Sora',
                           fontSize: 15,
                           fontWeight: FontWeight.w500,
-                          color: Color(0xFF3C342A),
+                          color: colors.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         dateStr,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: 'Sora',
                           fontSize: 12,
                           fontWeight: FontWeight.w400,
-                          color: Color(0xFF9A8A78),
+                          color: colors.textSecondary,
                         ),
                       ),
                     ],

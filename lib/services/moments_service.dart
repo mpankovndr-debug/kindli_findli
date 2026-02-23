@@ -1,4 +1,5 @@
 import 'dart:convert';
+import '../l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/moment.dart';
 
@@ -36,22 +37,24 @@ class MomentsService {
   }
 
   /// Returns moments grouped by month label, e.g. "February 2026".
-  static Future<Map<String, List<Moment>>> getGroupedByMonth() async {
+  static Future<Map<String, List<Moment>>> getGroupedByMonth(AppLocalizations l10n) async {
     final all = await getAll();
     final Map<String, List<Moment>> grouped = {};
 
     for (final moment in all) {
-      final key = _monthLabel(moment.completedAt);
+      final key = _monthLabel(moment.completedAt, l10n);
       grouped.putIfAbsent(key, () => []).add(moment);
     }
 
     return grouped;
   }
 
-  static String _monthLabel(DateTime date) {
-    const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December',
+  static String _monthLabel(DateTime date, AppLocalizations l10n) {
+    final months = [
+      l10n.monthJanuary, l10n.monthFebruary, l10n.monthMarch,
+      l10n.monthApril, l10n.monthMay, l10n.monthJune,
+      l10n.monthJuly, l10n.monthAugust, l10n.monthSeptember,
+      l10n.monthOctober, l10n.monthNovember, l10n.monthDecember,
     ];
     return '${months[date.month - 1]} ${date.year}';
   }

@@ -6,6 +6,9 @@ import 'package:provider/provider.dart';
 
 import 'daily_reminder_screen.dart';
 import 'onboarding_state.dart';
+import '../l10n/app_localizations.dart';
+import '../theme/app_colors.dart';
+import '../theme/theme_provider.dart';
 
 class FocusAreasScreen extends StatelessWidget {
   const FocusAreasScreen({super.key});
@@ -34,11 +37,35 @@ class FocusAreasScreen extends StatelessWidget {
 
   static const int maxSelections = 2;
 
+  /// Returns the localized display name for a focus area identifier.
+  static String localizedAreaName(AppLocalizations l10n, String area) {
+    switch (area) {
+      case 'Health':
+        return l10n.focusAreaHealth;
+      case 'Mood':
+        return l10n.focusAreaMood;
+      case 'Productivity':
+        return l10n.focusAreaProductivity;
+      case 'Home & organization':
+        return l10n.focusAreaHome;
+      case 'Relationships':
+        return l10n.focusAreaRelationships;
+      case 'Creativity':
+        return l10n.focusAreaCreativity;
+      case 'Finances':
+        return l10n.focusAreaFinances;
+      case 'Self-care':
+        return l10n.focusAreaSelfCare;
+      default:
+        return area;
+    }
+  }
+
   void _handleAreaTap(BuildContext context, String area) {
     HapticFeedback.selectionClick();
-    
+
     final state = context.read<OnboardingState>();
-    
+
     if (state.isSelected(area) || state.focusAreas.length < maxSelections) {
       state.toggleFocusArea(area);
     } else {
@@ -47,6 +74,8 @@ class FocusAreasScreen extends StatelessWidget {
   }
 
   void _showLimitReached(BuildContext context) {
+    final colors = context.read<ThemeProvider>().colors;
+    final l10n = AppLocalizations.of(context);
     HapticFeedback.lightImpact();
     showCupertinoDialog(
       context: context,
@@ -59,7 +88,7 @@ class FocusAreasScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(28),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF3C342A).withOpacity(0.15),
+                color: colors.textPrimary.withOpacity(0.15),
                 blurRadius: 24,
                 offset: const Offset(0, 8),
               ),
@@ -77,7 +106,7 @@ class FocusAreasScreen extends StatelessWidget {
                     end: Alignment.bottomCenter,
                     colors: [
                       const Color(0xFFFFFFFF).withOpacity(0.88),
-                      const Color(0xFFF8F5F2).withOpacity(0.82),
+                      colors.surfaceLight.withOpacity(0.82),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(28),
@@ -89,24 +118,24 @@ class FocusAreasScreen extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text(
-                      'Limit Reached',
+                    Text(
+                      l10n.focusAreasLimitTitle,
                       style: TextStyle(
                         fontFamily: 'Sora',
                         fontSize: 19,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF3C342A),
+                        color: colors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 10),
-                    const Text(
-                      'You can select up to 2 areas. Deselect one to choose another.',
+                    Text(
+                      l10n.focusAreasLimitMessage,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontFamily: 'Sora',
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color: Color(0xFF7A6B5F),
+                        color: colors.ctaSecondary,
                         height: 1.5,
                       ),
                     ),
@@ -123,18 +152,18 @@ class FocusAreasScreen extends StatelessWidget {
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                                 colors: [
-                                  const Color(0xFF8B7563).withOpacity(0.85),
-                                  const Color(0xFF7A6B5F).withOpacity(0.75),
+                                  colors.ctaPrimary.withOpacity(0.85),
+                                  colors.ctaSecondary.withOpacity(0.75),
                                 ],
                               ),
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: const Color(0xFF8B7563).withOpacity(0.3),
+                                color: colors.ctaPrimary.withOpacity(0.3),
                                 width: 1,
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF3C342A).withOpacity(0.2),
+                                  color: colors.textPrimary.withOpacity(0.2),
                                   blurRadius: 12,
                                   offset: const Offset(0, 4),
                                 ),
@@ -144,9 +173,9 @@ class FocusAreasScreen extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(vertical: 13),
                               borderRadius: BorderRadius.circular(16),
                               onPressed: () => Navigator.pop(context),
-                              child: const Text(
-                                'OK',
-                                style: TextStyle(
+                              child: Text(
+                                l10n.commonOk,
+                                style: const TextStyle(
                                   fontFamily: 'Sora',
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
@@ -184,7 +213,9 @@ class FocusAreasScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final state = context.watch<OnboardingState>();
+    final colors = context.watch<ThemeProvider>().colors;
     final canContinue = state.focusAreas.isNotEmpty;
     final selectedCount = state.focusAreas.length;
     final size = MediaQuery.of(context).size;
@@ -198,23 +229,23 @@ class FocusAreasScreen extends StatelessWidget {
         children: [
           // Base gradient background
           Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
-                begin: Alignment(0.15, -1.0),
-                end: Alignment(-0.15, 1.0),
+                begin: const Alignment(0.15, -1.0),
+                end: const Alignment(-0.15, 1.0),
                 colors: [
-                  Color(0xFFF2E9DB),
-                  Color(0xFFE6DDCF),
-                  Color(0xFFDBD2C4),
-                  Color(0xFFD5CCB8),
+                  colors.onboardingBg1,
+                  colors.onboardingBg2,
+                  colors.onboardingBg3,
+                  colors.onboardingBg4,
                 ],
-                stops: [0.0, 0.3, 0.6, 1.0],
+                stops: const [0.0, 0.3, 0.6, 1.0],
               ),
             ),
           ),
 
           // Background orbs
-          _buildBackgroundOrbs(size),
+          _buildBackgroundOrbs(size, colors),
 
           // Content
           SafeArea(
@@ -227,14 +258,14 @@ class FocusAreasScreen extends StatelessWidget {
                     // Header
                     Padding(
                       padding: const EdgeInsets.fromLTRB(28, 40, 28, 16),
-                      child: const Center(
+                      child: Center(
                         child: Text(
-                          'Focus areas',
+                          l10n.focusAreasTitle,
                           style: TextStyle(
                             fontFamily: 'Sora',
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF8B7563),
+                            color: colors.textLabel,
                             letterSpacing: 0.3,
                           ),
                         ),
@@ -249,35 +280,35 @@ class FocusAreasScreen extends StatelessWidget {
                         children: [
                           Text(
                             hasName
-                                ? 'What matters to you right now, $userName?'
-                                : 'What matters to you right now?',
-                            style: const TextStyle(
+                                ? l10n.focusAreasPromptWithName(userName)
+                                : l10n.focusAreasPrompt,
+                            style: TextStyle(
                               fontFamily: 'Sora',
                               fontSize: 26,
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFF3C342A),
+                              color: colors.textPrimary,
                               height: 1.3,
                               letterSpacing: -0.3,
                             ),
                           ),
                           const SizedBox(height: 10),
                           Text(
-                            'Choose up to two areas ($selectedCount/$maxSelections)',
-                            style: const TextStyle(
+                            l10n.focusAreasChooseCount(selectedCount, maxSelections),
+                            style: TextStyle(
                               fontFamily: 'Sora',
                               fontSize: 15,
                               fontWeight: FontWeight.w500,
-                              color: Color(0xFF7A6B5F),
+                              color: colors.ctaSecondary,
                             ),
                           ),
                           const SizedBox(height: 6),
-                          const Text(
-                            'You can change this later.',
+                          Text(
+                            l10n.focusAreasChangeLater,
                             style: TextStyle(
                               fontFamily: 'Sora',
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
-                              color: Color(0xFF9B8A7A),
+                              color: colors.textTertiary,
                             ),
                           ),
                         ],
@@ -295,7 +326,7 @@ class FocusAreasScreen extends StatelessWidget {
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 14),
                               child: _FocusAreaItem(
-                                area: area,
+                                label: localizedAreaName(l10n, area),
                                 icon: areaIcons[area]!,
                                 selected: selected,
                                 onTap: () => _handleAreaTap(context, area),
@@ -321,9 +352,9 @@ class FocusAreasScreen extends StatelessWidget {
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            const Color(0xFFD5CCB8).withOpacity(0.0),
-                            const Color(0xFFD5CCB8).withOpacity(0.92),
-                            const Color(0xFFD5CCB8).withOpacity(0.98),
+                            colors.onboardingBg4.withOpacity(0.0),
+                            colors.onboardingBg4.withOpacity(0.92),
+                            colors.onboardingBg4.withOpacity(0.98),
                           ],
                           stops: const [0.0, 0.6, 1.0],
                         ),
@@ -343,7 +374,7 @@ class FocusAreasScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF3C342A).withOpacity(0.35),
+                            color: colors.textPrimary.withOpacity(0.35),
                             blurRadius: 24,
                             spreadRadius: 2,
                             offset: const Offset(0, 6),
@@ -361,8 +392,8 @@ class FocusAreasScreen extends StatelessWidget {
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                                 colors: [
-                                  const Color(0xFF8B7563).withOpacity(0.92),
-                                  const Color(0xFF7A6B5F).withOpacity(0.88),
+                                  colors.ctaPrimary.withOpacity(0.92),
+                                  colors.ctaSecondary.withOpacity(0.88),
                                 ],
                               ),
                               borderRadius: BorderRadius.circular(20),
@@ -371,9 +402,9 @@ class FocusAreasScreen extends StatelessWidget {
                               onPressed: () => _handleContinue(context),
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               borderRadius: BorderRadius.circular(20),
-                              child: const Text(
-                                'Continue',
-                                style: TextStyle(
+                              child: Text(
+                                l10n.commonContinue,
+                                style: const TextStyle(
                                   fontFamily: 'Sora',
                                   fontSize: 17,
                                   fontWeight: FontWeight.w600,
@@ -394,7 +425,7 @@ class FocusAreasScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBackgroundOrbs(Size size) {
+  Widget _buildBackgroundOrbs(Size size, AppColorScheme colors) {
     return Stack(
       children: [
         // Orb 1 - Top Right
@@ -410,8 +441,8 @@ class FocusAreasScreen extends StatelessWidget {
                 center: const Alignment(-0.35, -0.35),
                 radius: 0.9,
                 colors: [
-                  const Color(0xFFFFF8F0).withOpacity(0.6),
-                  const Color(0xFFDCCDB9).withOpacity(0.2),
+                  colors.surfaceLightest.withOpacity(0.6),
+                  colors.borderMedium.withOpacity(0.2),
                 ],
               ),
             ),
@@ -435,8 +466,8 @@ class FocusAreasScreen extends StatelessWidget {
                 center: const Alignment(-0.35, -0.35),
                 radius: 0.9,
                 colors: [
-                  const Color(0xFFF0E6D7).withOpacity(0.55),
-                  const Color(0xFFD2C3AF).withOpacity(0.18),
+                  colors.onboardingBg1.withOpacity(0.55),
+                  colors.onboardingBg4.withOpacity(0.18),
                 ],
               ),
             ),
@@ -452,13 +483,13 @@ class FocusAreasScreen extends StatelessWidget {
 }
 
 class _FocusAreaItem extends StatefulWidget {
-  final String area;
+  final String label;
   final IconData icon;
   final bool selected;
   final VoidCallback onTap;
 
   const _FocusAreaItem({
-    required this.area,
+    required this.label,
     required this.icon,
     required this.selected,
     required this.onTap,
@@ -498,6 +529,7 @@ class _FocusAreaItemState extends State<_FocusAreaItem>
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.watch<ThemeProvider>().colors;
     return GestureDetector(
       onTap: _handleTap,
       child: AnimatedContainer(
@@ -510,24 +542,24 @@ class _FocusAreaItemState extends State<_FocusAreaItem>
             end: Alignment.bottomRight,
             colors: widget.selected
                 ? [
-                    const Color(0xFFE3DAcf).withOpacity(0.7),
-                    const Color(0xFFDAD1C6).withOpacity(0.5),
+                    colors.onboardingBg2.withOpacity(0.7),
+                    colors.onboardingBg2.withOpacity(0.5),
                   ]
                 : [
-                    const Color(0xFFFFFFFF).withOpacity(0.4),
-                    const Color(0xFFF8F5F2).withOpacity(0.25),
+                    colors.cardBrowse.withOpacity(colors.cardBrowseOpacity),
+                    colors.surfaceLight.withOpacity(0.25),
                   ],
           ),
           borderRadius: BorderRadius.circular(22),
           border: Border.all(
             color: widget.selected
-                ? const Color(0xFF8B7563).withOpacity(0.3)
+                ? colors.ctaPrimary.withOpacity(0.3)
                 : const Color(0xFFFFFFFF).withOpacity(0.35),
             width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF3C342A).withOpacity(widget.selected ? 0.12 : 0.06),
+              color: colors.textPrimary.withOpacity(widget.selected ? 0.12 : 0.06),
               blurRadius: widget.selected ? 16 : 10,
               offset: widget.selected ? const Offset(0, 4) : const Offset(0, 2),
             ),
@@ -549,12 +581,12 @@ class _FocusAreaItemState extends State<_FocusAreaItem>
                       end: Alignment.bottomRight,
                       colors: widget.selected
                           ? [
-                              const Color(0xFF8B7563).withOpacity(0.2),
-                              const Color(0xFF8B7563).withOpacity(0.1),
+                              colors.ctaPrimary.withOpacity(0.2),
+                              colors.ctaPrimary.withOpacity(0.1),
                             ]
                           : [
-                              const Color(0xFFC8BEB4).withOpacity(0.2),
-                              const Color(0xFFC8BEB4).withOpacity(0.1),
+                              colors.borderMedium.withOpacity(0.2),
+                              colors.borderMedium.withOpacity(0.1),
                             ],
                     ),
                     borderRadius: BorderRadius.circular(16),
@@ -563,8 +595,8 @@ class _FocusAreaItemState extends State<_FocusAreaItem>
                     widget.icon,
                     size: 22,
                     color: widget.selected
-                        ? const Color(0xFF8B7563)
-                        : const Color(0xFFA89181),
+                        ? colors.ctaPrimary
+                        : colors.accentMuted,
                   ),
                 ),
               ),
@@ -572,12 +604,12 @@ class _FocusAreaItemState extends State<_FocusAreaItem>
             const SizedBox(width: 14),
             Expanded(
               child: Text(
-                widget.area,
-                style: const TextStyle(
+                widget.label,
+                style: TextStyle(
                   fontFamily: 'Sora',
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
-                  color: Color(0xFF3C342A),
+                  color: colors.textPrimary,
                 ),
               ),
             ),
@@ -587,17 +619,17 @@ class _FocusAreaItemState extends State<_FocusAreaItem>
                 height: 24,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: const LinearGradient(
+                  gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      Color(0xFF8B7563),
-                      Color(0xFF7A6B5F),
+                      colors.ctaPrimary,
+                      colors.ctaSecondary,
                     ],
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF3C342A).withOpacity(0.25),
+                      color: colors.textPrimary.withOpacity(0.25),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),

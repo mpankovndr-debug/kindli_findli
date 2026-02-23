@@ -2,6 +2,11 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Colors;
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
+
+import '../l10n/app_localizations.dart';
+import '../theme/app_colors.dart';
+import '../theme/theme_provider.dart';
 
 class PaywallScreen extends StatefulWidget {
   const PaywallScreen({super.key});
@@ -41,6 +46,8 @@ class _PaywallScreenState extends State<PaywallScreen>
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final colors = context.watch<ThemeProvider>().colors;
+    final l10n = AppLocalizations.of(context);
 
     return Center(
       child: SingleChildScrollView(
@@ -55,15 +62,15 @@ class _PaywallScreenState extends State<PaywallScreen>
                 filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
                 child: Container(
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
+                    gradient: LinearGradient(
                       begin: Alignment.bottomCenter,
                       end: Alignment.topCenter,
                       colors: [
-                        Color.fromRGBO(245, 236, 224, 0.96),
-                        Color.fromRGBO(237, 228, 216, 0.96),
-                        Color.fromRGBO(229, 220, 208, 0.96),
+                        colors.modalBg1.withOpacity(0.96),
+                        colors.modalBg2.withOpacity(0.96),
+                        colors.modalBg3.withOpacity(0.96),
                       ],
-                      stops: [0.0, 0.5, 1.0],
+                      stops: const [0.0, 0.5, 1.0],
                     ),
                     borderRadius: BorderRadius.circular(36),
                     border: Border.all(
@@ -72,7 +79,7 @@ class _PaywallScreenState extends State<PaywallScreen>
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF32281E).withOpacity(0.35),
+                        color: colors.modalShadow.withOpacity(0.35),
                         blurRadius: 70,
                         offset: const Offset(0, 25),
                       ),
@@ -84,7 +91,7 @@ class _PaywallScreenState extends State<PaywallScreen>
                         blurStyle: BlurStyle.inner,
                       ),
                       BoxShadow(
-                        color: const Color(0xFFB4A591).withOpacity(0.15),
+                        color: colors.modalInnerShadow.withOpacity(0.15),
                         blurRadius: 0,
                         offset: const Offset(0, -1),
                         spreadRadius: 0,
@@ -99,27 +106,27 @@ class _PaywallScreenState extends State<PaywallScreen>
                         Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            _buildTulipIcon(),
+                            _buildTulipIcon(colors),
                             const SizedBox(height: 20),
-                            const Text(
-                              'Intended+',
+                            Text(
+                              l10n.paywallTitle,
                               style: TextStyle(
                                 fontFamily: 'Sora',
                                 fontSize: 30,
                                 fontWeight: FontWeight.w600,
-                                color: Color(0xFF3C342A),
+                                color: colors.textPrimary,
                                 letterSpacing: -0.5,
                               ),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Intended is free forever. Intended+ gives you more freedom to make it yours.',
+                              l10n.paywallDescription,
                               style: TextStyle(
                                 fontFamily: 'Sora',
                                 fontSize: 14,
                                 fontWeight: FontWeight.w400,
-                                color: const Color(0xFF8B7563).withOpacity(0.9),
+                                color: colors.ctaPrimary.withOpacity(0.9),
                                 height: 1.6,
                               ),
                               textAlign: TextAlign.center,
@@ -129,22 +136,22 @@ class _PaywallScreenState extends State<PaywallScreen>
                               padding: const EdgeInsets.symmetric(horizontal: 4),
                               child: Column(
                                 children: [
-                                  _buildAnimatedBullet(0, CupertinoIcons.star_fill, 'Create habits that truly fit your life'),
+                                  _buildAnimatedBullet(0, CupertinoIcons.star_fill, l10n.paywallFeature1),
                                   const SizedBox(height: 16),
-                                  _buildAnimatedBullet(1, CupertinoIcons.arrow_2_circlepath, 'Change your habits whenever life changes'),
+                                  _buildAnimatedBullet(1, CupertinoIcons.arrow_2_circlepath, l10n.paywallFeature2),
                                   const SizedBox(height: 16),
-                                  _buildAnimatedBullet(2, CupertinoIcons.arrow_up_circle, 'Shareable weekly progress cards'),
+                                  _buildAnimatedBullet(2, CupertinoIcons.arrow_up_circle, l10n.paywallFeature3),
                                   const SizedBox(height: 16),
-                                  _buildAnimatedBullet(3, CupertinoIcons.chat_bubble, 'Adjust your focus areas as often as you need'),
+                                  _buildAnimatedBullet(3, CupertinoIcons.chat_bubble, l10n.paywallFeature4),
                                 ],
                               ),
                             ),
                             const SizedBox(height: 24),
-                            _buildPricingOptions(),
+                            _buildPricingOptions(colors, l10n),
                             const SizedBox(height: 20),
-                            _buildCTAButton(),
+                            _buildCTAButton(colors, l10n),
                             const SizedBox(height: 12),
-                            _buildContinueFreeSection(),
+                            _buildContinueFreeSection(colors, l10n),
                           ],
                         ),
                         Positioned(
@@ -156,24 +163,24 @@ class _PaywallScreenState extends State<PaywallScreen>
                               width: 36,
                               height: 36,
                               decoration: BoxDecoration(
-                                color: const Color(0xFF8B7563).withOpacity(0.12),
+                                color: colors.ctaPrimary.withOpacity(0.12),
                                 shape: BoxShape.circle,
                                 border: Border.all(
-                                  color: const Color(0xFF8B7563).withOpacity(0.2),
+                                  color: colors.ctaPrimary.withOpacity(0.2),
                                   width: 1,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFF3C342A).withOpacity(0.1),
+                                    color: colors.textPrimary.withOpacity(0.1),
                                     blurRadius: 8,
                                     offset: const Offset(0, 2),
                                   ),
                                 ],
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 CupertinoIcons.xmark,
                                 size: 16,
-                                color: Color(0xFF7A6B5F),
+                                color: colors.ctaSecondary,
                               ),
                             ),
                           ),
@@ -207,7 +214,7 @@ class _PaywallScreenState extends State<PaywallScreen>
     );
   }
 
-  Widget _buildTulipIcon() {
+  Widget _buildTulipIcon(AppColorScheme colors) {
     return ClipOval(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
@@ -229,7 +236,7 @@ class _PaywallScreenState extends State<PaywallScreen>
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF3C342A).withOpacity(0.08),
+                color: colors.textPrimary.withOpacity(0.08),
                 blurRadius: 16,
                 offset: const Offset(0, 4),
               ),
@@ -249,15 +256,16 @@ class _PaywallScreenState extends State<PaywallScreen>
     );
   }
 
-  Widget _buildPricingOptions() {
+  Widget _buildPricingOptions(AppColorScheme colors, AppLocalizations l10n) {
     return Column(
       children: [
         // Monthly option
         _buildPricingCard(
+          colors: colors,
           plan: 'monthly',
-          label: 'Monthly',
-          price: '€4.99',
-          pricePerPeriod: 'per month',
+          label: l10n.paywallMonthly,
+          price: l10n.paywallMonthlyPrice,
+          pricePerPeriod: l10n.paywallMonthlyPeriod,
           badge: null,
           isSelected: _selectedPlan == 'monthly',
           onTap: () => setState(() => _selectedPlan = 'monthly'),
@@ -267,13 +275,15 @@ class _PaywallScreenState extends State<PaywallScreen>
 
         // Yearly option (default selected)
         _buildPricingCard(
+          colors: colors,
           plan: 'yearly',
-          label: 'Yearly',
-          price: '€39.99',
-          pricePerPeriod: 'per year',
-          badge: const _PricingBadge(
-            text: 'Save 33%',
-            color: Color(0xFF8B7563),
+          label: l10n.paywallYearly,
+          price: l10n.paywallYearlyPrice,
+          pricePerPeriod: l10n.paywallYearlyPeriod,
+          badge: _PricingBadge(
+            text: l10n.paywallYearlySave,
+            primaryColor: colors.ctaPrimary,
+            secondaryColor: colors.success,
           ),
           isSelected: _selectedPlan == 'yearly',
           onTap: () => setState(() => _selectedPlan = 'yearly'),
@@ -283,13 +293,15 @@ class _PaywallScreenState extends State<PaywallScreen>
 
         // Lifetime option
         _buildPricingCard(
+          colors: colors,
           plan: 'lifetime',
-          label: 'Lifetime',
-          price: '€69.99',
-          pricePerPeriod: 'one-time',
-          badge: const _PricingBadge(
-            text: 'Launch special',
-            color: Color(0xFF6B5B4A),
+          label: l10n.paywallLifetime,
+          price: l10n.paywallLifetimePrice,
+          pricePerPeriod: l10n.paywallLifetimePeriod,
+          badge: _PricingBadge(
+            text: l10n.paywallLifetimeBadge,
+            primaryColor: colors.buttonDark,
+            secondaryColor: colors.buttonDark,
           ),
           isSelected: _selectedPlan == 'lifetime',
           onTap: () => setState(() => _selectedPlan = 'lifetime'),
@@ -299,6 +311,7 @@ class _PaywallScreenState extends State<PaywallScreen>
   }
 
   Widget _buildPricingCard({
+    required AppColorScheme colors,
     required String plan,
     required String label,
     required String price,
@@ -314,25 +327,25 @@ class _PaywallScreenState extends State<PaywallScreen>
     List<BoxShadow>? boxShadow;
 
     if (isSelected) {
-      borderColor = const Color(0xFF8B7563);
-      backgroundColor = const Color(0xFF8B7563).withOpacity(0.12);
-      priceColor = const Color(0xFF8B7563);
-      suffixColor = const Color(0xFF8B7563);
+      borderColor = colors.ctaPrimary;
+      backgroundColor = colors.ctaPrimary.withOpacity(0.12);
+      priceColor = colors.ctaPrimary;
+      suffixColor = colors.ctaPrimary;
       boxShadow = [
         BoxShadow(
-          color: const Color(0xFF8B7563).withOpacity(0.2),
+          color: colors.ctaPrimary.withOpacity(0.2),
           blurRadius: 16,
           offset: const Offset(0, 4),
         ),
       ];
     } else {
-      borderColor = const Color(0xFF8B7563).withOpacity(0.15);
+      borderColor = colors.ctaPrimary.withOpacity(0.15);
       backgroundColor = const Color(0xFFFFFFFF).withOpacity(0.6);
-      priceColor = const Color(0xFF8B7563);
-      suffixColor = const Color(0xFFA08876);
+      priceColor = colors.ctaPrimary;
+      suffixColor = colors.textMutedBrown;
       boxShadow = [
         BoxShadow(
-          color: const Color(0xFF3C342A).withOpacity(0.06),
+          color: colors.textPrimary.withOpacity(0.06),
           blurRadius: 8,
           offset: const Offset(0, 2),
         ),
@@ -364,11 +377,11 @@ class _PaywallScreenState extends State<PaywallScreen>
                   children: [
                     Text(
                       label,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'Sora',
                         fontSize: 15,
                         fontWeight: FontWeight.w500,
-                        color: Color(0xFF3C342A),
+                        color: colors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -408,12 +421,12 @@ class _PaywallScreenState extends State<PaywallScreen>
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: isSelected
-                          ? const Color(0xFF8B7563)
-                          : const Color(0xFFC5BBAD),
+                          ? colors.ctaPrimary
+                          : colors.textDisabled,
                       width: 2,
                     ),
                     color: isSelected
-                        ? const Color(0xFF8B7563)
+                        ? colors.ctaPrimary
                         : Colors.transparent,
                   ),
                   child: isSelected
@@ -441,7 +454,7 @@ class _PaywallScreenState extends State<PaywallScreen>
     );
   }
 
-  Widget _buildCTAButton() {
+  Widget _buildCTAButton(AppColorScheme colors, AppLocalizations l10n) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
       child: BackdropFilter(
@@ -449,22 +462,22 @@ class _PaywallScreenState extends State<PaywallScreen>
         child: Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
+            gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Color.fromRGBO(139, 117, 99, 0.92),
-                Color.fromRGBO(122, 107, 95, 0.88),
+                colors.ctaPrimary.withOpacity(0.92),
+                colors.ctaSecondary.withOpacity(0.88),
               ],
             ),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: const Color(0xFF8B7563).withOpacity(0.4),
+              color: colors.ctaPrimary.withOpacity(0.4),
               width: 1,
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF3C342A).withOpacity(0.3),
+                color: colors.textPrimary.withOpacity(0.3),
                 blurRadius: 24,
                 offset: const Offset(0, 6),
               ),
@@ -484,9 +497,9 @@ class _PaywallScreenState extends State<PaywallScreen>
               // TODO: Implement purchase flow
               Navigator.pop(context);
             },
-            child: const Text(
-              'Start your 7-day free trial',
-              style: TextStyle(
+            child: Text(
+              l10n.paywallCta,
+              style: const TextStyle(
                 fontFamily: 'Sora',
                 fontSize: 17,
                 fontWeight: FontWeight.w600,
@@ -499,30 +512,30 @@ class _PaywallScreenState extends State<PaywallScreen>
     );
   }
 
-  Widget _buildContinueFreeSection() {
+  Widget _buildContinueFreeSection(AppColorScheme colors, AppLocalizations l10n) {
     return Column(
       children: [
         CupertinoButton(
           padding: const EdgeInsets.symmetric(vertical: 8),
           onPressed: () => Navigator.pop(context),
-          child: const Text(
-            'Continue with Core',
+          child: Text(
+            l10n.paywallContinueFree,
             style: TextStyle(
               fontFamily: 'Sora',
               fontSize: 16,
               fontWeight: FontWeight.w500,
-              color: Color(0xFF9B8A7A),
+              color: colors.textTertiary,
             ),
           ),
         ),
         const SizedBox(height: 4),
         Text(
-          'You can upgrade anytime from your profile.',
+          l10n.paywallUpgradeHint,
           style: TextStyle(
             fontFamily: 'Sora',
             fontSize: 12,
             fontWeight: FontWeight.w400,
-            color: const Color(0xFFB0A090).withOpacity(0.8),
+            color: colors.textDisabled.withOpacity(0.8),
           ),
           textAlign: TextAlign.center,
         ),
@@ -543,6 +556,8 @@ class _FeatureItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.watch<ThemeProvider>().colors;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -551,18 +566,18 @@ class _FeatureItem extends StatelessWidget {
           child: Icon(
             icon,
             size: 20,
-            color: const Color(0xFF8B7563),
+            color: colors.ctaPrimary,
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
           child: Text(
             text,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Sora',
               fontSize: 14.5,
               fontWeight: FontWeight.w400,
-              color: Color(0xFF3C342A),
+              color: colors.textPrimary,
               height: 1.5,
               letterSpacing: -0.1,
             ),
@@ -576,39 +591,32 @@ class _FeatureItem extends StatelessWidget {
 // Pricing badge widget
 class _PricingBadge extends StatelessWidget {
   final String text;
-  final Color color;
+  final Color primaryColor;
+  final Color secondaryColor;
 
   const _PricingBadge({
     required this.text,
-    required this.color,
+    required this.primaryColor,
+    required this.secondaryColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    final isGreen = color == const Color(0xFF8B7563);
-
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: isGreen
-              ? [
-                  const Color(0xFF8B7563).withOpacity(0.92),
-                  const Color(0xFF6A8B6F).withOpacity(0.88),
-                ]
-              : [
-                  const Color(0xFF6B5B4A).withOpacity(0.88),
-                  const Color(0xFF5A4C3D).withOpacity(0.84),
-                ],
+          colors: [
+            primaryColor.withOpacity(0.92),
+            secondaryColor.withOpacity(0.88),
+          ],
         ),
         borderRadius: BorderRadius.circular(100),
         boxShadow: [
           BoxShadow(
-            color: isGreen
-                ? const Color(0xFF8B7563).withOpacity(0.3)
-                : const Color(0xFF6B5B4A).withOpacity(0.25),
+            color: primaryColor.withOpacity(0.3),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -627,4 +635,3 @@ class _PricingBadge extends StatelessWidget {
     );
   }
 }
-

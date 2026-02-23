@@ -1,3 +1,4 @@
+import '../l10n/app_localizations.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -43,7 +44,7 @@ class NotificationScheduler {
     return false;
   }
 
-  static Future<void> scheduleDaily() async {
+  static Future<void> scheduleDaily(AppLocalizations l10n) async {
     final hour = await NotificationPreferencesService.getHour();
     final minute = await NotificationPreferencesService.getMinute();
 
@@ -60,6 +61,7 @@ class NotificationScheduler {
     }
 
     final now = tz.TZDateTime.now(tz.local);
+    final messages = NotificationMessages.daily(l10n);
 
     for (int dayOffset = 0; dayOffset < 7; dayOffset++) {
       var scheduled = tz.TZDateTime(
@@ -80,23 +82,23 @@ class NotificationScheduler {
       final poolSize = subscribed ? 60 : 30;
       final messageIndex =
           await NotificationPreferencesService.nextMessageIndex(poolSize);
-      final body = NotificationMessages.daily[messageIndex];
+      final body = messages[messageIndex];
 
       await _plugin.zonedSchedule(
         dayOffset,
         '',
         body,
         scheduled,
-        const NotificationDetails(
-          iOS: DarwinNotificationDetails(
+        NotificationDetails(
+          iOS: const DarwinNotificationDetails(
             presentAlert: true,
             presentBadge: false,
             presentSound: true,
           ),
           android: AndroidNotificationDetails(
             'daily_reminders',
-            'Daily Reminders',
-            channelDescription: 'Gentle daily habit reminders',
+            l10n.notifDailyChannelName,
+            channelDescription: l10n.notifDailyChannelDesc,
             importance: Importance.defaultImportance,
             priority: Priority.defaultPriority,
           ),
@@ -109,7 +111,7 @@ class NotificationScheduler {
     }
   }
 
-  static Future<void> scheduleWeekly() async {
+  static Future<void> scheduleWeekly(AppLocalizations l10n) async {
     final now = tz.TZDateTime.now(tz.local);
 
     // Find the next Sunday at 21:00
@@ -139,18 +141,18 @@ class NotificationScheduler {
     await _plugin.zonedSchedule(
       100,
       '',
-      'Check in with how your week felt. Your habits were there for you.',
+      l10n.notifWeeklyBody,
       scheduled,
-      const NotificationDetails(
-        iOS: DarwinNotificationDetails(
+      NotificationDetails(
+        iOS: const DarwinNotificationDetails(
           presentAlert: true,
           presentBadge: false,
           presentSound: true,
         ),
         android: AndroidNotificationDetails(
           'weekly_reminders',
-          'Weekly Reminders',
-          channelDescription: 'Weekly reflection reminders',
+          l10n.notifWeeklyChannelName,
+          channelDescription: l10n.notifWeeklyChannelDesc,
           importance: Importance.defaultImportance,
           priority: Priority.defaultPriority,
         ),
@@ -166,14 +168,14 @@ class NotificationScheduler {
     await _plugin.cancelAll();
   }
 
-  static Future<void> rescheduleAll() async {
+  static Future<void> rescheduleAll(AppLocalizations l10n) async {
     await cancelAll();
-    await scheduleDaily();
+    await scheduleDaily(l10n);
 
     final weeklyEnabled =
         await NotificationPreferencesService.isWeeklyEnabled();
     if (weeklyEnabled) {
-      await scheduleWeekly();
+      await scheduleWeekly(l10n);
     }
   }
 }

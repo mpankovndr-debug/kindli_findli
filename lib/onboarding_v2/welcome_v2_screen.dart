@@ -6,11 +6,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
+import '../l10n/app_localizations.dart';
 import '../main.dart';
 import '../utils/profanity_filter.dart';
 import 'focus_areas_screen.dart';
 import 'onboarding_state.dart';
 import '../state/user_state.dart';
+import '../theme/app_colors.dart';
+import '../theme/theme_provider.dart';
 
 class WelcomeV2Screen extends StatefulWidget {
   const WelcomeV2Screen({super.key});
@@ -19,7 +22,7 @@ class WelcomeV2Screen extends StatefulWidget {
   State<WelcomeV2Screen> createState() => _WelcomeV2ScreenState();
 }
 
-class _WelcomeV2ScreenState extends State<WelcomeV2Screen> 
+class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
     with SingleTickerProviderStateMixin {
   final controller = TextEditingController();
   late final AnimationController _anim;
@@ -114,16 +117,18 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
 
   void _handleContinue() {
     final name = controller.text.trim();
-    
+
     if (name.isEmpty) return;
-    
+
     if (name.length > _maxNameLength) {
-      _showError('Name should be under $_maxNameLength characters');
+      final l10n = AppLocalizations.of(context);
+      _showError(l10n.onboardingNameTooLong(_maxNameLength));
       return;
     }
 
     if (ProfanityFilter.containsProfanity(name)) {
-      _showError('Please choose a more appropriate name');
+      final l10n = AppLocalizations.of(context);
+      _showError(l10n.onboardingNameInappropriate);
       return;
     }
 
@@ -131,13 +136,14 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
   }
 
   void _showError(String message) {
-    showKindliDialog(
+    final l10n = AppLocalizations.of(context);
+    showIntendedDialog(
       context: context,
-      title: 'Oops',
+      title: l10n.onboardingOops,
       subtitle: message,
       actions: [
         CupertinoDialogAction(
-          child: const Text('OK'),
+          child: Text(l10n.commonOk),
           onPressed: () => Navigator.pop(context),
         ),
       ],
@@ -147,6 +153,8 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final colors = context.watch<ThemeProvider>().colors;
+    final l10n = AppLocalizations.of(context);
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -156,24 +164,24 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
           children: [
             // Base gradient background
             Container(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  begin: Alignment(0.2, -1.0),
-                  end: Alignment(-0.2, 1.0),
+                  begin: const Alignment(0.2, -1.0),
+                  end: const Alignment(-0.2, 1.0),
                   colors: [
-                    Color(0xFFF5EDE0),
-                    Color(0xFFE8DCC8),
-                    Color(0xFFDDD1C0),
-                    Color(0xFFD9CDB8),
-                    Color(0xFFE0D4C4),
+                    colors.onboardingBg1,
+                    colors.onboardingBg2,
+                    colors.onboardingBg3,
+                    colors.onboardingBg4,
+                    colors.onboardingBg3,
                   ],
-                  stops: [0.0, 0.25, 0.5, 0.75, 1.0],
+                  stops: const [0.0, 0.25, 0.5, 0.75, 1.0],
                 ),
               ),
             ),
 
             // Background orbs
-            _buildBackgroundOrbs(size),
+            _buildBackgroundOrbs(size, colors),
 
             // Floating glass cards
             _FloatingCards(size: size),
@@ -216,7 +224,7 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
                                           end: Alignment.bottomRight,
                                           colors: [
                                             const Color(0xFFFFFFFF).withOpacity(0.2),
-                                            const Color(0xFFF8F5F2).withOpacity(0.12),
+                                            colors.surfaceLight.withOpacity(0.12),
                                           ],
                                         ),
                                         borderRadius: BorderRadius.circular(32),
@@ -226,7 +234,7 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
                                         ),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: const Color(0xFF3C342A).withOpacity(0.06),
+                                            color: colors.textPrimary.withOpacity(0.06),
                                             blurRadius: 32,
                                             offset: const Offset(0, 8),
                                           ),
@@ -252,14 +260,14 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
                                 const SizedBox(height: 40),
 
                                 // Title
-                                const Text(
-                                  'Intended',
+                                Text(
+                                  l10n.appNameIntended,
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontFamily: 'Sora',
                                     fontSize: 36,
                                     fontWeight: FontWeight.w600,
-                                    color: Color(0xFF3C342A),
+                                    color: colors.textPrimary,
                                     letterSpacing: -0.5,
                                     height: 1.2,
                                   ),
@@ -273,14 +281,14 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
                           // Tagline
                           FadeTransition(
                             opacity: _fadeTagline,
-                            child: const Text(
-                              'Intention, not perfection.',
+                            child: Text(
+                              l10n.onboardingTagline,
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontFamily: 'Sora',
                                 fontSize: 17,
                                 fontWeight: FontWeight.w500,
-                                color: Color(0xFF7A6B5F),
+                                color: colors.ctaSecondary,
                                 height: 1.6,
                               ),
                             ),
@@ -309,7 +317,7 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
                                             end: Alignment.bottomRight,
                                             colors: [
                                               const Color(0xFFFFFFFF).withOpacity(0.45),
-                                              const Color(0xFFF8F5F2).withOpacity(0.3),
+                                              colors.surfaceLight.withOpacity(0.3),
                                             ],
                                           ),
                                           borderRadius: BorderRadius.circular(20),
@@ -319,7 +327,7 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
                                           ),
                                           boxShadow: [
                                             BoxShadow(
-                                              color: const Color(0xFF3C342A).withOpacity(0.08),
+                                              color: colors.textPrimary.withOpacity(0.08),
                                               blurRadius: 16,
                                               offset: const Offset(0, 4),
                                             ),
@@ -327,19 +335,19 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
                                         ),
                                         child: CupertinoTextField(
                                           controller: controller,
-                                          placeholder: 'What should we call you?',
+                                          placeholder: l10n.onboardingNamePrompt,
                                           textAlign: TextAlign.center,
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontFamily: 'Sora',
                                             fontSize: 16,
                                             fontWeight: FontWeight.w500,
-                                            color: Color(0xFF3C342A),
+                                            color: colors.textPrimary,
                                           ),
                                           placeholderStyle: TextStyle(
                                             fontFamily: 'Sora',
                                             fontSize: 16,
                                             fontWeight: FontWeight.w500,
-                                            color: const Color(0xFF3C342A).withOpacity(0.4),
+                                            color: colors.textPrimary.withOpacity(0.4),
                                           ),
                                           decoration: const BoxDecoration(),
                                           padding: const EdgeInsets.symmetric(
@@ -371,18 +379,18 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
                                               begin: Alignment.topLeft,
                                               end: Alignment.bottomRight,
                                               colors: [
-                                                const Color(0xFF8B7563).withOpacity(0.75),
-                                                const Color(0xFF7A6B5F).withOpacity(0.65),
+                                                colors.ctaPrimary.withOpacity(0.75),
+                                                colors.ctaSecondary.withOpacity(0.65),
                                               ],
                                             ),
                                             borderRadius: BorderRadius.circular(20),
                                             border: Border.all(
-                                              color: const Color(0xFF8B7563).withOpacity(0.3),
+                                              color: colors.ctaPrimary.withOpacity(0.3),
                                               width: 1,
                                             ),
                                             boxShadow: [
                                               BoxShadow(
-                                                color: const Color(0xFF3C342A).withOpacity(0.2),
+                                                color: colors.textPrimary.withOpacity(0.2),
                                                 blurRadius: 20,
                                                 offset: const Offset(0, 4),
                                               ),
@@ -392,8 +400,8 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
                                             onPressed: _isEnabled ? _handleContinue : null,
                                             padding: const EdgeInsets.symmetric(vertical: 16),
                                             borderRadius: BorderRadius.circular(20),
-                                            child: const Text(
-                                              'Continue',
+                                            child: Text(
+                                              l10n.commonContinue,
                                               style: TextStyle(
                                                 fontFamily: 'Sora',
                                                 fontSize: 17,
@@ -414,13 +422,13 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
                                 CupertinoButton(
                                   padding: const EdgeInsets.all(12),
                                   onPressed: () => _navigateToFocusAreas(),
-                                  child: const Text(
-                                    'Skip for now',
+                                  child: Text(
+                                    l10n.onboardingSkipForNow,
                                     style: TextStyle(
                                       fontFamily: 'Sora',
                                       fontSize: 15,
                                       fontWeight: FontWeight.w500,
-                                      color: Color(0xFF9B8A7A),
+                                      color: colors.textTertiary,
                                     ),
                                   ),
                                 ),
@@ -443,7 +451,7 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
     );
   }
 
-  Widget _buildBackgroundOrbs(Size size) {
+  Widget _buildBackgroundOrbs(Size size, AppColorScheme colors) {
     return Stack(
       children: [
         // Orb 1 - Top Right (largest)
@@ -459,8 +467,8 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
                 center: const Alignment(-0.3, -0.3),
                 radius: 0.9,
                 colors: [
-                  const Color(0xFFFFF8F0).withOpacity(0.8),
-                  const Color(0xFFE2CEB4).withOpacity(0.3),
+                  colors.surfaceLightest.withOpacity(0.8),
+                  colors.onboardingBg2.withOpacity(0.3),
                 ],
               ),
             ),
@@ -484,8 +492,8 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
                 center: const Alignment(-0.35, -0.35),
                 radius: 0.9,
                 colors: [
-                  const Color(0xFFF0E4D2).withOpacity(0.7),
-                  const Color(0xFFD2C3AF).withOpacity(0.25),
+                  colors.onboardingBg1.withOpacity(0.7),
+                  colors.onboardingBg4.withOpacity(0.25),
                 ],
               ),
             ),
@@ -509,8 +517,8 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
                 center: const Alignment(-0.4, -0.4),
                 radius: 0.9,
                 colors: [
-                  const Color(0xFFFFF5EB).withOpacity(0.65),
-                  const Color(0xFFC8B9A5).withOpacity(0.2),
+                  colors.surfaceLightest.withOpacity(0.65),
+                  colors.onboardingBg4.withOpacity(0.2),
                 ],
               ),
             ),
@@ -534,8 +542,8 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
                 center: const Alignment(-0.35, -0.35),
                 radius: 0.9,
                 colors: [
-                  const Color(0xFFEBDCC8).withOpacity(0.6),
-                  const Color(0xFFC3B4A0).withOpacity(0.2),
+                  colors.onboardingBg1.withOpacity(0.6),
+                  colors.onboardingBg4.withOpacity(0.2),
                 ],
               ),
             ),
@@ -904,7 +912,7 @@ class _FloatingParticlesState extends State<_FloatingParticles>
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    
+
     return IgnorePointer(
       child: SizedBox.expand(
         child: AnimatedBuilder(

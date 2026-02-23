@@ -2,12 +2,15 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Colors;
 import 'package:flutter/services.dart';
+import '../l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
-import 'habit_reveal_screen.dart';
+import 'theme_selection_screen.dart';
 import 'onboarding_state.dart';
 import '../services/notification_scheduler.dart';
 import '../services/notification_preferences_service.dart';
+import '../theme/app_colors.dart';
+import '../theme/theme_provider.dart';
 
 class DailyReminderScreen extends StatefulWidget {
   const DailyReminderScreen({super.key});
@@ -46,7 +49,7 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
       context,
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) =>
-            const HabitRevealScreen(),
+            const ThemeSelectionScreen(),
         transitionDuration: const Duration(milliseconds: 350),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(
@@ -61,6 +64,8 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<OnboardingState>();
+    final colors = context.watch<ThemeProvider>().colors;
+    final l10n = AppLocalizations.of(context);
     final size = MediaQuery.of(context).size;
 
     final userName = state.name;
@@ -72,23 +77,23 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
         children: [
           // Base gradient background
           Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
-                begin: Alignment(0.18, -1.0),
-                end: Alignment(-0.18, 1.0),
+                begin: const Alignment(0.18, -1.0),
+                end: const Alignment(-0.18, 1.0),
                 colors: [
-                  Color(0xFFEFE6D8),
-                  Color(0xFFE3D9CB),
-                  Color(0xFFD8CEC0),
-                  Color(0xFFD0C6B8),
+                  colors.onboardingBg1,
+                  colors.onboardingBg2,
+                  colors.onboardingBg3,
+                  colors.onboardingBg4,
                 ],
-                stops: [0.0, 0.35, 0.7, 1.0],
+                stops: const [0.0, 0.35, 0.7, 1.0],
               ),
             ),
           ),
 
           // Background orbs
-          _buildBackgroundOrbs(size),
+          _buildBackgroundOrbs(size, colors),
 
           // Content
           SafeArea(
@@ -105,14 +110,14 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                         alignment: Alignment.center,
                         children: [
                           // Label (centered)
-                          const Center(
+                          Center(
                             child: Text(
-                              'Reminder',
+                              l10n.reminderTitle,
                               style: TextStyle(
                                 fontFamily: 'Sora',
                                 fontSize: 18,
                                 fontWeight: FontWeight.w600,
-                                color: Color(0xFF8B7563),
+                                color: colors.textLabel,
                                 letterSpacing: 0.3,
                               ),
                             ),
@@ -144,7 +149,7 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                                     ),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: const Color(0xFF3C342A).withOpacity(0.08),
+                                        color: colors.textPrimary.withOpacity(0.08),
                                         blurRadius: 10,
                                         offset: const Offset(0, 2),
                                       ),
@@ -153,10 +158,10 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                                   child: CupertinoButton(
                                     padding: EdgeInsets.zero,
                                     onPressed: () => Navigator.pop(context),
-                                    child: const Icon(
+                                    child: Icon(
                                       CupertinoIcons.back,
                                       size: 20,
-                                      color: Color(0xFF8B7563),
+                                      color: colors.ctaPrimary,
                                     ),
                                   ),
                                 ),
@@ -175,51 +180,51 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const SizedBox(height: 32),
-                            const Text(
-                              'Want a gentle daily reminder?',
+                            Text(
+                              l10n.reminderSubtitle,
                               style: TextStyle(
                                 fontFamily: 'Sora',
                                 fontSize: 26,
                                 fontWeight: FontWeight.w600,
-                                color: Color(0xFF3C342A),
+                                color: colors.textPrimary,
                                 height: 1.3,
                                 letterSpacing: -0.3,
                               ),
                             ),
                             const SizedBox(height: 10),
-                            const Text(
-                              'Just once a day. No pressure.',
+                            Text(
+                              l10n.reminderDescription,
                               style: TextStyle(
                                 fontFamily: 'Sora',
                                 fontSize: 15,
                                 fontWeight: FontWeight.w500,
-                                color: Color(0xFF7A6B5F),
+                                color: colors.ctaSecondary,
                               ),
                             ),
 
                             const SizedBox(height: 60),
 
                             // Toggle card
-                            _buildToggleCard(state),
+                            _buildToggleCard(state, colors, l10n),
 
                             const SizedBox(height: 16),
 
                             // Weekly summary toggle
-                            _buildWeeklySummaryCard(state),
+                            _buildWeeklySummaryCard(state, colors, l10n),
 
                             // Helper message when OFF
                             if (!state.dailyReminderEnabled && !_permissionDenied)
-                              const Padding(
-                                padding: EdgeInsets.only(top: 4, bottom: 20),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4, bottom: 20),
                                 child: Center(
                                   child: Text(
-                                    'Switch this on to pick the time for your daily reminder.',
+                                    l10n.reminderSwitchHint,
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                       fontFamily: 'Sora',
                                       fontSize: 14,
                                       fontWeight: FontWeight.w500,
-                                      color: Color(0xFF9B8A7A),
+                                      color: colors.textTertiary,
                                       height: 1.5,
                                     ),
                                   ),
@@ -228,17 +233,17 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
 
                             // Permission denied message
                             if (_permissionDenied)
-                              const Padding(
-                                padding: EdgeInsets.only(top: 4, bottom: 20),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4, bottom: 20),
                                 child: Center(
                                   child: Text(
-                                    'No worries — you can turn these on anytime from your profile.',
+                                    l10n.reminderNoWorries,
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                       fontFamily: 'Sora',
                                       fontSize: 14,
                                       fontWeight: FontWeight.w500,
-                                      color: Color(0xFF9B8A7A),
+                                      color: colors.textTertiary,
                                       height: 1.5,
                                     ),
                                   ),
@@ -266,9 +271,9 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            const Color(0xFFD0C6B8).withOpacity(0.0),
-                            const Color(0xFFD0C6B8).withOpacity(0.92),
-                            const Color(0xFFD0C6B8).withOpacity(0.98),
+                            colors.onboardingBg4.withOpacity(0.0),
+                            colors.onboardingBg4.withOpacity(0.92),
+                            colors.onboardingBg4.withOpacity(0.98),
                           ],
                           stops: const [0.0, 0.5, 1.0],
                         ),
@@ -291,7 +296,7 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF3C342A).withOpacity(0.3),
+                              color: colors.textPrimary.withOpacity(0.3),
                               blurRadius: 24,
                               offset: const Offset(0, 8),
                             ),
@@ -307,8 +312,8 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                   colors: [
-                                    const Color(0xFF8B7563).withOpacity(0.92),
-                                    const Color(0xFF7A6B5F).withOpacity(0.88),
+                                    colors.ctaPrimary.withOpacity(0.92),
+                                    colors.ctaSecondary.withOpacity(0.88),
                                   ],
                                 ),
                                 borderRadius: BorderRadius.circular(20),
@@ -317,7 +322,7 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                                 onPressed: _handleContinue,
                                 padding: const EdgeInsets.symmetric(vertical: 16),
                                 child: Text(
-                                  hasName ? 'Let\'s go, $userName' : 'Start',
+                                  hasName ? l10n.reminderLetsGo(userName!) : l10n.commonStart,
                                   style: const TextStyle(
                                     fontFamily: 'Sora',
                                     fontSize: 17,
@@ -335,13 +340,13 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                       CupertinoButton(
                         padding: const EdgeInsets.all(12),
                         onPressed: _handleContinue,
-                        child: const Text(
-                          'Skip',
+                        child: Text(
+                          l10n.commonSkip,
                           style: TextStyle(
                             fontFamily: 'Sora',
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
-                            color: Color(0xFF9B8A7A),
+                            color: colors.textTertiary,
                           ),
                         ),
                       ),
@@ -356,7 +361,7 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
     );
   }
 
-  Widget _buildBackgroundOrbs(Size size) {
+  Widget _buildBackgroundOrbs(Size size, AppColorScheme colors) {
     return Stack(
       children: [
         // Orb 1 - Top Left
@@ -372,8 +377,8 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                 center: const Alignment(-0.35, -0.35),
                 radius: 0.9,
                 colors: [
-                  const Color(0xFFFFFAF2).withOpacity(0.65),
-                  const Color(0xFFDCD2C3).withOpacity(0.22),
+                  colors.surfaceLightest.withOpacity(0.65),
+                  colors.borderMedium.withOpacity(0.22),
                 ],
               ),
             ),
@@ -397,8 +402,8 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                 center: const Alignment(-0.4, -0.4),
                 radius: 0.9,
                 colors: [
-                  const Color(0xFFF5EBDC).withOpacity(0.6),
-                  const Color(0xFFD2C8B9).withOpacity(0.2),
+                  colors.onboardingBg1.withOpacity(0.6),
+                  colors.onboardingBg4.withOpacity(0.2),
                 ],
               ),
             ),
@@ -412,7 +417,7 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
     );
   }
 
-  Widget _buildToggleCard(OnboardingState state) {
+  Widget _buildToggleCard(OnboardingState state, AppColorScheme colors, AppLocalizations l10n) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(22),
       child: BackdropFilter(
@@ -426,7 +431,7 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
               end: Alignment.bottomRight,
               colors: [
                 const Color(0xFFFFFFFF).withOpacity(0.65),
-                const Color(0xFFF8F5F2).withOpacity(0.60),
+                colors.surfaceLight.withOpacity(0.60),
               ],
             ),
             borderRadius: BorderRadius.circular(22),
@@ -436,7 +441,7 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF3C342A).withOpacity(0.08),
+                color: colors.textPrimary.withOpacity(0.08),
                 blurRadius: 16,
                 offset: const Offset(0, 4),
               ),
@@ -453,29 +458,29 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Gentle daily reminder',
+                          Text(
+                            l10n.reminderDailyToggle,
                             style: TextStyle(
                               fontFamily: 'Sora',
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFF3C342A),
+                              color: colors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Around ${_timeController.text}',
-                            style: const TextStyle(
+                            l10n.reminderAroundTime(_timeController.text),
+                            style: TextStyle(
                               fontFamily: 'Sora',
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
-                              color: Color(0xFF8B7563),
+                              color: colors.textLabel,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    _buildToggleSwitch(state),
+                    _buildToggleSwitch(state, colors),
                   ],
                 ),
               ),
@@ -490,9 +495,9 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight,
                       colors: [
-                        const Color(0xFFC8BEB4).withOpacity(0),
-                        const Color(0xFFC8BEB4).withOpacity(0.3),
-                        const Color(0xFFC8BEB4).withOpacity(0),
+                        colors.borderMedium.withOpacity(0),
+                        colors.borderMedium.withOpacity(0.3),
+                        colors.borderMedium.withOpacity(0),
                       ],
                     ),
                   ),
@@ -502,13 +507,13 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
                   child: Column(
                     children: [
-                      const Text(
-                        'Remind me at',
+                      Text(
+                        l10n.reminderTimeLabel,
                         style: TextStyle(
                           fontFamily: 'Sora',
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF6B5B4A),
+                          color: colors.buttonDark,
                           letterSpacing: 0.3,
                         ),
                       ),
@@ -532,12 +537,12 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                               ),
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: const Color(0xFFC8BEB4).withOpacity(0.25),
+                                color: colors.borderMedium.withOpacity(0.25),
                                 width: 1.5,
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF3C342A).withOpacity(0.06),
+                                  color: colors.textPrimary.withOpacity(0.06),
                                   blurRadius: 8,
                                   offset: const Offset(0, 2),
                                 ),
@@ -546,11 +551,11 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                             child: CupertinoTextField(
                               controller: _timeController,
                               textAlign: TextAlign.center,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontFamily: 'Sora',
                                 fontSize: 20,
                                 fontWeight: FontWeight.w500,
-                                color: Color(0xFF3C342A),
+                                color: colors.textPrimary,
                               ),
                               decoration: const BoxDecoration(),
                               onTap: () async {
@@ -575,9 +580,9 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                                               begin: Alignment.topCenter,
                                               end: Alignment.bottomCenter,
                                               colors: [
-                                                const Color(0xFFF5ECE0).withOpacity(0.98),
-                                                const Color(0xFFEDE4D8).withOpacity(0.96),
-                                                const Color(0xFFE6DDD1).withOpacity(0.98),
+                                                colors.modalBg1.withOpacity(0.98),
+                                                colors.modalBg2.withOpacity(0.96),
+                                                colors.modalBg3.withOpacity(0.98),
                                               ],
                                               stops: const [0.0, 0.5, 1.0],
                                             ),
@@ -595,24 +600,24 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                                                 width: 36,
                                                 height: 4,
                                                 decoration: BoxDecoration(
-                                                  color: const Color(0xFF8B7563).withOpacity(0.2),
+                                                  color: colors.ctaPrimary.withOpacity(0.2),
                                                   borderRadius: BorderRadius.circular(2),
                                                 ),
                                               ),
-                                              
+
                                               // Header with Done button
                                               Padding(
                                                 padding: const EdgeInsets.fromLTRB(24, 16, 16, 12),
                                                 child: Row(
                                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                   children: [
-                                                    const Text(
-                                                      'Set reminder time',
+                                                    Text(
+                                                      l10n.reminderTimePicker,
                                                       style: TextStyle(
                                                         fontFamily: 'Sora',
                                                         fontSize: 18,
                                                         fontWeight: FontWeight.w600,
-                                                        color: Color(0xFF3C342A),
+                                                        color: colors.textPrimary,
                                                       ),
                                                     ),
                                                     GestureDetector(
@@ -628,7 +633,8 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                                                         await NotificationPreferencesService.setMinute(tempTime.minute);
                                                         final enabled = await NotificationPreferencesService.isEnabled();
                                                         if (enabled) {
-                                                          await NotificationScheduler.rescheduleAll();
+                                                          final l10n = AppLocalizations.of(context);
+                                                          await NotificationScheduler.rescheduleAll(l10n);
                                                         }
                                                       },
                                                       child: Container(
@@ -638,21 +644,21 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                                                             begin: Alignment.topLeft,
                                                             end: Alignment.bottomRight,
                                                             colors: [
-                                                              const Color(0xFF8B7563).withOpacity(0.92),
-                                                              const Color(0xFF7A6B5F).withOpacity(0.88),
+                                                              colors.ctaPrimary.withOpacity(0.92),
+                                                              colors.ctaSecondary.withOpacity(0.88),
                                                             ],
                                                           ),
                                                           borderRadius: BorderRadius.circular(14),
                                                           boxShadow: [
                                                             BoxShadow(
-                                                              color: const Color(0xFF3C342A).withOpacity(0.2),
+                                                              color: colors.textPrimary.withOpacity(0.2),
                                                               blurRadius: 8,
                                                               offset: const Offset(0, 3),
                                                             ),
                                                           ],
                                                         ),
-                                                        child: const Text(
-                                                          'Done',
+                                                        child: Text(
+                                                          l10n.commonDone,
                                                           style: TextStyle(
                                                             fontFamily: 'Sora',
                                                             fontSize: 15,
@@ -673,9 +679,9 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                                                 decoration: BoxDecoration(
                                                   gradient: LinearGradient(
                                                     colors: [
-                                                      const Color(0xFF8B7563).withOpacity(0.0),
-                                                      const Color(0xFF8B7563).withOpacity(0.15),
-                                                      const Color(0xFF8B7563).withOpacity(0.0),
+                                                      colors.ctaPrimary.withOpacity(0.0),
+                                                      colors.ctaPrimary.withOpacity(0.15),
+                                                      colors.ctaPrimary.withOpacity(0.0),
                                                     ],
                                                   ),
                                                 ),
@@ -684,13 +690,13 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                                               // Time picker with custom styling
                                               Expanded(
                                                 child: CupertinoTheme(
-                                                  data: const CupertinoThemeData(
+                                                  data: CupertinoThemeData(
                                                     textTheme: CupertinoTextThemeData(
                                                       dateTimePickerTextStyle: TextStyle(
                                                         fontFamily: 'Sora',
                                                         fontSize: 22,
                                                         fontWeight: FontWeight.w500,
-                                                        color: Color(0xFF3C342A),
+                                                        color: colors.textPrimary,
                                                       ),
                                                     ),
                                                   ),
@@ -705,7 +711,7 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                                                   ),
                                                 ),
                                               ),
-                                              
+
                                               // Bottom safe area padding
                                               SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
                                             ],
@@ -731,7 +737,7 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
     );
   }
 
-  Widget _buildWeeklySummaryCard(OnboardingState state) {
+  Widget _buildWeeklySummaryCard(OnboardingState state, AppColorScheme colors, AppLocalizations l10n) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(22),
       child: BackdropFilter(
@@ -743,7 +749,7 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
               end: Alignment.bottomRight,
               colors: [
                 const Color(0xFFFFFFFF).withOpacity(0.65),
-                const Color(0xFFF8F5F2).withOpacity(0.60),
+                colors.surfaceLight.withOpacity(0.60),
               ],
             ),
             borderRadius: BorderRadius.circular(22),
@@ -753,7 +759,7 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF3C342A).withOpacity(0.08),
+                color: colors.textPrimary.withOpacity(0.08),
                 blurRadius: 16,
                 offset: const Offset(0, 4),
               ),
@@ -766,24 +772,24 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
+                    children: [
                       Text(
-                        'Weekly summary',
+                        l10n.reminderWeeklySummary,
                         style: TextStyle(
                           fontFamily: 'Sora',
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF3C342A),
+                          color: colors.textPrimary,
                         ),
                       ),
-                      SizedBox(height: 2),
+                      const SizedBox(height: 2),
                       Text(
-                        'Every Sunday evening',
+                        l10n.reminderWeeklySubtitle,
                         style: TextStyle(
                           fontFamily: 'Sora',
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
-                          color: Color(0xFF8B7563),
+                          color: colors.textLabel,
                         ),
                       ),
                     ],
@@ -795,12 +801,13 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                     final value = !_weeklyEnabled;
                     setState(() => _weeklyEnabled = value);
                     await NotificationPreferencesService.setWeeklyEnabled(value);
+                    final l10n = AppLocalizations.of(context);
                     if (value) {
                       if (state.dailyReminderEnabled) {
-                        await NotificationScheduler.rescheduleAll();
+                        await NotificationScheduler.rescheduleAll(l10n);
                       }
                     } else {
-                      await NotificationScheduler.rescheduleAll();
+                      await NotificationScheduler.rescheduleAll(l10n);
                     }
                   },
                   child: AnimatedContainer(
@@ -814,24 +821,24 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                         end: Alignment.bottomRight,
                         colors: _weeklyEnabled
                             ? [
-                                const Color(0xFF8B7563).withOpacity(0.9),
-                                const Color(0xFF7A6B5F).withOpacity(0.85),
+                                colors.ctaPrimary.withOpacity(0.9),
+                                colors.ctaSecondary.withOpacity(0.85),
                               ]
                             : [
-                                const Color(0xFFE0D8CD).withOpacity(0.8),
-                                const Color(0xFFD2CABF).withOpacity(0.7),
+                                colors.onboardingBg3.withOpacity(0.8),
+                                colors.onboardingBg3.withOpacity(0.7),
                               ],
                       ),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
                         color: _weeklyEnabled
-                            ? const Color(0xFF8B7563).withOpacity(0.3)
-                            : const Color(0xFFC8BEB4).withOpacity(0.3),
+                            ? colors.ctaPrimary.withOpacity(0.3)
+                            : colors.borderMedium.withOpacity(0.3),
                         width: 1,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF3C342A).withOpacity(_weeklyEnabled ? 0.2 : 0.08),
+                          color: colors.textPrimary.withOpacity(_weeklyEnabled ? 0.2 : 0.08),
                           blurRadius: _weeklyEnabled ? 8 : 6,
                           offset: const Offset(0, 2),
                         ),
@@ -871,7 +878,7 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
     );
   }
 
-  Widget _buildToggleSwitch(OnboardingState state) {
+  Widget _buildToggleSwitch(OnboardingState state, AppColorScheme colors) {
     return GestureDetector(
       onTap: () async {
         HapticFeedback.selectionClick();
@@ -884,7 +891,8 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
             final time = _parseTime(_timeController.text);
             await NotificationPreferencesService.setHour(time.hour);
             await NotificationPreferencesService.setMinute(time.minute);
-            await NotificationScheduler.scheduleDaily();
+            final l10n = AppLocalizations.of(context);
+            await NotificationScheduler.scheduleDaily(l10n);
             if (mounted) {
               setState(() => _permissionDenied = false);
               context.read<OnboardingState>().setDailyReminder(true);
@@ -915,24 +923,24 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
             end: Alignment.bottomRight,
             colors: state.dailyReminderEnabled
                 ? [
-                    const Color(0xFF8B7563).withOpacity(0.9),
-                    const Color(0xFF7A6B5F).withOpacity(0.85),
+                    colors.ctaPrimary.withOpacity(0.9),
+                    colors.ctaSecondary.withOpacity(0.85),
                   ]
                 : [
-                    const Color(0xFFE0D8CD).withOpacity(0.8),
-                    const Color(0xFFD2CABF).withOpacity(0.7),
+                    colors.onboardingBg3.withOpacity(0.8),
+                    colors.onboardingBg3.withOpacity(0.7),
                   ],
           ),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: state.dailyReminderEnabled
-                ? const Color(0xFF8B7563).withOpacity(0.3)
-                : const Color(0xFFC8BEB4).withOpacity(0.3),
+                ? colors.ctaPrimary.withOpacity(0.3)
+                : colors.borderMedium.withOpacity(0.3),
             width: 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF3C342A).withOpacity(state.dailyReminderEnabled ? 0.2 : 0.08),
+              color: colors.textPrimary.withOpacity(state.dailyReminderEnabled ? 0.2 : 0.08),
               blurRadius: state.dailyReminderEnabled ? 8 : 6,
               offset: const Offset(0, 2),
             ),

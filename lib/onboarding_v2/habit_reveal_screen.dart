@@ -4,8 +4,11 @@ import 'package:flutter/material.dart' show Colors;
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import '../l10n/app_localizations.dart';
 import '../main.dart';
 import 'onboarding_state.dart';
+import '../theme/app_colors.dart';
+import '../theme/theme_provider.dart';
 
 class HabitRevealScreen extends StatefulWidget {
   const HabitRevealScreen({super.key});
@@ -131,7 +134,9 @@ class _HabitRevealScreenState extends State<HabitRevealScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final state = context.watch<OnboardingState>();
+    final colors = context.watch<ThemeProvider>().colors;
     final size = MediaQuery.of(context).size;
 
     if (state.userHabits.isEmpty) {
@@ -146,23 +151,23 @@ class _HabitRevealScreenState extends State<HabitRevealScreen>
         children: [
           // Background - same as Focus Areas / Reminder
           Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
-                begin: Alignment(0.15, -1.0),
-                end: Alignment(-0.15, 1.0),
+                begin: const Alignment(0.15, -1.0),
+                end: const Alignment(-0.15, 1.0),
                 colors: [
-                  Color(0xFFF2E9DB),
-                  Color(0xFFE6DDCF),
-                  Color(0xFFDBD2C4),
-                  Color(0xFFD5CCB8),
+                  colors.onboardingBg1,
+                  colors.onboardingBg2,
+                  colors.onboardingBg3,
+                  colors.onboardingBg4,
                 ],
-                stops: [0.0, 0.3, 0.6, 1.0],
+                stops: const [0.0, 0.3, 0.6, 1.0],
               ),
             ),
           ),
 
           // Background orbs
-          _buildBackgroundOrbs(size),
+          _buildBackgroundOrbs(size, colors),
 
           // Content
           SafeArea(
@@ -179,20 +184,20 @@ class _HabitRevealScreenState extends State<HabitRevealScreen>
                       Center(
                         child: Column(
                           children: [
-                            const Text(
-                              'Here\'s what we picked for you',
+                            Text(
+                              l10n.habitRevealTitle,
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontFamily: 'Sora',
                                 fontSize: 26,
                                 fontWeight: FontWeight.w600,
-                                color: Color(0xFF3C342A),
+                                color: colors.textPrimary,
                                 height: 1.3,
                                 letterSpacing: -0.3,
                               ),
                             ),
                             const SizedBox(height: 10),
-                            _buildSubheading(state),
+                            _buildSubheading(state, colors),
                           ],
                         ),
                       ),
@@ -211,6 +216,7 @@ class _HabitRevealScreenState extends State<HabitRevealScreen>
                                 state.userHabits[index],
                                 index,
                                 state,
+                                colors,
                               ),
                             );
                           },
@@ -233,9 +239,9 @@ class _HabitRevealScreenState extends State<HabitRevealScreen>
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            const Color(0xFFD5CCB8).withOpacity(0.0),
-                            const Color(0xFFD5CCB8).withOpacity(0.92),
-                            const Color(0xFFD5CCB8).withOpacity(0.98),
+                            colors.onboardingBg4.withOpacity(0.0),
+                            colors.onboardingBg4.withOpacity(0.92),
+                            colors.onboardingBg4.withOpacity(0.98),
                           ],
                           stops: const [0.0, 0.5, 1.0],
                         ),
@@ -264,7 +270,7 @@ class _HabitRevealScreenState extends State<HabitRevealScreen>
                                 end: Alignment.bottomRight,
                                 colors: [
                                   const Color(0xFFFFFFFF).withOpacity(0.60),
-                                  const Color(0xFFF8F5F2).withOpacity(0.50),
+                                  colors.surfaceLight.withOpacity(0.50),
                                 ],
                               ),
                               borderRadius: BorderRadius.circular(16),
@@ -274,20 +280,20 @@ class _HabitRevealScreenState extends State<HabitRevealScreen>
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF3C342A).withOpacity(0.06),
+                                  color: colors.textPrimary.withOpacity(0.06),
                                   blurRadius: 10,
                                   offset: const Offset(0, 2),
                                 ),
                               ],
                             ),
-                            child: const Text(
-                              'You can add, remove, or browse more habits anytime. There\'s no pressure to do them all.',
+                            child: Text(
+                              l10n.habitRevealDescription,
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontFamily: 'Sora',
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
-                                color: Color(0xFF7A6B5F),
+                                color: colors.ctaSecondary,
                                 height: 1.6,
                               ),
                             ),
@@ -304,7 +310,7 @@ class _HabitRevealScreenState extends State<HabitRevealScreen>
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF3C342A).withOpacity(0.35),
+                              color: colors.textPrimary.withOpacity(0.35),
                               blurRadius: 24,
                               spreadRadius: 2,
                               offset: const Offset(0, 8),
@@ -324,24 +330,24 @@ class _HabitRevealScreenState extends State<HabitRevealScreen>
                                   end: Alignment.bottomRight,
                                   colors: _allCardsRevealed
                                       ? [
-                                          const Color(0xFF6B8E6E).withOpacity(0.9),
-                                          const Color(0xFF5A7D5D).withOpacity(0.85),
+                                          colors.ctaAlternative.withOpacity(0.9),
+                                          colors.ctaAlternative.withOpacity(0.85),
                                         ]
                                       : [
-                                          const Color(0xFF8B7563).withOpacity(0.9),
-                                          const Color(0xFF7A6B5F).withOpacity(0.85),
+                                          colors.ctaPrimary.withOpacity(0.9),
+                                          colors.ctaSecondary.withOpacity(0.85),
                                         ],
                                 ),
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
                                   color: _allCardsRevealed
-                                      ? const Color(0xFF6B8E6E).withOpacity(0.4)
-                                      : const Color(0xFF8B7563).withOpacity(0.4),
+                                      ? colors.ctaAlternative.withOpacity(0.6)
+                                      : colors.ctaPrimary.withOpacity(0.4),
                                   width: 1,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFF3C342A).withOpacity(0.25),
+                                    color: colors.textPrimary.withOpacity(0.25),
                                     blurRadius: 24,
                                     offset: const Offset(0, 6),
                                   ),
@@ -351,9 +357,9 @@ class _HabitRevealScreenState extends State<HabitRevealScreen>
                                 onPressed: _allCardsRevealed ? _handleContinue : null,
                                 padding: const EdgeInsets.symmetric(vertical: 16),
                                 borderRadius: BorderRadius.circular(20),
-                                child: const Text(
-                                  'Let\'s begin',
-                                  style: TextStyle(
+                                child: Text(
+                                  l10n.habitRevealBegin,
+                                  style: const TextStyle(
                                     fontFamily: 'Sora',
                                     fontSize: 17,
                                     fontWeight: FontWeight.w600,
@@ -376,55 +382,53 @@ class _HabitRevealScreenState extends State<HabitRevealScreen>
     );
   }
 
-  Widget _buildSubheading(OnboardingState state) {
+  Widget _buildSubheading(OnboardingState state, AppColorScheme colors) {
+    final l10n = AppLocalizations.of(context);
+
     if (state.focusAreas.isEmpty) {
-      return const Text(
-        'Based on your preferences',
+      return Text(
+        l10n.habitRevealSubtitleDefault,
         textAlign: TextAlign.center,
         style: TextStyle(
           fontFamily: 'Sora',
           fontSize: 15,
           fontWeight: FontWeight.w500,
-          color: Color(0xFF7A6B5F),
+          color: colors.ctaSecondary,
           height: 1.5,
         ),
       );
     }
 
     final areas = state.focusAreas;
-    final text = areas.length == 1
-        ? 'Based on ${areas[0]}'
-        : 'Based on ${areas[0]} & ${areas[1]}';
 
-    return RichText(
-      textAlign: TextAlign.center,
-      text: TextSpan(
-        style: const TextStyle(
+    if (areas.length == 1) {
+      return Text(
+        l10n.habitRevealSubtitleOneArea(areas[0]),
+        textAlign: TextAlign.center,
+        style: TextStyle(
           fontFamily: 'Sora',
           fontSize: 15,
           fontWeight: FontWeight.w500,
-          color: Color(0xFF7A6B5F),
+          color: colors.ctaSecondary,
           height: 1.5,
         ),
-        children: [
-          const TextSpan(text: 'Based on '),
-          TextSpan(
-            text: areas[0],
-            style: const TextStyle(fontWeight: FontWeight.w600),
-          ),
-          if (areas.length > 1) ...[
-            const TextSpan(text: ' & '),
-            TextSpan(
-              text: areas[1],
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
-          ],
-        ],
+      );
+    }
+
+    return Text(
+      l10n.habitRevealSubtitleTwoAreas(areas[0], areas[1]),
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontFamily: 'Sora',
+        fontSize: 15,
+        fontWeight: FontWeight.w500,
+        color: colors.ctaSecondary,
+        height: 1.5,
       ),
     );
   }
 
-  Widget _buildAnimatedHabitCard(String habit, int index, OnboardingState state) {
+  Widget _buildAnimatedHabitCard(String habit, int index, OnboardingState state, AppColorScheme colors) {
     if (_controllers.isEmpty || index >= _controllers.length) {
       return const SizedBox();
     }
@@ -450,7 +454,7 @@ class _HabitRevealScreenState extends State<HabitRevealScreen>
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF3C342A).withOpacity(0.05),
+                      color: colors.textPrimary.withOpacity(0.05),
                       blurRadius: 20,
                       offset: const Offset(0, 4),
                     ),
@@ -458,11 +462,11 @@ class _HabitRevealScreenState extends State<HabitRevealScreen>
                 ),
                 child: Text(
                   habit,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Sora',
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
-                    color: Color(0xFF3C342A),
+                    color: colors.textPrimary,
                     height: 1.4,
                   ),
                 ),
@@ -474,7 +478,7 @@ class _HabitRevealScreenState extends State<HabitRevealScreen>
     );
   }
 
-  Widget _buildBackgroundOrbs(Size size) {
+  Widget _buildBackgroundOrbs(Size size, AppColorScheme colors) {
     return Stack(
       children: [
         // Orb 1 - Top Right
@@ -490,8 +494,8 @@ class _HabitRevealScreenState extends State<HabitRevealScreen>
                 center: const Alignment(-0.35, -0.35),
                 radius: 0.9,
                 colors: [
-                  const Color(0xFFFFF8F0).withOpacity(0.6),
-                  const Color(0xFFDCCDB9).withOpacity(0.2),
+                  colors.surfaceLightest.withOpacity(0.6),
+                  colors.borderMedium.withOpacity(0.2),
                 ],
               ),
             ),
@@ -515,8 +519,8 @@ class _HabitRevealScreenState extends State<HabitRevealScreen>
                 center: const Alignment(-0.35, -0.35),
                 radius: 0.9,
                 colors: [
-                  const Color(0xFFF0E6D7).withOpacity(0.55),
-                  const Color(0xFFD2C3AF).withOpacity(0.18),
+                  colors.onboardingBg1.withOpacity(0.55),
+                  colors.onboardingBg4.withOpacity(0.18),
                 ],
               ),
             ),

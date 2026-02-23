@@ -1,5 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../theme/theme_provider.dart';
 
 class WarmthToast extends StatefulWidget {
   final String message;
@@ -65,6 +68,7 @@ class _WarmthToastState extends State<WarmthToast>
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.watch<ThemeProvider>().colors;
     final bottomPadding = MediaQuery.of(context).padding.bottom;
 
     return Positioned(
@@ -92,7 +96,7 @@ class _WarmthToastState extends State<WarmthToast>
                       end: Alignment.bottomRight,
                       colors: [
                         const Color(0xFFFFFFFF).withOpacity(0.55),
-                        const Color(0xFFF8F4EF).withOpacity(0.40),
+                        colors.surfaceLight.withOpacity(0.40),
                       ],
                     ),
                     borderRadius: BorderRadius.circular(20),
@@ -102,7 +106,7 @@ class _WarmthToastState extends State<WarmthToast>
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF3C342A).withOpacity(0.10),
+                        color: colors.textPrimary.withOpacity(0.10),
                         blurRadius: 20,
                         offset: const Offset(0, 6),
                       ),
@@ -111,11 +115,11 @@ class _WarmthToastState extends State<WarmthToast>
                   child: Text(
                     widget.message,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Sora',
                       fontSize: 15,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFF4A3F35),
+                      color: colors.toastText,
                       height: 1.5,
                     ),
                   ),

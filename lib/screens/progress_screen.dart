@@ -1,12 +1,16 @@
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart' show Colors;
 import 'package:provider/provider.dart';
 
+import '../l10n/app_localizations.dart';
 import '../main.dart';
 import '../onboarding_v2/onboarding_state.dart';
 import '../models/moment.dart';
 import '../services/moments_service.dart';
+import '../theme/app_colors.dart';
+import '../theme/theme_provider.dart';
 import 'moments_collection_screen.dart';
 
 class ProgressScreen extends StatefulWidget {
@@ -18,50 +22,29 @@ class ProgressScreen extends StatefulWidget {
 
 class _ProgressScreenState extends State<ProgressScreen> {
   bool _showAllHabits = false;
+  Future<_WeekStats>? _weekStatsFuture;
+  List<String>? _lastHabits;
 
-  // 35 rotating affirmation messages
-  static const List<String> _affirmations = [
-    'Missing days doesn\'t erase what you\'ve already done.',
-    'You don\'t need to earn rest.',
-    'Three habits or one — both are enough.',
-    'The fact that you\'re here says something good about you.',
-    'Progress isn\'t about perfection, it\'s about showing up.',
-    'You\'re allowed to have off days.',
-    'Small actions count, even when they feel small.',
-    'You\'re not behind. You\'re exactly where you need to be.',
-    'Consistency is important, but so is self-compassion.',
-    'Your worth isn\'t measured by what you check off.',
-    'Some weeks are harder than others. That\'s just being human.',
-    'You don\'t need to do everything to be doing enough.',
-    'Rest is part of progress, not the opposite of it.',
-    'Showing up imperfectly is still showing up.',
-    'You\'re doing better than you think you are.',
-    'It\'s okay to start over as many times as you need.',
-    'Your pace is your own. Comparison won\'t help.',
-    'Every attempt matters, even the ones that feel small.',
-    'You don\'t have to feel motivated to deserve kindness.',
-    'Progress can look like simply trying again tomorrow.',
-    'You\'re allowed to adjust your expectations.',
-    'Taking breaks doesn\'t mean you\'ve failed.',
-    'The hardest part is often just beginning. You did that.',
-    'You don\'t need permission to take care of yourself.',
-    'Your best today might look different than yesterday. That\'s okay.',
-    'Struggling doesn\'t mean you\'re doing it wrong.',
-    'You\'ve already done hard things. You can do this too.',
-    'It\'s okay if your progress doesn\'t look like anyone else\'s.',
-    'You don\'t have to prove anything to anyone.',
-    'Sometimes just surviving the day is progress enough.',
-    'You\'re learning, even when it doesn\'t feel like it.',
-    'Being gentle with yourself is not giving up.',
-    'You don\'t need a reason to be kind to yourself.',
-    'What you\'re doing right now is enough.',
-    'Tomorrow is always a chance to try again.',
+  List<String> _getAffirmations(AppLocalizations l10n) => [
+    l10n.affirmation1, l10n.affirmation2, l10n.affirmation3,
+    l10n.affirmation4, l10n.affirmation5, l10n.affirmation6,
+    l10n.affirmation7, l10n.affirmation8, l10n.affirmation9,
+    l10n.affirmation10, l10n.affirmation11, l10n.affirmation12,
+    l10n.affirmation13, l10n.affirmation14, l10n.affirmation15,
+    l10n.affirmation16, l10n.affirmation17, l10n.affirmation18,
+    l10n.affirmation19, l10n.affirmation20, l10n.affirmation21,
+    l10n.affirmation22, l10n.affirmation23, l10n.affirmation24,
+    l10n.affirmation25, l10n.affirmation26, l10n.affirmation27,
+    l10n.affirmation28, l10n.affirmation29, l10n.affirmation30,
+    l10n.affirmation31, l10n.affirmation32, l10n.affirmation33,
+    l10n.affirmation34, l10n.affirmation35,
   ];
 
-  String _getTodaysAffirmation() {
+  String _getTodaysAffirmation(AppLocalizations l10n) {
+    final affirmations = _getAffirmations(l10n);
     final now = DateTime.now();
     final dayOfYear = now.difference(DateTime(now.year, 1, 1)).inDays;
-    return _affirmations[dayOfYear % _affirmations.length];
+    return affirmations[dayOfYear % affirmations.length];
   }
 
   Future<_WeekStats> _calculateWeekStats(List<String> habits, DateTime now) async {
@@ -102,11 +85,22 @@ class _ProgressScreenState extends State<ProgressScreen> {
     );
   }
 
+  void _refreshStats(List<String> habits) {
+    _lastHabits = List.of(habits);
+    _weekStatsFuture = _calculateWeekStats(habits, DateTime.now());
+  }
+
   @override
   Widget build(BuildContext context) {
-    final now = DateTime.now();
     final onboardingState = context.watch<OnboardingState>();
     final userHabits = onboardingState.userHabits;
+    final colors = context.watch<ThemeProvider>().colors;
+    final l10n = AppLocalizations.of(context);
+
+    // Only recalculate when habits list actually changes
+    if (_weekStatsFuture == null || !listEquals(userHabits, _lastHabits)) {
+      _refreshStats(userHabits);
+    }
 
     return CupertinoPageScaffold(
       backgroundColor: Colors.transparent,
@@ -117,17 +111,17 @@ class _ProgressScreenState extends State<ProgressScreen> {
             child: userHabits.isEmpty
                 ? Center(
                     child: Text(
-                      'Complete onboarding to see your week',
-                      style: const TextStyle(
+                      l10n.progressOnboardingPrompt,
+                      style: TextStyle(
                         fontFamily: 'Sora',
                         fontSize: 15,
                         fontWeight: FontWeight.w500,
-                        color: Color(0xFF6B5B4F),
+                        color: colors.textSubtitle,
                       ),
                     ),
                   )
                 : FutureBuilder<_WeekStats>(
-                    future: _calculateWeekStats(userHabits, now),
+                    future: _weekStatsFuture,
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) {
                         return const Center(
@@ -143,13 +137,13 @@ class _ProgressScreenState extends State<ProgressScreen> {
                           // 1. Header (fixed)
                           Padding(
                             padding: EdgeInsets.fromLTRB(24, MediaQuery.of(context).padding.top + 24, 24, 20),
-                            child: const Text(
-                              'Your week',
+                            child: Text(
+                              l10n.progressTitle,
                               style: TextStyle(
                                 fontFamily: 'Sora',
                                 fontSize: 32,
                                 fontWeight: FontWeight.w600,
-                                color: Color(0xFF3C342A),
+                                color: colors.textPrimary,
                               ),
                             ),
                           ),
@@ -160,19 +154,19 @@ class _ProgressScreenState extends State<ProgressScreen> {
                               padding: const EdgeInsets.fromLTRB(24, 0, 24, 140),
                               children: [
                           // 2. Main Unified Card
-                          _buildMainCard(stats),
+                          _buildMainCard(stats, colors, l10n),
                           const SizedBox(height: 24),
 
                           // 3. Motivational Text
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 24),
                             child: Text(
-                              _getTodaysAffirmation(),
-                              style: const TextStyle(
+                              _getTodaysAffirmation(l10n),
+                              style: TextStyle(
                                 fontFamily: 'DMSans',
                                 fontSize: 16,
                                 fontWeight: FontWeight.w400,
-                                color: Color(0xFF9A8A78),
+                                color: colors.textSecondary,
                                 fontStyle: FontStyle.italic,
                                 height: 1.6,
                               ),
@@ -191,7 +185,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                               final moments = snap.data!;
                               final count = moments.length;
                               final recent = moments.first;
-                              return _buildRecentMoment(count, recent);
+                              return _buildRecentMoment(count, recent, colors, l10n);
                             },
                           ),
                               ],
@@ -206,7 +200,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
     );
   }
 
-  Widget _buildMainCard(_WeekStats stats) {
+  Widget _buildMainCard(_WeekStats stats, AppColorScheme colors, AppLocalizations l10n) {
     final habitsToShow = _showAllHabits
         ? stats.completedHabits
         : stats.completedHabits.take(3).toList();
@@ -219,15 +213,15 @@ class _ProgressScreenState extends State<ProgressScreen> {
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: const Color(0xFFFFFFFF).withOpacity(0.50),
+            color: colors.profileCard.withOpacity(colors.profileCardOpacity),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: const Color(0xFFFFFFFF).withOpacity(0.40),
+              color: colors.cardBrowse.withOpacity(colors.cardBrowseOpacity),
               width: 1,
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF3C342A).withOpacity(0.05),
+                color: colors.textPrimary.withOpacity(0.05),
                 blurRadius: 20,
                 offset: const Offset(0, 4),
               ),
@@ -237,13 +231,13 @@ class _ProgressScreenState extends State<ProgressScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 2a. Section Label
-              const Text(
-                'WEEKLY SUMMARY',
+              Text(
+                l10n.progressWeeklySummary,
                 style: TextStyle(
                   fontFamily: 'Sora',
                   fontSize: 11,
                   fontWeight: FontWeight.w500,
-                  color: Color(0xFF8B7563),
+                  color: colors.ctaPrimary,
                   letterSpacing: 1,
                 ),
               ),
@@ -252,15 +246,15 @@ class _ProgressScreenState extends State<ProgressScreen> {
               // 2b. Main Stat Heading
               Text(
                 stats.completionCount == 0
-                    ? 'Your week is just beginning.'
+                    ? l10n.progressWeekBeginning
                     : stats.completionCount == 1
-                        ? 'You showed up once this week.'
-                        : 'You showed up ${stats.completionCount} times this week.',
-                style: const TextStyle(
+                        ? l10n.progressShowedUpOnce
+                        : l10n.progressShowedUpCount(stats.completionCount),
+                style: TextStyle(
                   fontFamily: 'Sora',
                   fontSize: 24,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF3C342A),
+                  color: colors.textPrimary,
                   height: 1.3,
                 ),
               ),
@@ -275,14 +269,14 @@ class _ProgressScreenState extends State<ProgressScreen> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Padding(
-                            padding: EdgeInsets.only(top: 1),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 1),
                             child: Text(
                               '✓',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
-                                color: Color(0xFF8B7563),
+                                color: colors.ctaPrimary,
                               ),
                             ),
                           ),
@@ -290,11 +284,11 @@ class _ProgressScreenState extends State<ProgressScreen> {
                           Expanded(
                             child: Text(
                               habit,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontFamily: 'DMSans',
                                 fontSize: 15,
                                 fontWeight: FontWeight.w400,
-                                color: Color(0xFF3C342A),
+                                color: colors.textPrimary,
                                 height: 1.4,
                               ),
                             ),
@@ -317,21 +311,21 @@ class _ProgressScreenState extends State<ProgressScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              '+$hiddenCount more',
-                              style: const TextStyle(
-                                fontFamily: 'DMSans',
-                                fontSize: 14,
-                                fontWeight: FontWeight.w400,
-                                color: Color(0xFF9A8A78),
-                              ),
-                            ),
-                            const Text(
-                              'See all',
+                              l10n.progressMore(hiddenCount),
                               style: TextStyle(
                                 fontFamily: 'DMSans',
                                 fontSize: 14,
                                 fontWeight: FontWeight.w400,
-                                color: Color(0xFF9A8A78),
+                                color: colors.textSecondary,
+                              ),
+                            ),
+                            Text(
+                              l10n.progressSeeAll,
+                              style: TextStyle(
+                                fontFamily: 'DMSans',
+                                fontSize: 14,
+                                fontWeight: FontWeight.w400,
+                                color: colors.textSecondary,
                               ),
                             ),
                           ],
@@ -341,15 +335,15 @@ class _ProgressScreenState extends State<ProgressScreen> {
                   else
                     GestureDetector(
                       onTap: () => setState(() => _showAllHabits = false),
-                      child: const Padding(
-                        padding: EdgeInsets.only(bottom: 24),
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 24),
                         child: Text(
-                          'Show less',
+                          l10n.progressShowLess,
                           style: TextStyle(
                             fontFamily: 'DMSans',
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
-                            color: Color(0xFF9A8A78),
+                            color: colors.textSecondary,
                           ),
                         ),
                       ),
@@ -362,7 +356,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
               if (stats.completedHabits.isNotEmpty)
                 Container(
                   height: 1,
-                  color: const Color(0xFF8B7563).withOpacity(0.15),
+                  color: colors.ctaPrimary.withOpacity(0.15),
                 ),
               if (stats.completedHabits.isNotEmpty)
                 const SizedBox(height: 20),
@@ -378,7 +372,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
     );
   }
 
-  Widget _buildRecentMoment(int count, Moment recent) {
+  Widget _buildRecentMoment(int count, Moment recent, AppColorScheme colors, AppLocalizations l10n) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final momentDay = DateTime(
@@ -389,24 +383,24 @@ class _ProgressScreenState extends State<ProgressScreen> {
 
     final String timeLabel;
     if (momentDay == today) {
-      timeLabel = 'Earlier today';
+      timeLabel = l10n.progressEarlierToday;
     } else if (momentDay == today.subtract(const Duration(days: 1))) {
-      timeLabel = 'Yesterday';
+      timeLabel = l10n.progressYesterday;
     } else {
       final diff = today.difference(momentDay).inDays;
-      timeLabel = '$diff days ago';
+      timeLabel = l10n.progressDaysAgo(diff);
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'YOUR MOMENTS',
+        Text(
+          l10n.progressYourMoments,
           style: TextStyle(
             fontFamily: 'Sora',
             fontSize: 11,
             fontWeight: FontWeight.w500,
-            color: Color(0xFF8B7563),
+            color: colors.ctaPrimary,
             letterSpacing: 1,
           ),
         ),
@@ -428,7 +422,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFFFFF).withOpacity(0.25),
+                  color: colors.momentsCard.withOpacity(colors.momentsCardOpacity),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: const Color(0xFFFFFFFF).withOpacity(0.25),
@@ -441,31 +435,31 @@ class _ProgressScreenState extends State<ProgressScreen> {
                       child: Row(
                         children: [
                           Text(
-                            '$count ${count == 1 ? 'moment' : 'moments'} collected',
-                            style: const TextStyle(
+                            l10n.progressMomentsCollected(count),
+                            style: TextStyle(
                               fontFamily: 'DMSans',
                               fontSize: 15,
                               fontWeight: FontWeight.w400,
-                              color: Color(0xFF3C342A),
+                              color: colors.textPrimary,
                             ),
                           ),
                           const SizedBox(width: 8),
                           Text(
                             '· $timeLabel',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontFamily: 'DMSans',
                               fontSize: 14,
                               fontWeight: FontWeight.w400,
-                              color: Color(0xFF9A8A78),
+                              color: colors.textSecondary,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const Icon(
+                    Icon(
                       CupertinoIcons.chevron_right,
                       size: 16,
-                      color: Color(0xFF9A8A78),
+                      color: colors.textSecondary,
                     ),
                   ],
                 ),
@@ -547,7 +541,13 @@ class _AnimatedWeekDotsState extends State<_AnimatedWeekDots>
 
   @override
   Widget build(BuildContext context) {
-    final dayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+    final colors = context.watch<ThemeProvider>().colors;
+    final l10n = AppLocalizations.of(context);
+    final dayLabels = [
+      l10n.dayShortMon, l10n.dayShortTue, l10n.dayShortWed,
+      l10n.dayShortThu, l10n.dayShortFri, l10n.dayShortSat,
+      l10n.dayShortSun,
+    ];
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -567,8 +567,8 @@ class _AnimatedWeekDotsState extends State<_AnimatedWeekDots>
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: isCompleted
-                        ? const Color(0xFF7A8B6F)
-                        : const Color(0xFFBFB9B0),
+                        ? colors.ctaAlternative
+                        : colors.textDisabled,
                   ),
                 ),
               ),
@@ -576,11 +576,11 @@ class _AnimatedWeekDotsState extends State<_AnimatedWeekDots>
               // Day label (no animation needed)
               Text(
                 dayLabels[index],
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'DMSans',
                   fontSize: 12,
                   fontWeight: FontWeight.w400,
-                  color: Color(0xFF9A8A78),
+                  color: colors.textSecondary,
                 ),
               ),
             ],

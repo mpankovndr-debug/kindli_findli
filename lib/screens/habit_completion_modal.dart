@@ -1,11 +1,15 @@
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import '../l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 import '../models/moment.dart';
 import '../services/moments_service.dart';
 import '../widgets/warmth_toast_overlay.dart';
 import '../main.dart';
 import '../utils/completion_messages.dart';
+import '../theme/app_colors.dart';
+import '../theme/theme_provider.dart';
 
 /// Modal for completing a habit with smooth animations
 /// Implements the full completion sequence from design specs
@@ -64,14 +68,14 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
       CurvedAnimation(parent: _buttonScaleController, curve: Curves.easeOut),
     );
 
-    // Button color transition (brown → green)
+    // Button color transition (brown → dusty rose)
     _colorController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 250),
     );
     _buttonColorAnimation = ColorTween(
-      begin: const Color(0xFF8B7563), // Brown
-      end: const Color(0xFFC4908A), // Dusty Rose (matches heart)
+      begin: context.read<ThemeProvider>().colors.ctaPrimary,
+      end: context.read<ThemeProvider>().colors.completionHeart,
     ).animate(
       CurvedAnimation(parent: _colorController, curve: Curves.easeOut),
     );
@@ -194,8 +198,9 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
     if (mounted) {
       setState(() {
         _showCelebration = true;
-        _celebrationTitle = CompletionMessages.getCelebrationTitle();
-        _celebrationMessage = CompletionMessages.getMessage(widget.habitTitle);
+        final l10n = AppLocalizations.of(context);
+        _celebrationTitle = CompletionMessages.getCelebrationTitle(l10n);
+        _celebrationMessage = CompletionMessages.getMessage(widget.habitTitle, l10n);
       });
 
       // Start heart animation
@@ -223,6 +228,8 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.watch<ThemeProvider>().colors;
+
     return AnimatedBuilder(
       animation: _blurAnimation,
       builder: (context, child) {
@@ -231,7 +238,7 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
           child: ScaleTransition(
             scale: _modalScaleAnimation,
             child: Container(
-              color: const Color(0xFF2A1F14).withOpacity(0.40),
+              color: colors.textPrimary.withOpacity(0.40),
               child: BackdropFilter(
                 filter: ImageFilter.blur(
                   sigmaX: _showCelebration ? 5 : _blurAnimation.value,
@@ -243,8 +250,8 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
                     scale: _modalEntranceScaleAnimation,
                     child: Center(
                       child: _showCelebration
-                          ? _buildCelebrationView()
-                          : _buildQuestionView(),
+                          ? _buildCelebrationView(colors)
+                          : _buildQuestionView(colors),
                     ),
                   ),
                 ),
@@ -256,7 +263,8 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
     );
   }
 
-  Widget _buildQuestionView() {
+  Widget _buildQuestionView(AppColorScheme colors) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24),
       constraints: const BoxConstraints(maxWidth: 384),
@@ -267,15 +275,15 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
           child: Container(
             padding: const EdgeInsets.fromLTRB(28, 32, 28, 36),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                begin: Alignment(0.0, 1.0), // bottom
-                end: Alignment(0.0, -1.0), // top
+              gradient: LinearGradient(
+                begin: const Alignment(0.0, 1.0), // bottom
+                end: const Alignment(0.0, -1.0), // top
                 colors: [
-                  Color.fromRGBO(245, 236, 224, 0.96),
-                  Color.fromRGBO(237, 228, 216, 0.96),
-                  Color.fromRGBO(229, 220, 208, 0.96),
+                  colors.modalBg1.withOpacity(0.96),
+                  colors.modalBg2.withOpacity(0.96),
+                  colors.modalBg3.withOpacity(0.96),
                 ],
-                stops: [0.0, 0.5, 1.0],
+                stops: const [0.0, 0.5, 1.0],
               ),
               borderRadius: BorderRadius.circular(32),
               border: Border.all(
@@ -284,7 +292,7 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
               ),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF32281E).withOpacity(0.35),
+                  color: colors.modalShadow.withOpacity(0.35),
                   blurRadius: 70,
                   offset: const Offset(0, 25),
                 ),
@@ -303,14 +311,14 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
                 // Question text
                 FadeTransition(
                   opacity: _titleFadeAnimation,
-                  child: const Text(
-                    'Did you do this today?',
+                  child: Text(
+                    l10n.completionQuestion,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontFamily: 'Sora',
                       fontSize: 24,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF3C342A),
+                      color: colors.textPrimary,
                       letterSpacing: -0.3,
                       height: 1.3,
                     ),
@@ -347,20 +355,20 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                                 colors: [
-                                  _buttonColorAnimation.value ?? const Color(0xFF8B7563),
-                                  (_buttonColorAnimation.value ?? const Color(0xFF8B7563))
+                                  _buttonColorAnimation.value ?? colors.ctaPrimary,
+                                  (_buttonColorAnimation.value ?? colors.ctaPrimary)
                                       .withOpacity(0.88),
                                 ],
                               ),
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                color: (_buttonColorAnimation.value ?? const Color(0xFF8B7563))
+                                color: (_buttonColorAnimation.value ?? colors.ctaPrimary)
                                     .withOpacity(0.4),
                                 width: 1,
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF3C342A).withOpacity(0.3),
+                                  color: colors.textPrimary.withOpacity(0.3),
                                   blurRadius: 24,
                                   offset: const Offset(0, 6),
                                 ),
@@ -373,10 +381,10 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
                                 ),
                               ],
                             ),
-                            child: const Text(
-                              'I did it',
+                            child: Text(
+                              l10n.completionConfirm,
                               textAlign: TextAlign.center,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontFamily: 'Sora',
                                 fontSize: 17,
                                 fontWeight: FontWeight.w600,
@@ -398,13 +406,13 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
                   child: CupertinoButton(
                     onPressed: _handleNotToday,
                     padding: const EdgeInsets.symmetric(vertical: 12),
-                    child: const Text(
-                      'Not today',
+                    child: Text(
+                      l10n.completionDecline,
                       style: TextStyle(
                         fontFamily: 'Sora',
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
-                        color: Color(0xFF9B8A7A),
+                        color: colors.textTertiary,
                       ),
                     ),
                   ),
@@ -417,7 +425,7 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
     );
   }
 
-  Widget _buildCelebrationView() {
+  Widget _buildCelebrationView(AppColorScheme colors) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24),
       constraints: const BoxConstraints(maxWidth: 384),
@@ -428,15 +436,15 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 48),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                begin: Alignment(0.0, 1.0), // bottom
-                end: Alignment(0.0, -1.0), // top
+              gradient: LinearGradient(
+                begin: const Alignment(0.0, 1.0), // bottom
+                end: const Alignment(0.0, -1.0), // top
                 colors: [
-                  Color.fromRGBO(245, 236, 224, 0.96),
-                  Color.fromRGBO(237, 228, 216, 0.94),
-                  Color.fromRGBO(230, 221, 209, 0.95),
+                  colors.modalBg1.withOpacity(0.96),
+                  colors.modalBg2.withOpacity(0.94),
+                  colors.modalBg3.withOpacity(0.95),
                 ],
-                stops: [0.0, 0.5, 1.0],
+                stops: const [0.0, 0.5, 1.0],
               ),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
@@ -445,7 +453,7 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
               ),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF32281E).withOpacity(0.35),
+                  color: colors.modalShadow.withOpacity(0.35),
                   blurRadius: 70,
                   offset: const Offset(0, 25),
                 ),
@@ -457,7 +465,7 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
                   blurStyle: BlurStyle.inner,
                 ),
                 BoxShadow(
-                  color: const Color(0xFFB4A591).withOpacity(0.15),
+                  color: colors.modalInnerShadow.withOpacity(0.15),
                   blurRadius: 0,
                   offset: const Offset(0, -1),
                   spreadRadius: 0,
@@ -475,7 +483,7 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
                     width: 72,
                     height: 72,
                     child: CustomPaint(
-                      painter: _HeartPainter(),
+                      painter: _HeartPainter(colors: colors),
                     ),
                   ),
                 ),
@@ -486,11 +494,11 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
                 Text(
                   _celebrationTitle,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Sora',
                     fontSize: 30,
                     fontWeight: FontWeight.w500,
-                    color: Color(0xFF6B5B4A),
+                    color: colors.buttonDark,
                     letterSpacing: -0.3,
                     height: 1.2,
                   ),
@@ -502,11 +510,11 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
                 Text(
                   _celebrationMessage,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'DM Sans',
                     fontSize: 17,
                     fontWeight: FontWeight.w400,
-                    color: Color(0xFF8A8078),
+                    color: colors.textTertiary,
                     letterSpacing: -0.1,
                     height: 1.5,
                   ),
@@ -522,16 +530,20 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
 
 /// Custom painter for gradient heart icon
 class _HeartPainter extends CustomPainter {
+  final AppColorScheme colors;
+
+  const _HeartPainter({required this.colors});
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..shader = const LinearGradient(
+      ..shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [
-          Color(0xFFE5B5B0),
-          Color(0xFFD4A0A0),
-          Color(0xFFC99090),
+          colors.heartHighlight,
+          Color.lerp(colors.heartHighlight, colors.heartDeep, 0.5)!,
+          colors.heartDeep,
         ],
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
       ..style = PaintingStyle.fill;
@@ -574,5 +586,6 @@ class _HeartPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _HeartPainter oldDelegate) =>
+      oldDelegate.colors != colors;
 }
