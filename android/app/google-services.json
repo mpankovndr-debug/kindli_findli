@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "651637918599",
+    "project_id": "intended-e613f",
+    "storage_bucket": "intended-e613f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:651637918599:android:0a1aa7b2ac3e5a42222122",
+        "android_client_info": {
+          "package_name": "com.intendedapp.android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "651637918599-nup23thk0rium54644qsgr721d9346v1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB45XhesWbQFOFJQ5OeI4olLz1E_x1Rm-c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "651637918599-nup23thk0rium54644qsgr721d9346v1.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "651637918599-jmv3i3jmsum2kecu5jo4l5sfnoekmmps.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.kindliapp.ios"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

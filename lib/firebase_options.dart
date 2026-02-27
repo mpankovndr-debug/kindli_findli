@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -28,15 +25,9 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -50,21 +41,51 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDDqmUOzxQk0TgJOwYzRtw2NkjjcYbJE9s',
-    appId: '1:229181063815:android:a62b59089f3944a6362e22',
-    messagingSenderId: '229181063815',
-    projectId: 'kindli-e94da',
-    storageBucket: 'kindli-e94da.firebasestorage.app',
+    apiKey: 'AIzaSyB45XhesWbQFOFJQ5OeI4olLz1E_x1Rm-c',
+    appId: '1:651637918599:android:0a1aa7b2ac3e5a42222122',
+    messagingSenderId: '651637918599',
+    projectId: 'intended-e613f',
+    storageBucket: 'intended-e613f.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDNGJkX81ee4YVQUx0CWw2q85UyT36tZEY',
-    appId: '1:229181063815:ios:25cb870dcd77aa1b362e22',
-    messagingSenderId: '229181063815',
-    projectId: 'kindli-e94da',
-    storageBucket: 'kindli-e94da.firebasestorage.app',
-    iosClientId: '229181063815-g4frra4jfo0fppe4m2dpgeb9chjudrmj.apps.googleusercontent.com',
+    apiKey: 'AIzaSyDf5yJ8yjLfzB_D_fH39jrj9LojoHzIaUU',
+    appId: '1:651637918599:ios:210a4eb10ae173ca222122',
+    messagingSenderId: '651637918599',
+    projectId: 'intended-e613f',
+    storageBucket: 'intended-e613f.firebasestorage.app',
+    iosClientId: '651637918599-pr6s42v9goh36flr17bjbeabrti743fg.apps.googleusercontent.com',
+    iosBundleId: 'com.intendedapp.ios',
+  );
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyD_ZxeDbqvRzbwtTLa7aQRR94ffXl-CyPE',
+    appId: '1:651637918599:web:270c79c94ad50003222122',
+    messagingSenderId: '651637918599',
+    projectId: 'intended-e613f',
+    authDomain: 'intended-e613f.firebaseapp.com',
+    storageBucket: 'intended-e613f.firebasestorage.app',
+    measurementId: 'G-TFGVN9RW88',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyDf5yJ8yjLfzB_D_fH39jrj9LojoHzIaUU',
+    appId: '1:651637918599:ios:d5632a97e0582a72222122',
+    messagingSenderId: '651637918599',
+    projectId: 'intended-e613f',
+    storageBucket: 'intended-e613f.firebasestorage.app',
+    iosClientId: '651637918599-69bmvm8rmlc84qiegms6u16ons0oe0ql.apps.googleusercontent.com',
     iosBundleId: 'com.example.gently',
+  );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyD_ZxeDbqvRzbwtTLa7aQRR94ffXl-CyPE',
+    appId: '1:651637918599:web:fa65cfd3f0be15cb222122',
+    messagingSenderId: '651637918599',
+    projectId: 'intended-e613f',
+    authDomain: 'intended-e613f.firebaseapp.com',
+    storageBucket: 'intended-e613f.firebasestorage.app',
+    measurementId: 'G-QEVVH1X8E6',
   );
 
 }
