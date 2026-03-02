@@ -1,32 +1,35 @@
-import 'dart:ui';
+import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
-const _warmCream = Color(0xFFF5F0EB);
-const _dustyRose = Color(0xFFD4B5B0);
-const _softSand = Color(0xFFE8DDD3);
-const _deepBrown = Color(0xFF3D2E1F);
-const _warmClay = Color(0xFFC4A98C);
-const _mutedSage = Color(0xFFB5C4B1);
+import '../theme/theme_provider.dart';
 
 class IntentionShareCard extends StatelessWidget {
   final int completionCount;
-  final String showedUpText;
+  final String showedUpPhrase;
   final String timesText;
-  final String thisWeekText;
-  final String taglineText;
+  final String descriptorText;
+  final String? userName;
 
   const IntentionShareCard({
     super.key,
     required this.completionCount,
-    required this.showedUpText,
+    required this.showedUpPhrase,
     required this.timesText,
-    required this.thisWeekText,
-    required this.taglineText,
+    required this.descriptorText,
+    this.userName,
   });
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.watch<ThemeProvider>().colors;
+    final baseColor = colors.onboardingBg1;
+    final accentSoft = colors.accentCustom;
+    final baseDarker = colors.onboardingBg2;
+    final textDark = colors.textPrimary;
+    final accent = colors.accentRegular;
+    final heroTop = colors.ctaPrimary;
+
     return SizedBox(
       width: 1080,
       height: 1920,
@@ -36,7 +39,7 @@ class IntentionShareCard extends StatelessWidget {
 
           // 0. Solid opaque base to prevent transparency
           Positioned.fill(
-            child: Container(color: _warmCream),
+            child: Container(color: baseColor),
           ),
 
           // 1. Base gradient (~145°)
@@ -47,9 +50,9 @@ class IntentionShareCard extends StatelessWidget {
                   begin: const Alignment(-0.6, -0.8),
                   end: const Alignment(0.6, 0.8),
                   colors: [
-                    _warmCream,
-                    _dustyRose.withOpacity(0.27),
-                    _softSand,
+                    baseColor,
+                    accentSoft.withOpacity(0.27),
+                    baseDarker,
                   ],
                   stops: const [0.0, 0.45, 1.0],
                 ),
@@ -57,7 +60,7 @@ class IntentionShareCard extends StatelessWidget {
             ),
           ),
 
-          // 2. Ambient depth blobs (20-60% opacity, 60-80px blur → scaled 3x)
+          // 2. Ambient depth blobs
           Positioned(
             top: 140,
             right: -80,
@@ -68,7 +71,7 @@ class IntentionShareCard extends StatelessWidget {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: _dustyRose.withOpacity(0.42),
+                    color: accentSoft.withOpacity(0.42),
                     blurRadius: 210,
                     spreadRadius: 50,
                   ),
@@ -86,7 +89,7 @@ class IntentionShareCard extends StatelessWidget {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: _warmClay.withOpacity(0.38),
+                    color: accent.withOpacity(0.38),
                     blurRadius: 200,
                     spreadRadius: 40,
                   ),
@@ -104,7 +107,7 @@ class IntentionShareCard extends StatelessWidget {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: _dustyRose.withOpacity(0.35),
+                    color: accentSoft.withOpacity(0.35),
                     blurRadius: 190,
                     spreadRadius: 30,
                   ),
@@ -113,115 +116,91 @@ class IntentionShareCard extends StatelessWidget {
             ),
           ),
 
-          // 3. Flowing curves (3 ribbons, bottom-left to top-right)
+          // 3. Flowing curves
           Positioned.fill(
             child: CustomPaint(
-              painter: _FlowingCurvesPainter(),
+              painter: _FlowingCurvesPainter(accent: accent),
             ),
           ),
 
-          // 4. Decorative arcs (2 bezier paths in warm clay at 15-20% opacity)
+          // 4. Decorative arcs
           Positioned.fill(
             child: CustomPaint(
-              painter: _DecorativeArcsPainter(),
+              painter: _DecorativeArcsPainter(accent: accent),
             ),
           ),
 
-          // 5. Radial glow behind hero number — centered
-          Positioned(
-            left: 1080 / 2 - 220,
-            top: 420,
-            child: ImageFiltered(
-              imageFilter: ImageFilter.blur(sigmaX: 80, sigmaY: 80),
-              child: Container(
-                width: 440,
-                height: 440,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: CupertinoColors.white.withOpacity(0.15),
-                ),
-              ),
-            ),
-          ),
+          // == CONTENT LAYER ==
 
-          // == CONTENT LAYER — center-aligned ==
+          // Center: Hero number + "times"
           Positioned(
             left: 80,
-            top: 400,
+            top: 480,
             right: 80,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
-                // "I showed up" — Inter, 36px, deepBrown at 50%
+                // Hero number — Sora, large, gradient via foreground paint
                 Text(
-                  showedUpText,
-                  style: GoogleFonts.inter(
-                    fontSize: 56,
-                    fontWeight: FontWeight.w400,
-                    color: _deepBrown.withOpacity(0.65),
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // Hero number — Playfair Display 300px, bold, gradient shader
-                ShaderMask(
-                  blendMode: BlendMode.srcIn,
-                  shaderCallback: (bounds) => const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [_deepBrown, _warmClay],
-                  ).createShader(bounds),
-                  child: Text(
-                    '$completionCount',
-                    style: GoogleFonts.playfairDisplay(
-                      fontSize: 360,
-                      fontWeight: FontWeight.w700,
-                      color: CupertinoColors.white,
-                      height: 0.85,
-                    ),
+                  '$completionCount',
+                  style: TextStyle(
+                    fontFamily: 'Sora',
+                    fontSize: 360,
+                    fontWeight: FontWeight.w700,
+                    foreground: Paint()
+                      ..shader = ui.Gradient.linear(
+                        const Offset(0, 0),
+                        const Offset(0, 320),
+                        [heroTop, accent],
+                      ),
+                    height: 0.85,
                   ),
                 ),
 
-                // "times" — Playfair Display, 100px, gradient shader
-                ShaderMask(
-                  blendMode: BlendMode.srcIn,
-                  shaderCallback: (bounds) => const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [_deepBrown, _warmClay],
-                  ).createShader(bounds),
-                  child: Text(
-                    timesText,
-                    style: GoogleFonts.playfairDisplay(
-                      fontSize: 140,
-                      fontWeight: FontWeight.w700,
-                      color: CupertinoColors.white,
-                      height: 1.1,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 30),
-
-                // "for myself this week" — Playfair Display, 48px, weight 500, deepBrown
+                // "times" — Sora, gradient via foreground paint
                 Text(
-                  thisWeekText,
-                  style: GoogleFonts.playfairDisplay(
-                    fontSize: 64,
-                    fontWeight: FontWeight.w500,
-                    color: _deepBrown,
-                    height: 1.2,
+                  timesText,
+                  style: TextStyle(
+                    fontFamily: 'Sora',
+                    fontSize: 120,
+                    fontWeight: FontWeight.w600,
+                    foreground: Paint()
+                      ..shader = ui.Gradient.linear(
+                        const Offset(0, 0),
+                        const Offset(0, 132),
+                        [textDark, accent],
+                      ),
+                    height: 1.1,
                   ),
                 ),
               ],
             ),
           ),
 
-          // Decorative gradient divider — 40px→120px wide, centered, 50% opacity
+          // "I showed up for myself this week" — single Instrument Sans text
+          Positioned(
+            left: 80,
+            right: 80,
+            top: 1000,
+            child: Text(
+              showedUpPhrase,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'InstrumentSans',
+                fontSize: 52,
+                fontWeight: FontWeight.w400,
+                color: textDark.withOpacity(0.65),
+                height: 1.3,
+              ),
+            ),
+          ),
+
+          // Decorative gradient divider
           Positioned(
             left: 0,
             right: 0,
-            top: 1083,
+            top: 1120,
             child: Center(
               child: Container(
                 width: 120,
@@ -230,9 +209,9 @@ class IntentionShareCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(2),
                   gradient: LinearGradient(
                     colors: [
-                      _deepBrown.withOpacity(0.0),
-                      _deepBrown.withOpacity(0.50),
-                      _deepBrown.withOpacity(0.0),
+                      textDark.withOpacity(0.0),
+                      textDark.withOpacity(0.50),
+                      textDark.withOpacity(0.0),
                     ],
                   ),
                 ),
@@ -240,104 +219,79 @@ class IntentionShareCard extends StatelessWidget {
             ),
           ),
 
-          // Glassmorphism pill — centered
-          Positioned(
-            left: 0,
-            right: 0,
-            top: 1500,
-            child: Center(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(100),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: CupertinoColors.white.withOpacity(0.35),
-                      borderRadius: BorderRadius.circular(100),
-                      border: Border.all(
-                        color: CupertinoColors.white.withOpacity(0.50),
-                        width: 1,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF000000).withOpacity(0.08),
-                          blurRadius: 32,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 48,
-                      vertical: 24,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Green dot — 14px diameter
-                        Container(
-                          width: 16,
-                          height: 16,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: _mutedSage,
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        // Pill text — Inter 32px, 65% opacity
-                        Text(
-                          taglineText,
-                          style: GoogleFonts.inter(
-                            fontSize: 40,
-                            fontWeight: FontWeight.w400,
-                            color: _deepBrown.withOpacity(0.80),
-                          ),
-                        ),
-                      ],
-                    ),
+          // P.S. Name — only if user has a name
+          if (userName != null && userName!.isNotEmpty)
+            Positioned(
+              left: 0,
+              right: 0,
+              top: 1180,
+              child: Center(
+                child: Text(
+                  'P.S. $userName',
+                  style: TextStyle(
+                    fontFamily: 'InstrumentSans',
+                    fontSize: 52,
+                    fontWeight: FontWeight.w400,
+                    color: textDark.withOpacity(0.65),
+                    height: 1.3,
                   ),
                 ),
               ),
             ),
-          ),
 
-          // Bottom branding
+          // Bottom branding — icon + "INTENDED" + descriptor
           Positioned(
             left: 0,
             right: 0,
-            top: 1700,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            bottom: 240,
+            child: Column(
               children: [
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF000000).withOpacity(0.08),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF000000).withOpacity(0.08),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(24),
-                    child: Image.asset(
-                      'assets/images/kindli_icon.png',
-                      width: 96,
-                      height: 96,
-                      fit: BoxFit.cover,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(24),
+                        child: Image.asset(
+                          'assets/images/kindli_icon.png',
+                          width: 96,
+                          height: 96,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 24),
+                    Text(
+                      'INTENDED',
+                      style: TextStyle(
+                        fontFamily: 'Sora',
+                        fontSize: 40,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 6,
+                        color: textDark.withOpacity(0.75),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 24),
+                const SizedBox(height: 16),
                 Text(
-                  'INTENDED',
-                  style: GoogleFonts.inter(
-                    fontSize: 40,
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: 6,
-                    color: _deepBrown.withOpacity(0.75),
-                    fontFeatures: const [FontFeature.enable('smcp')],
+                  descriptorText,
+                  style: TextStyle(
+                    fontFamily: 'InstrumentSans',
+                    fontSize: 36,
+                    fontWeight: FontWeight.w400,
+                    color: textDark.withOpacity(0.50),
+                    letterSpacing: 0.5,
                   ),
                 ),
               ],
@@ -351,12 +305,14 @@ class IntentionShareCard extends StatelessWidget {
 
 /// Draws 3 flowing bezier curves — white at 18-28% opacity + one theme-tinted
 class _FlowingCurvesPainter extends CustomPainter {
+  final Color accent;
+  const _FlowingCurvesPainter({required this.accent});
+
   @override
   void paint(Canvas canvas, Size size) {
     final w = size.width;
     final h = size.height;
 
-    // Curve 1 — widest sweep, white at 28%
     final paint1 = Paint()
       ..color = CupertinoColors.white.withOpacity(0.28)
       ..style = PaintingStyle.stroke
@@ -372,9 +328,8 @@ class _FlowingCurvesPainter extends CustomPainter {
       );
     canvas.drawPath(path1, paint1);
 
-    // Curve 2 — middle sweep, warmClay tint at 22%
     final paint2 = Paint()
-      ..color = _warmClay.withOpacity(0.22)
+      ..color = accent.withOpacity(0.22)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0
       ..strokeCap = StrokeCap.round;
@@ -388,7 +343,6 @@ class _FlowingCurvesPainter extends CustomPainter {
       );
     canvas.drawPath(path2, paint2);
 
-    // Curve 3 — tightest sweep, white at 20%
     final paint3 = Paint()
       ..color = CupertinoColors.white.withOpacity(0.20)
       ..style = PaintingStyle.stroke
@@ -406,19 +360,22 @@ class _FlowingCurvesPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _FlowingCurvesPainter oldDelegate) =>
+      accent != oldDelegate.accent;
 }
 
-/// Draws 2 decorative arcs in warm clay at 15-20% opacity
+/// Draws 2 decorative arcs at 15-20% opacity
 class _DecorativeArcsPainter extends CustomPainter {
+  final Color accent;
+  const _DecorativeArcsPainter({required this.accent});
+
   @override
   void paint(Canvas canvas, Size size) {
     final w = size.width;
     final h = size.height;
 
-    // Arc 1 — gentle sweep
     final paint1 = Paint()
-      ..color = _warmClay.withOpacity(0.18)
+      ..color = accent.withOpacity(0.18)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0
       ..strokeCap = StrokeCap.round;
@@ -432,9 +389,8 @@ class _DecorativeArcsPainter extends CustomPainter {
       );
     canvas.drawPath(path1, paint1);
 
-    // Arc 2 — shorter arc
     final paint2 = Paint()
-      ..color = _warmClay.withOpacity(0.15)
+      ..color = accent.withOpacity(0.15)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5
       ..strokeCap = StrokeCap.round;
@@ -450,5 +406,6 @@ class _DecorativeArcsPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _DecorativeArcsPainter oldDelegate) =>
+      accent != oldDelegate.accent;
 }

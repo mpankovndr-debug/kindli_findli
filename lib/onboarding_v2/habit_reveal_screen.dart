@@ -1,11 +1,15 @@
+import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Colors;
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../l10n/app_localizations.dart';
 import '../main.dart';
+import '../services/analytics_service.dart';
+import '../services/revenue_cat_service.dart';
 import 'onboarding_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme_provider.dart';
@@ -28,6 +32,8 @@ class _HabitRevealScreenState extends State<HabitRevealScreen>
   @override
   void initState() {
     super.initState();
+
+    AnalyticsService.logScreenView('habit_reveal');
 
     // Generate habits first
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -109,11 +115,35 @@ class _HabitRevealScreenState extends State<HabitRevealScreen>
     super.dispose();
   }
 
+  static String _generateDeviceId() {
+    final random = Random.secure();
+    final bytes = List.generate(16, (_) => random.nextInt(256));
+    return bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
+  }
+
+  static Future<String> getOrCreateDeviceId() async {
+    final prefs = await SharedPreferences.getInstance();
+    var deviceId = prefs.getString('device_id');
+    if (deviceId == null) {
+      deviceId = _generateDeviceId();
+      await prefs.setString('device_id', deviceId);
+    }
+    return deviceId;
+  }
+
   void _handleContinue() async {
     HapticFeedback.mediumImpact();
 
     final state = context.read<OnboardingState>();
+    final revenueCat = context.read<RevenueCatService>();
     await state.completeOnboarding();
+
+    AnalyticsService.logOnboardingStepCompleted('habit_reveal');
+    AnalyticsService.logOnboardingCompleted();
+
+    // Link device to RevenueCat for subscription tracking
+    final deviceId = await getOrCreateDeviceId();
+    await revenueCat.logIn(deviceId);
 
     if (mounted) {
       Navigator.pushReplacement(

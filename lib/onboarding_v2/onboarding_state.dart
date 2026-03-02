@@ -11,15 +11,20 @@ class OnboardingState extends ChangeNotifier {
   bool _onboardingComplete = false;
   List<String> userHabits = [];
   List<String> _customHabits = [];
-  static const int _maxCustomHabitsCore = 2;
-  
+  static const int _maxCustomHabitsFree = 2;
+  static const int _maxCustomHabitsBoost = 3;
+  static const int _maxSwapsFree = 2;
+  static const int _maxSwapsBoost = 3;
+  static const int _maxFocusAreasFree = 2;
+  static const int _maxFocusAreasBoost = 3;
+
   // NEW: Pin tracking
   String? _pinnedHabit;
-  
+
   // NEW: Swap tracking
   final Map<String, int> _swapsUsed = {}; // category -> swaps used this month
   DateTime? _lastSwapReset;
-  
+
   // NEW: Focus area change tracking
   DateTime? _lastFocusAreaChange;
 
@@ -166,11 +171,16 @@ class OnboardingState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void toggleFocusArea(String area) {
+  /// Max focus areas for the user's current tier (free or boost).
+  /// Subscription users get unlimited focus areas.
+  int maxFocusAreas({bool hasBoost = false}) =>
+      hasBoost ? _maxFocusAreasBoost : _maxFocusAreasFree;
+
+  void toggleFocusArea(String area, {bool hasBoost = false}) {
     if (_focusAreas.contains(area)) {
       _focusAreas.remove(area);
     } else {
-      if (_focusAreas.length >= 2) return;
+      if (_focusAreas.length >= maxFocusAreas(hasBoost: hasBoost)) return;
       _focusAreas.add(area);
     }
     notifyListeners();
@@ -230,8 +240,22 @@ class OnboardingState extends ChangeNotifier {
   // Load habits from storage
   Future<void> loadUserHabits() async {
     final prefs = await SharedPreferences.getInstance();
+
+    // Load onboarding completion state
+    _onboardingComplete = prefs.getBool('onboarding_complete') ?? false;
+
+    // Sync daily reminder state from persisted notification preferences
+    _dailyReminderEnabled = prefs.getBool('notifications_enabled') ?? false;
+
+    // Load focus areas
+    final savedFocusAreas = prefs.getStringList('focus_areas');
+    if (savedFocusAreas != null) {
+      _focusAreas.clear();
+      _focusAreas.addAll(savedFocusAreas);
+    }
+
     final savedHabits = prefs.getStringList('user_habits');
-    
+
     if (savedHabits != null && savedHabits.isNotEmpty) {
       userHabits = savedHabits;
 
@@ -239,6 +263,19 @@ class OnboardingState extends ChangeNotifier {
       final savedCustom = prefs.getStringList('custom_habits');
       if (savedCustom != null) {
         _customHabits = savedCustom;
+      }
+
+      // Migration: infer focus areas from existing habits for users who
+      // completed onboarding before focus areas were persisted.
+      if (_focusAreas.isEmpty && _onboardingComplete) {
+        for (final entry in habitsByCategory.entries) {
+          if (userHabits.any((h) => entry.value.contains(h))) {
+            _focusAreas.add(entry.key);
+          }
+        }
+        if (_focusAreas.isNotEmpty) {
+          await prefs.setStringList('focus_areas', _focusAreas);
+        }
       }
     } else {
       // No saved habits = fresh start — clear any stale custom habits from prefs
@@ -378,39 +415,54 @@ class OnboardingState extends ChangeNotifier {
     return null;
   }
 
-  // Check if user can swap (2 total per month for free users)
-  bool canSwapInCategory(String category) {
+  /// Max swaps for the user's current tier (free or boost).
+  /// Subscription users bypass this entirely at the call site.
+  int maxSwaps({bool hasBoost = false}) =>
+      hasBoost ? _maxSwapsBoost : _maxSwapsFree;
+
+  // Check if user can swap (free: 2/month, boost: 3/month)
+  bool canSwapInCategory(String category, {bool hasBoost = false}) {
     _checkMonthlyReset();
-    return getTotalSwapsUsed() < 2;
+    return getTotalSwapsUsed() < maxSwaps(hasBoost: hasBoost);
   }
 
   // Get remaining swaps (global, not per-category)
-  int getRemainingSwaps(String category) {
+  int getRemainingSwaps(String category, {bool hasBoost = false}) {
     _checkMonthlyReset();
-    return 2 - getTotalSwapsUsed();
+    return maxSwaps(hasBoost: hasBoost) - getTotalSwapsUsed();
   }
 
   // Swap a habit
-  Future<bool> swapHabit(String oldHabit, String newHabit, {bool isPremium = false}) async {
+  Future<bool> swapHabit(String oldHabit, String newHabit, {bool isPremium = false, bool hasBoost = false}) async {
     final category = getCategoryForHabit(oldHabit);
     if (category == null) return false;
 
-    if (!isPremium && !canSwapInCategory(category)) return false;
+    if (!isPremium && !canSwapInCategory(category, hasBoost: hasBoost)) return false;
 
     final index = userHabits.indexOf(oldHabit);
     if (index == -1) return false;
 
     userHabits[index] = newHabit;
 
+    // If the swapped habit was pinned, transfer the pin
+    if (_pinnedHabit == oldHabit) {
+      _pinnedHabit = newHabit;
+    }
+
     // Increment swap count
     _swapsUsed[category] = (_swapsUsed[category] ?? 0) + 1;
 
-    // Save
+    // Notify UI immediately so cards update before async saves
+    notifyListeners();
+
+    // Persist in background
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('user_habits', userHabits);
+    if (_pinnedHabit == newHabit) {
+      await prefs.setString('pinned_habit', newHabit);
+    }
     await _saveSwapData();
 
-    notifyListeners();
     return true;
   }
 
@@ -420,14 +472,14 @@ class OnboardingState extends ChangeNotifier {
     return _swapsUsed.values.fold(0, (sum, count) => sum + count);
   }
 
-  // Check if user can swap from Browse (2 total swaps per month)
-  bool canSwapFromBrowse() {
-    return getTotalSwapsUsed() < 2;
+  // Check if user can swap from Browse (free: 2/month, boost: 3/month)
+  bool canSwapFromBrowse({bool hasBoost = false}) {
+    return getTotalSwapsUsed() < maxSwaps(hasBoost: hasBoost);
   }
 
   // Get remaining Browse swaps
-  int getRemainingBrowseSwaps() {
-    return 2 - getTotalSwapsUsed();
+  int getRemainingBrowseSwaps({bool hasBoost = false}) {
+    return maxSwaps(hasBoost: hasBoost) - getTotalSwapsUsed();
   }
 
 
@@ -479,8 +531,9 @@ class OnboardingState extends ChangeNotifier {
     // Generate new habits (custom habits will be preserved inside this method now)
     await generateUserHabits();
     
-    // Save timestamp
+    // Save focus areas and timestamp
     final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('focus_areas', _focusAreas);
     await prefs.setString('last_focus_change', _lastFocusAreaChange!.toIso8601String());
     
     notifyListeners();
@@ -488,11 +541,17 @@ class OnboardingState extends ChangeNotifier {
 
   Future<void> completeOnboarding() async {
     _onboardingComplete = true;
-    
+
     if (userHabits.isEmpty) {
       await generateUserHabits();
     }
-    
+
+    // Persist onboarding completion
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('onboarding_complete', true);
+    await prefs.setBool('just_completed_onboarding', true);
+    await prefs.setStringList('focus_areas', _focusAreas);
+
     notifyListeners();
   }
 
@@ -510,10 +569,13 @@ class OnboardingState extends ChangeNotifier {
     await generateUserHabits();
   }
 
-  bool canAddCustomHabit() {
-    // TODO: Check if user has Intended+ plan
-    // For now, enforce Core limit (2 custom habits)
-    return _customHabits.length < _maxCustomHabitsCore;
+  /// Max custom habits for the user's current tier (free or boost).
+  /// Subscription users bypass this entirely at the call site.
+  int maxCustomHabits({bool hasBoost = false}) =>
+      hasBoost ? _maxCustomHabitsBoost : _maxCustomHabitsFree;
+
+  bool canAddCustomHabit({bool hasBoost = false}) {
+    return _customHabits.length < maxCustomHabits(hasBoost: hasBoost);
   }
 
   Future<void> addCustomHabit(String habitTitle) async {

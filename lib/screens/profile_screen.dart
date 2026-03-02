@@ -10,6 +10,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../main.dart';
 import '../onboarding_v2/onboarding_state.dart';
+import '../services/analytics_service.dart';
 import '../onboarding_v2/welcome_v2_screen.dart';
 import '../state/user_state.dart';
 import '../utils/profanity_filter.dart';
@@ -20,10 +21,12 @@ import 'paywall_screen.dart';
 import 'subscription_management_modal.dart';
 import '../widgets/theme_picker.dart';
 import '../services/auth_service.dart';
+import '../services/revenue_cat_service.dart';
 import '../services/moments_service.dart';
 import '../services/notification_scheduler.dart';
 import '../services/notification_preferences_service.dart';
 import 'moments_collection_screen.dart';
+import '../widgets/boost_offer_sheet.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -47,6 +50,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.logScreenView('profile');
     controller.addListener(() {
       setState(() {});
     });
@@ -57,7 +61,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final enabled = await NotificationPreferencesService.isEnabled();
     final hour = await NotificationPreferencesService.getHour();
     final minute = await NotificationPreferencesService.getMinute();
-    final weeklyEnabled = await NotificationPreferencesService.isWeeklyEnabled();
+    final weeklyEnabled =
+        await NotificationPreferencesService.isWeeklyEnabled();
     if (mounted) {
       setState(() {
         _dailyEnabled = enabled;
@@ -83,15 +88,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   String _localizedAreaName(AppLocalizations l10n, String area) {
     switch (area) {
-      case 'Health': return l10n.focusAreaHealth;
-      case 'Mood': return l10n.focusAreaMood;
-      case 'Productivity': return l10n.focusAreaProductivity;
-      case 'Home & organization': return l10n.focusAreaHome;
-      case 'Relationships': return l10n.focusAreaRelationships;
-      case 'Creativity': return l10n.focusAreaCreativity;
-      case 'Finances': return l10n.focusAreaFinances;
-      case 'Self-care': return l10n.focusAreaSelfCare;
-      default: return area;
+      case 'Health':
+        return l10n.focusAreaHealth;
+      case 'Mood':
+        return l10n.focusAreaMood;
+      case 'Productivity':
+        return l10n.focusAreaProductivity;
+      case 'Home & organization':
+        return l10n.focusAreaHome;
+      case 'Relationships':
+        return l10n.focusAreaRelationships;
+      case 'Creativity':
+        return l10n.focusAreaCreativity;
+      case 'Finances':
+        return l10n.focusAreaFinances;
+      case 'Self-care':
+        return l10n.focusAreaSelfCare;
+      default:
+        return area;
     }
   }
 
@@ -127,6 +141,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     await prefs.setString('user_name', name);
 
     userNameNotifier.value = name;
+    AnalyticsService.logProfileNameEdited();
 
     if (mounted) {
       context.read<OnboardingState>().setName(name);
@@ -164,7 +179,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } else {
       if (mounted) {
         final l10n = AppLocalizations.of(context);
-        final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
+        final colors =
+            Provider.of<ThemeProvider>(context, listen: false).colors;
         showIntendedModal(
           context: context,
           title: l10n.profileCannotOpenEmail,
@@ -228,8 +244,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _changeFocusAreas() {
     final onboardingState = context.read<OnboardingState>();
+    final userState = context.read<UserState>();
 
-    if (!onboardingState.canChangeFocusAreas()) {
+    // Subscription & boost users bypass the monthly focus area change limit
+    if (!userState.hasSubscription && !userState.hasBoost && !onboardingState.canChangeFocusAreas()) {
+      AnalyticsService.logFocusAreaChangeLimitShown();
       _showFocusAreaLimitDialog();
       return;
     }
@@ -346,12 +365,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: colors.textPrimary.withOpacity(0.3),
+                                      color:
+                                          colors.textPrimary.withOpacity(0.3),
                                       blurRadius: 24,
                                       offset: const Offset(0, 6),
                                     ),
                                     BoxShadow(
-                                      color: const Color(0xFFFFFFFF).withOpacity(0.15),
+                                      color: const Color(0xFFFFFFFF)
+                                          .withOpacity(0.15),
                                       blurRadius: 0,
                                       offset: const Offset(0, 1),
                                       spreadRadius: 0,
@@ -365,11 +386,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     Navigator.push(
                                       context,
                                       CupertinoPageRoute(
-                                        builder: (_) => _FocusAreaChangeScreen(),
+                                        builder: (_) =>
+                                            _FocusAreaChangeScreen(),
                                       ),
                                     );
                                   },
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 16),
                                   borderRadius: BorderRadius.circular(20),
                                   child: Text(
                                     l10n.profileChangeAreas,
@@ -418,267 +441,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showFocusAreaLimitDialog() {
-    final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
     final l10n = AppLocalizations.of(context);
-
-    showCupertinoDialog(
+    final userState = Provider.of<UserState>(context, listen: false);
+    showBoostOfferSheet(
       context: context,
-      barrierDismissible: true,
-      builder: (context) => Container(
-        color: colors.barrierColor.withOpacity(colors.barrierOpacity),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-          child: Center(
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 24),
-              constraints: const BoxConstraints(maxWidth: 384),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(32),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-                  child: Container(
-                    padding: const EdgeInsets.fromLTRB(28, 32, 28, 36),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: const Alignment(0.0, 2.41),
-                        end: const Alignment(0.0, -2.41),
-                        colors: [
-                          colors.modalBg1.withOpacity(0.96),
-                          colors.modalBg2.withOpacity(0.93),
-                          colors.modalBg3.withOpacity(0.95),
-                        ],
-                        stops: const [0.0, 0.5, 1.0],
-                      ),
-                      borderRadius: BorderRadius.circular(32),
-                      border: Border.all(
-                        color: const Color(0xFFFFFFFF).withOpacity(0.5),
-                        width: 1.5,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: colors.modalShadow.withOpacity(0.4),
-                          blurRadius: 70,
-                          offset: const Offset(0, 25),
-                        ),
-                        BoxShadow(
-                          color: const Color(0xFFFFFFFF).withOpacity(0.6),
-                          blurRadius: 0,
-                          offset: const Offset(0, 1),
-                          spreadRadius: 0,
-                          blurStyle: BlurStyle.inner,
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Title
-                        Text(
-                          l10n.profileChangeFocusTitle,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: 'Sora',
-                            fontSize: 24,
-                            fontWeight: FontWeight.w600,
-                            color: colors.textPrimary,
-                            letterSpacing: -0.3,
-                            height: 1.3,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-
-                        // Description
-                        Text(
-                          l10n.profileFocusLimitMessage,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: 'DM Sans',
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                            color: colors.ctaPrimary,
-                            height: 1.5,
-                          ),
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        // Options
-                        Text(
-                          l10n.profileFocusLimitOptions,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: 'DM Sans',
-                            fontSize: 15,
-                            fontWeight: FontWeight.w400,
-                            color: colors.ctaPrimary,
-                            height: 1.6,
-                          ),
-                        ),
-
-                        const SizedBox(height: 32),
-
-                        // Primary button (Pay)
-                        SizedBox(
-                          width: double.infinity,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(20),
-                            child: BackdropFilter(
-                              filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: [
-                                      colors.ctaPrimary.withOpacity(0.92),
-                                      colors.ctaSecondary.withOpacity(0.88),
-                                    ],
-                                  ),
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(
-                                    color: colors.ctaPrimary.withOpacity(0.4),
-                                    width: 1,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: colors.textPrimary.withOpacity(0.3),
-                                      blurRadius: 24,
-                                      offset: const Offset(0, 6),
-                                    ),
-                                    BoxShadow(
-                                      color: const Color(0xFFFFFFFF).withOpacity(0.15),
-                                      blurRadius: 0,
-                                      offset: const Offset(0, 1),
-                                      spreadRadius: 0,
-                                      blurStyle: BlurStyle.inner,
-                                    ),
-                                  ],
-                                ),
-                                child: CupertinoButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                    _showPaymentPlaceholder();
-                                  },
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
-                                  borderRadius: BorderRadius.circular(20),
-                                  child: Text(
-                                    l10n.profilePayAmount,
-                                    style: const TextStyle(
-                                      fontFamily: 'Sora',
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.w600,
-                                      color: Color(0xFFFFFFFF),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 14),
-
-                        // Secondary button (Unlock Intended+)
-                        SizedBox(
-                          width: double.infinity,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(20),
-                            child: BackdropFilter(
-                              filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFFFFFFF).withOpacity(0.25),
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(
-                                    color: const Color(0xFFFFFFFF).withOpacity(0.4),
-                                    width: 1,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: colors.textPrimary.withOpacity(0.05),
-                                      blurRadius: 16,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
-                                child: CupertinoButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                    _showUpgradeScreen();
-                                  },
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
-                                  borderRadius: BorderRadius.circular(20),
-                                  child: Text(
-                                    l10n.appUnlockPlus,
-                                    style: TextStyle(
-                                      fontFamily: 'Sora',
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.w600,
-                                      color: colors.ctaPrimary,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 16),
-
-                        // Cancel button (ghost)
-                        SizedBox(
-                          width: double.infinity,
-                          child: CupertinoButton(
-                            onPressed: () => Navigator.pop(context),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            child: Text(
-                              l10n.commonCancel,
-                              style: TextStyle(
-                                fontFamily: 'Sora',
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                color: colors.textTertiary,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showPaymentPlaceholder() {
-    final l10n = AppLocalizations.of(context);
-    showStyledPopup(
-      context: context,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            l10n.profilePaymentTitle,
-            style: AppTextStyles.h2(context),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            l10n.profilePaymentMessage,
-            style: AppTextStyles.body(context),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 32),
-          styledPrimaryButton(
-            label: l10n.commonOk,
-            onPressed: () => Navigator.pop(context),
-          ),
-        ],
-      ),
+      title: l10n.boostOfferFocusTitle,
+      description: l10n.boostOfferFocusDesc,
+      showBoostOption: !userState.hasBoost,
+      source: 'focus_area_limit',
     );
   }
 
@@ -687,7 +457,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       barrierColor: Colors.black.withOpacity(0.5),
       filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-      builder: (context) => const PaywallScreen(),
+      builder: (context) => const PaywallScreen(source: 'profile'),
     );
   }
 
@@ -704,7 +474,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           final colors = themeProvider.colors;
           return Container(
             child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(32)),
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
                 child: Container(
@@ -716,7 +487,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         colors.modalBg3.withOpacity(0.98),
                       ],
                     ),
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+                    borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(32)),
                     border: Border.all(
                       color: Colors.white.withOpacity(0.6),
                       width: 1.5,
@@ -806,6 +578,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Navigator.pop(context);
               final onboardingState = context.read<OnboardingState>();
               await onboardingState.refreshHabits();
+              AnalyticsService.logHabitRefreshed();
               if (mounted) {
                 _showRefreshSuccess();
               }
@@ -851,8 +624,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _refreshHabits() async {
     final onboardingState = context.read<OnboardingState>();
+    final userState = context.read<UserState>();
 
-    if (!onboardingState.canRefreshHabits()) {
+    if (!userState.hasSubscription && !onboardingState.canRefreshHabits()) {
+      AnalyticsService.logHabitRefreshLimitReached();
       final l10n = AppLocalizations.of(context);
       showIntendedDialog(
         context: context,
@@ -1010,72 +785,291 @@ class _ProfileScreenState extends State<ProfileScreen> {
       backgroundColor: Colors.transparent,
       child: AppBackground(
         child: SafeArea(
-            top: false,
-            bottom: false,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header (fixed)
-                Padding(
-                  padding: EdgeInsets.fromLTRB(24, MediaQuery.of(context).padding.top + 24, 24, 20),
-                  child: Text(
-                    l10n.profileTitle,
-                    style: TextStyle(
-                      fontFamily: 'Sora',
-                      fontSize: 32,
-                      fontWeight: FontWeight.w600,
-                      color: colors.textPrimary,
-                    ),
+          top: false,
+          bottom: false,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header (fixed)
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    24, MediaQuery.of(context).padding.top + 24, 24, 20),
+                child: Text(
+                  l10n.profileTitle,
+                  style: TextStyle(
+                    fontFamily: 'Sora',
+                    fontSize: 32,
+                    fontWeight: FontWeight.w600,
+                    color: colors.textPrimary,
                   ),
                 ),
+              ),
 
-                // Scrollable content
-                Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 140),
-                    children: [
-                // Profile Info Card (Main Card with 4 sections)
-                _GlassCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Section 1: Your Name
-                      Text(
-                        l10n.profileYourName,
-                        style: TextStyle(
-                          fontFamily: 'Sora',
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: colors.textSecondary,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
+              // Scrollable content
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 140),
+                  children: [
+                    // Profile Info Card (Main Card with 4 sections)
+                    _GlassCard(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Section 1: Your Name
+                          Text(
+                            l10n.profileYourName,
+                            style: TextStyle(
+                              fontFamily: 'Sora',
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: colors.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
 
-                      if (!_isEditing) ...[
-                        ValueListenableBuilder<String?>(
-                          valueListenable: userNameNotifier,
-                          builder: (context, name, _) {
-                            final displayName =
-                                (name != null && name.isNotEmpty) ? name : l10n.profileAddName;
-                            final hasName = name != null && name.isNotEmpty;
+                          if (!_isEditing) ...[
+                            ValueListenableBuilder<String?>(
+                              valueListenable: userNameNotifier,
+                              builder: (context, name, _) {
+                                final displayName =
+                                    (name != null && name.isNotEmpty)
+                                        ? name
+                                        : l10n.profileAddName;
+                                final hasName = name != null && name.isNotEmpty;
 
-                            return Row(
+                                return Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        displayName,
+                                        style: TextStyle(
+                                          fontFamily: 'Sora',
+                                          fontSize: 17,
+                                          fontWeight: FontWeight.w500,
+                                          color: hasName
+                                              ? colors.textPrimary
+                                              : colors.textDisabled,
+                                        ),
+                                      ),
+                                    ),
+                                    CupertinoButton(
+                                      padding: EdgeInsets.zero,
+                                      onPressed: _startEditing,
+                                      child: Icon(
+                                        CupertinoIcons.pencil,
+                                        size: 20,
+                                        color: colors.ctaPrimary,
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+                          ] else ...[
+                            CupertinoTextField(
+                              controller: controller,
+                              placeholder: l10n.profileEnterName,
+                              autofocus: true,
+                              style: TextStyle(
+                                fontFamily: 'Sora',
+                                fontSize: 17,
+                                fontWeight: FontWeight.w500,
+                                color: colors.textPrimary,
+                              ),
+                              placeholderStyle: TextStyle(
+                                fontFamily: 'Sora',
+                                fontSize: 17,
+                                color: colors.textDisabled,
+                              ),
+                              decoration: BoxDecoration(
+                                color: colors.surfaceLightest,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: colors.borderWarm,
+                                  width: 0.8,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: CupertinoButton(
+                                    color: canSave
+                                        ? colors.buttonDark
+                                        : colors.borderMedium,
+                                    borderRadius: BorderRadius.circular(12),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 12),
+                                    onPressed: canSave ? _saveName : null,
+                                    child: Text(
+                                      l10n.commonSave,
+                                      style: TextStyle(
+                                        fontFamily: 'Sora',
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                        color: canSave
+                                            ? colors.surfaceLightest
+                                            : colors.textDisabled,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                CupertinoButton(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
+                                  onPressed: _cancelEditing,
+                                  child: Text(
+                                    l10n.commonCancel,
+                                    style: TextStyle(
+                                      fontFamily: 'Sora',
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w500,
+                                      color: colors.ctaPrimary,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+
+                          // Divider
+                          const SizedBox(height: 24),
+                          Container(
+                            height: 1,
+                            color: colors.ctaPrimary.withOpacity(0.1),
+                          ),
+                          const SizedBox(height: 24),
+
+                          // Section 2: Plan
+                          Text(
+                            l10n.profilePlan,
+                            style: TextStyle(
+                              fontFamily: 'Sora',
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: colors.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Consumer<UserState>(
+                                  builder: (context, userState, child) {
+                                    return Text(
+                                      userState.hasSubscription
+                                          ? l10n.appNameIntendedPlus
+                                          : userState.hasBoost
+                                              ? l10n.appPlanBoost
+                                              : l10n.appPlanCore,
+                                      style: TextStyle(
+                                        fontFamily: 'Sora',
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w600,
+                                        color: colors.textPrimary,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                              Consumer<UserState>(
+                                builder: (context, userState, child) {
+                                  if (userState.hasSubscription) {
+                                    // Show "Manage" button for subscribed users
+                                    return CupertinoButton(
+                                      padding: EdgeInsets.zero,
+                                      onPressed: _showSubscriptionManagement,
+                                      child: Text(
+                                        l10n.profileManage,
+                                        style: TextStyle(
+                                          fontFamily: 'Sora',
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                          color: colors.ctaPrimary,
+                                        ),
+                                      ),
+                                    );
+                                  } else {
+                                    // Show "UNLOCK INTENDED+" button for free users
+                                    return CupertinoButton(
+                                      padding: EdgeInsets.zero,
+                                      onPressed: _showUpgradeScreen,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 8,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: colors.accentRegular
+                                              .withOpacity(0.5),
+                                          borderRadius:
+                                              BorderRadius.circular(100),
+                                          border: Border.all(
+                                            color: colors.accentRegular
+                                                .withOpacity(0.6),
+                                            width: 1,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          l10n.profileUnlockPlus,
+                                          style: TextStyle(
+                                            fontFamily: 'Sora',
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
+                                            color: colors.ctaPrimary,
+                                            letterSpacing: 0.5,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+
+                          if (focusAreas.isNotEmpty) ...[
+                            // Divider
+                            const SizedBox(height: 24),
+                            Container(
+                              height: 1,
+                              color: colors.ctaPrimary.withOpacity(0.1),
+                            ),
+                            const SizedBox(height: 24),
+
+                            // Section 3: Focus Areas
+                            Text(
+                              l10n.profileFocusAreas,
+                              style: TextStyle(
+                                fontFamily: 'Sora',
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                                color: colors.textSecondary,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+
+                            Row(
                               children: [
                                 Expanded(
                                   child: Text(
-                                    displayName,
+                                    focusAreas
+                                        .map((a) => _localizedAreaName(l10n, a))
+                                        .join(', '),
                                     style: TextStyle(
                                       fontFamily: 'Sora',
                                       fontSize: 17,
                                       fontWeight: FontWeight.w500,
-                                      color:
-                                          hasName ? colors.textPrimary : colors.textDisabled,
+                                      color: colors.textPrimary,
                                     ),
                                   ),
                                 ),
                                 CupertinoButton(
                                   padding: EdgeInsets.zero,
-                                  onPressed: _startEditing,
+                                  onPressed: _changeFocusAreas,
                                   child: Icon(
                                     CupertinoIcons.pencil,
                                     size: 20,
@@ -1083,502 +1077,115 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ),
                                 ),
                               ],
-                            );
-                          },
-                        ),
-                      ] else ...[
-                        CupertinoTextField(
-                          controller: controller,
-                          placeholder: l10n.profileEnterName,
-                          autofocus: true,
-                          style: TextStyle(
-                            fontFamily: 'Sora',
-                            fontSize: 17,
-                            fontWeight: FontWeight.w500,
-                            color: colors.textPrimary,
-                          ),
-                          placeholderStyle: TextStyle(
-                            fontFamily: 'Sora',
-                            fontSize: 17,
-                            color: colors.textDisabled,
-                          ),
-                          decoration: BoxDecoration(
-                            color: colors.surfaceLightest,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: colors.borderWarm,
-                              width: 0.8,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: CupertinoButton(
-                                color: canSave
-                                    ? colors.buttonDark
-                                    : colors.borderMedium,
-                                borderRadius: BorderRadius.circular(12),
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                onPressed: canSave ? _saveName : null,
-                                child: Text(
-                                  l10n.commonSave,
-                                  style: TextStyle(
-                                    fontFamily: 'Sora',
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600,
-                                    color: canSave
-                                        ? colors.surfaceLightest
-                                        : colors.textDisabled,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            CupertinoButton(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
-                              onPressed: _cancelEditing,
-                              child: Text(
-                                l10n.commonCancel,
-                                style: TextStyle(
-                                  fontFamily: 'Sora',
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w500,
-                                  color: colors.ctaPrimary,
-                                ),
-                              ),
                             ),
                           ],
-                        ),
-                      ],
 
-                      // Divider
-                      const SizedBox(height: 24),
-                      Container(
-                        height: 1,
-                        color: colors.ctaPrimary.withOpacity(0.1),
-                      ),
-                      const SizedBox(height: 24),
+                          // Divider
+                          const SizedBox(height: 24),
+                          Container(
+                            height: 1,
+                            color: colors.ctaPrimary.withOpacity(0.1),
+                          ),
+                          const SizedBox(height: 24),
 
-                      // Section 2: Plan
-                      Text(
-                        l10n.profilePlan,
-                        style: TextStyle(
-                          fontFamily: 'Sora',
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: colors.textSecondary,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Consumer<UserState>(
-                              builder: (context, userState, child) {
-                                return Text(
-                                  userState.hasSubscription ? l10n.appNameIntendedPlus : l10n.appPlanCore,
-                                  style: TextStyle(
-                                    fontFamily: 'Sora',
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w600,
-                                    color: colors.textPrimary,
-                                  ),
-                                );
-                              },
+                          // Section: Your Moments
+                          Text(
+                            l10n.profileYourMoments,
+                            style: TextStyle(
+                              fontFamily: 'Sora',
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                              color: colors.textSecondary,
                             ),
                           ),
-                          Consumer<UserState>(
-                            builder: (context, userState, child) {
-                              if (userState.hasSubscription) {
-                                // Show "Manage" button for subscribed users
-                                return CupertinoButton(
-                                  padding: EdgeInsets.zero,
-                                  onPressed: _showSubscriptionManagement,
-                                  child: Text(
-                                    l10n.profileManage,
-                                    style: TextStyle(
-                                      fontFamily: 'Sora',
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
+                          const SizedBox(height: 8),
+
+                          FutureBuilder<int>(
+                            future: MomentsService.getCount(),
+                            builder: (context, snapshot) {
+                              final count = snapshot.data ?? 0;
+                              final label = count == 0
+                                  ? l10n.profileMomentsNone
+                                  : l10n.profileMomentsCount(count);
+                              return Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      label,
+                                      style: TextStyle(
+                                        fontFamily: 'Sora',
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w500,
+                                        color: colors.textPrimary,
+                                      ),
+                                    ),
+                                  ),
+                                  CupertinoButton(
+                                    padding: EdgeInsets.zero,
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        CupertinoPageRoute(
+                                          builder: (_) =>
+                                              const MomentsCollectionScreen(),
+                                        ),
+                                      );
+                                    },
+                                    child: Icon(
+                                      CupertinoIcons.chevron_right,
+                                      size: 20,
                                       color: colors.ctaPrimary,
                                     ),
                                   ),
-                                );
-                              } else {
-                                // Show "UNLOCK INTENDED+" button for free users
-                                return CupertinoButton(
-                                  padding: EdgeInsets.zero,
-                                  onPressed: _showUpgradeScreen,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 8,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: colors.accentRegular.withOpacity(0.5),
-                                      borderRadius: BorderRadius.circular(100),
-                                      border: Border.all(
-                                        color: colors.accentRegular.withOpacity(0.6),
-                                        width: 1,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      l10n.profileUnlockPlus,
-                                      style: TextStyle(
-                                        fontFamily: 'Sora',
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                        color: colors.ctaPrimary,
-                                        letterSpacing: 0.5,
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              }
+                                ],
+                              );
                             },
                           ),
                         ],
                       ),
+                    ),
 
-                      if (focusAreas.isNotEmpty) ...[
-                        // Divider
-                        const SizedBox(height: 24),
-                        Container(
-                          height: 1,
-                          color: colors.ctaPrimary.withOpacity(0.1),
-                        ),
-                        const SizedBox(height: 24),
+                    const SizedBox(height: 16),
 
-                        // Section 3: Focus Areas
-                        Text(
-                          l10n.profileFocusAreas,
-                          style: TextStyle(
-                            fontFamily: 'Sora',
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                            color: colors.textSecondary,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                focusAreas.map((a) => _localizedAreaName(l10n, a)).join(', '),
-                                style: TextStyle(
-                                  fontFamily: 'Sora',
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w500,
-                                  color: colors.textPrimary,
-                                ),
-                              ),
-                            ),
-                            CupertinoButton(
-                              padding: EdgeInsets.zero,
-                              onPressed: _changeFocusAreas,
-                              child: Icon(
-                                CupertinoIcons.pencil,
-                                size: 20,
-                                color: colors.ctaPrimary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-
-                      // Divider
-                      const SizedBox(height: 24),
-                      Container(
-                        height: 1,
-                        color: colors.ctaPrimary.withOpacity(0.1),
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Section: Your Moments
-                      Text(
-                        l10n.profileYourMoments,
+                    // SETTINGS label
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16, bottom: 4),
+                      child: Text(
+                        l10n.profileSettings,
                         style: TextStyle(
                           fontFamily: 'Sora',
-                          fontSize: 15,
+                          fontSize: 11,
                           fontWeight: FontWeight.w500,
                           color: colors.textSecondary,
+                          letterSpacing: 0.8,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                    ),
 
-                      FutureBuilder<int>(
-                        future: MomentsService.getCount(),
-                        builder: (context, snapshot) {
-                          final count = snapshot.data ?? 0;
-                          final label = count == 0
-                              ? l10n.profileMomentsNone
-                              : l10n.profileMomentsCount(count);
-                          return Row(
+                    // Notifications Card
+                    _GlassCard(
+                      child: Column(
+                        children: [
+                          // Row 1: Daily reminders toggle
+                          Row(
                             children: [
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: colors.ctaPrimary.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(
+                                  CupertinoIcons.bell,
+                                  size: 18,
+                                  color: colors.textMutedBrown,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
-                                  label,
-                                  style: TextStyle(
-                                    fontFamily: 'Sora',
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.w500,
-                                    color: colors.textPrimary,
-                                  ),
-                                ),
-                              ),
-                              CupertinoButton(
-                                padding: EdgeInsets.zero,
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    CupertinoPageRoute(
-                                      builder: (_) => const MomentsCollectionScreen(),
-                                    ),
-                                  );
-                                },
-                                child: Icon(
-                                  CupertinoIcons.chevron_right,
-                                  size: 20,
-                                  color: colors.ctaPrimary,
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // SETTINGS label
-                Padding(
-                  padding: const EdgeInsets.only(top: 16, bottom: 4),
-                  child: Text(
-                    l10n.profileSettings,
-                    style: TextStyle(
-                      fontFamily: 'Sora',
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                      color: colors.textSecondary,
-                      letterSpacing: 0.8,
-                    ),
-                  ),
-                ),
-
-                // Notifications Card
-                _GlassCard(
-                  child: Column(
-                    children: [
-                      // Row 1: Daily reminders toggle
-                      Row(
-                        children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: colors.ctaPrimary.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Icon(
-                              CupertinoIcons.bell,
-                              size: 18,
-                              color: colors.textMutedBrown,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              l10n.profileDailyReminders,
-                              style: TextStyle(
-                                fontFamily: 'Sora',
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                color: colors.textPrimary,
-                              ),
-                            ),
-                          ),
-                          CupertinoSwitch(
-                            value: _dailyEnabled,
-                            activeTrackColor: colors.success,
-                            thumbColor: const Color(0xFFFFFFFF),
-                            onChanged: (value) async {
-                              if (value) {
-                                final granted = await NotificationScheduler.requestPermission();
-                                if (granted) {
-                                  await NotificationPreferencesService.setEnabled(true);
-                                  final l10n = AppLocalizations.of(context);
-                                  await NotificationScheduler.scheduleDaily(l10n);
-                                  if (mounted) {
-                                    setState(() {
-                                      _dailyEnabled = true;
-                                      _notifPermissionDenied = false;
-                                    });
-                                  }
-                                } else {
-                                  await NotificationPreferencesService.setEnabled(false);
-                                  if (mounted) {
-                                    setState(() {
-                                      _notifPermissionDenied = true;
-                                    });
-                                  }
-                                }
-                              } else {
-                                await NotificationPreferencesService.setEnabled(false);
-                                await NotificationScheduler.cancelAll();
-                                if (mounted) {
-                                  setState(() {
-                                    _dailyEnabled = false;
-                                    _notifPermissionDenied = false;
-                                  });
-                                }
-                              }
-                            },
-                          ),
-                        ],
-                      ),
-
-                      // Time picker row (visible when daily is ON)
-                      AnimatedSize(
-                        duration: const Duration(milliseconds: 250),
-                        curve: Curves.easeOut,
-                        child: _dailyEnabled
-                            ? Padding(
-                                padding: const EdgeInsets.only(top: 16),
-                                child: Row(
-                                  children: [
-                                    const SizedBox(width: 52),
-                                    Expanded(
-                                      child: Text(
-                                        l10n.profileRemindAt,
-                                        style: TextStyle(
-                                          fontFamily: 'Sora',
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w400,
-                                          color: colors.ctaPrimary,
-                                        ),
-                                      ),
-                                    ),
-                                    CupertinoButton(
-                                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                                      minSize: 0,
-                                      onPressed: () {
-                                        DateTime tempTime = DateTime(
-                                          2024, 1, 1, _notifHour, _notifMinute,
-                                        );
-                                        showCupertinoModalPopup(
-                                          context: context,
-                                          builder: (ctx) => Container(
-                                            height: 280,
-                                            color: colors.modalBg1,
-                                            child: Column(
-                                              children: [
-                                                Row(
-                                                  mainAxisAlignment: MainAxisAlignment.end,
-                                                  children: [
-                                                    CupertinoButton(
-                                                      child: Text(
-                                                        l10n.commonDone,
-                                                        style: TextStyle(
-                                                          fontFamily: 'Sora',
-                                                          fontSize: 16,
-                                                          fontWeight: FontWeight.w600,
-                                                          color: colors.ctaPrimary,
-                                                        ),
-                                                      ),
-                                                      onPressed: () async {
-                                                        Navigator.pop(ctx);
-                                                        await NotificationPreferencesService.setHour(tempTime.hour);
-                                                        await NotificationPreferencesService.setMinute(tempTime.minute);
-                                                        final enabled = await NotificationPreferencesService.isEnabled();
-                                                        if (enabled) {
-                                                          final l10n = AppLocalizations.of(context);
-                                                          await NotificationScheduler.rescheduleAll(l10n);
-                                                        }
-                                                        if (mounted) {
-                                                          setState(() {
-                                                            _notifHour = tempTime.hour;
-                                                            _notifMinute = tempTime.minute;
-                                                          });
-                                                        }
-                                                      },
-                                                    ),
-                                                  ],
-                                                ),
-                                                Expanded(
-                                                  child: CupertinoDatePicker(
-                                                    mode: CupertinoDatePickerMode.time,
-                                                    initialDateTime: tempTime,
-                                                    onDateTimeChanged: (dt) {
-                                                      tempTime = dt;
-                                                    },
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                        decoration: BoxDecoration(
-                                          color: colors.borderWarm,
-                                          borderRadius: BorderRadius.circular(10),
-                                        ),
-                                        child: Text(
-                                          _formatTime(_notifHour, _notifMinute),
-                                          style: TextStyle(
-                                            fontFamily: 'Sora',
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.w500,
-                                            color: colors.textPrimary,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )
-                            : const SizedBox.shrink(),
-                      ),
-
-                      // Divider
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: Container(
-                          height: 1,
-                          color: colors.ctaPrimary.withOpacity(0.1),
-                        ),
-                      ),
-
-                      // Row 2: Weekly summary toggle
-                      Row(
-                        children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: colors.ctaPrimary.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Icon(
-                              CupertinoIcons.calendar,
-                              size: 18,
-                              color: colors.textMutedBrown,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  l10n.profileWeeklySummary,
+                                  l10n.profileDailyReminders,
                                   style: TextStyle(
                                     fontFamily: 'Sora',
                                     fontSize: 16,
@@ -1586,126 +1193,355 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     color: colors.textPrimary,
                                   ),
                                 ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  l10n.profileWeeklySubtitle,
-                                  style: TextStyle(
-                                    fontFamily: 'Sora',
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w400,
-                                    color: colors.textSecondary,
+                              ),
+                              CupertinoSwitch(
+                                value: _dailyEnabled,
+                                activeTrackColor: colors.ctaPrimary,
+                                thumbColor: const Color(0xFFFFFFFF),
+                                onChanged: (value) async {
+                                  if (value) {
+                                    final granted = await NotificationScheduler
+                                        .requestPermission();
+                                    if (granted) {
+                                      await NotificationPreferencesService
+                                          .setEnabled(true);
+                                      final l10n = AppLocalizations.of(context);
+                                      await NotificationScheduler.scheduleDaily(
+                                          l10n);
+                                      AnalyticsService.logDailyReminderToggled(true);
+                                      if (mounted) {
+                                        setState(() {
+                                          _dailyEnabled = true;
+                                          _notifPermissionDenied = false;
+                                        });
+                                      }
+                                    } else {
+                                      await NotificationPreferencesService
+                                          .setEnabled(false);
+                                      if (mounted) {
+                                        setState(() {
+                                          _notifPermissionDenied = true;
+                                        });
+                                      }
+                                    }
+                                  } else {
+                                    await NotificationPreferencesService
+                                        .setEnabled(false);
+                                    await NotificationScheduler.cancelAll();
+                                    AnalyticsService.logDailyReminderToggled(false);
+                                    if (mounted) {
+                                      setState(() {
+                                        _dailyEnabled = false;
+                                        _notifPermissionDenied = false;
+                                      });
+                                    }
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+
+                          // Time picker row (visible when daily is ON)
+                          AnimatedSize(
+                            duration: const Duration(milliseconds: 250),
+                            curve: Curves.easeOut,
+                            child: _dailyEnabled
+                                ? Padding(
+                                    padding: const EdgeInsets.only(top: 16),
+                                    child: Row(
+                                      children: [
+                                        const SizedBox(width: 52),
+                                        Expanded(
+                                          child: Text(
+                                            l10n.profileRemindAt,
+                                            style: TextStyle(
+                                              fontFamily: 'Sora',
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w400,
+                                              color: colors.ctaPrimary,
+                                            ),
+                                          ),
+                                        ),
+                                        CupertinoButton(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 14, vertical: 8),
+                                          onPressed: () {
+                                            DateTime tempTime = DateTime(
+                                              2024,
+                                              1,
+                                              1,
+                                              _notifHour,
+                                              _notifMinute,
+                                            );
+                                            showCupertinoModalPopup(
+                                              context: context,
+                                              builder: (ctx) => Container(
+                                                height: 280,
+                                                color: colors.modalBg1,
+                                                child: Column(
+                                                  children: [
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment.end,
+                                                      children: [
+                                                        CupertinoButton(
+                                                          child: Text(
+                                                            l10n.commonDone,
+                                                            style: TextStyle(
+                                                              fontFamily:
+                                                                  'Sora',
+                                                              fontSize: 16,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                              color: colors
+                                                                  .ctaPrimary,
+                                                            ),
+                                                          ),
+                                                          onPressed: () async {
+                                                            Navigator.pop(ctx);
+                                                            await NotificationPreferencesService
+                                                                .setHour(
+                                                                    tempTime
+                                                                        .hour);
+                                                            await NotificationPreferencesService
+                                                                .setMinute(
+                                                                    tempTime
+                                                                        .minute);
+                                                            final enabled =
+                                                                await NotificationPreferencesService
+                                                                    .isEnabled();
+                                                            if (enabled) {
+                                                              final l10n =
+                                                                  AppLocalizations
+                                                                      .of(context);
+                                                              await NotificationScheduler
+                                                                  .rescheduleAll(
+                                                                      l10n);
+                                                            }
+                                                            AnalyticsService.logReminderTimeChanged();
+                                                            if (mounted) {
+                                                              setState(() {
+                                                                _notifHour =
+                                                                    tempTime
+                                                                        .hour;
+                                                                _notifMinute =
+                                                                    tempTime
+                                                                        .minute;
+                                                              });
+                                                            }
+                                                          },
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    Expanded(
+                                                      child:
+                                                          CupertinoDatePicker(
+                                                        mode:
+                                                            CupertinoDatePickerMode
+                                                                .time,
+                                                        initialDateTime:
+                                                            tempTime,
+                                                        onDateTimeChanged:
+                                                            (dt) {
+                                                          tempTime = dt;
+                                                        },
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 12, vertical: 6),
+                                            decoration: BoxDecoration(
+                                              color: colors.borderWarm,
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                            ),
+                                            child: Text(
+                                              _formatTime(
+                                                  _notifHour, _notifMinute),
+                                              style: TextStyle(
+                                                fontFamily: 'Sora',
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w500,
+                                                color: colors.textPrimary,
+                                              ),
+                                            ),
+                                          ),
+                                          minimumSize: Size(0, 0),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                : const SizedBox.shrink(),
+                          ),
+
+                          // Divider
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: Container(
+                              height: 1,
+                              color: colors.ctaPrimary.withOpacity(0.1),
+                            ),
+                          ),
+
+                          // Row 2: Weekly summary toggle
+                          Row(
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: colors.ctaPrimary.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(
+                                  CupertinoIcons.calendar,
+                                  size: 18,
+                                  color: colors.textMutedBrown,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      l10n.profileWeeklySummary,
+                                      style: TextStyle(
+                                        fontFamily: 'Sora',
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        color: colors.textPrimary,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      l10n.profileWeeklySubtitle,
+                                      style: TextStyle(
+                                        fontFamily: 'Sora',
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w400,
+                                        color: colors.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              CupertinoSwitch(
+                                value: _weeklyEnabled,
+                                activeTrackColor: colors.ctaPrimary,
+                                thumbColor: const Color(0xFFFFFFFF),
+                                onChanged: (value) async {
+                                  await NotificationPreferencesService
+                                      .setWeeklyEnabled(value);
+                                  final l10n = AppLocalizations.of(context);
+                                  await NotificationScheduler.rescheduleAll(
+                                      l10n);
+                                  if (mounted) {
+                                    setState(() {
+                                      _weeklyEnabled = value;
+                                    });
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+
+                          // Permission denied message
+                          if (_notifPermissionDenied)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 16),
+                              child: Text(
+                                l10n.profileNotifDenied,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontFamily: 'Sora',
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w400,
+                                  color: colors.textTertiary,
+                                  height: 1.5,
+                                ),
+                              ),
+                            ),
+
+                          // Divider
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: Container(
+                              height: 1,
+                              color: colors.ctaPrimary.withOpacity(0.1),
+                            ),
+                          ),
+
+                          // Row 3: Appearance
+                          GestureDetector(
+                            onTap: () => _showAppearancePicker(context),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: colors.ctaPrimary.withOpacity(0.15),
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
+                                  child: Icon(
+                                    CupertinoIcons.paintbrush,
+                                    size: 18,
+                                    color: colors.textMutedBrown,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    l10n.profileAppearance,
+                                    style: TextStyle(
+                                      fontFamily: 'Sora',
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                      color: colors.textPrimary,
+                                    ),
+                                  ),
+                                ),
+                                Icon(
+                                  CupertinoIcons.chevron_right,
+                                  size: 16,
+                                  color: colors.textSecondary,
                                 ),
                               ],
                             ),
                           ),
-                          CupertinoSwitch(
-                            value: _weeklyEnabled,
-                            activeTrackColor: colors.success,
-                            thumbColor: const Color(0xFFFFFFFF),
-                            onChanged: (value) async {
-                              await NotificationPreferencesService.setWeeklyEnabled(value);
-                              final l10n = AppLocalizations.of(context);
-                              await NotificationScheduler.rescheduleAll(l10n);
-                              if (mounted) {
-                                setState(() {
-                                  _weeklyEnabled = value;
-                                });
-                              }
-                            },
-                          ),
                         ],
                       ),
-
-                      // Permission denied message
-                      if (_notifPermissionDenied)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 16),
-                          child: Text(
-                            l10n.profileNotifDenied,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontFamily: 'Sora',
-                              fontSize: 13,
-                              fontWeight: FontWeight.w400,
-                              color: colors.textTertiary,
-                              height: 1.5,
-                            ),
-                          ),
-                        ),
-
-                      // Divider
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: Container(
-                          height: 1,
-                          color: colors.ctaPrimary.withOpacity(0.1),
-                        ),
-                      ),
-
-                      // Row 3: Appearance
-                      GestureDetector(
-                        onTap: () => _showAppearancePicker(context),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: colors.ctaPrimary.withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Icon(
-                                CupertinoIcons.paintbrush,
-                                size: 18,
-                                color: colors.textMutedBrown,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                l10n.profileAppearance,
-                                style: TextStyle(
-                                  fontFamily: 'Sora',
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: colors.textPrimary,
-                                ),
-                              ),
-                            ),
-                            Icon(
-                              CupertinoIcons.chevron_right,
-                              size: 16,
-                              color: colors.textSecondary,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 12),
-
-                // SUPPORT label
-                Padding(
-                  padding: const EdgeInsets.only(top: 12, bottom: 4),
-                  child: Text(
-                    l10n.profileSupport,
-                    style: TextStyle(
-                      fontFamily: 'Sora',
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                      color: colors.textSecondary,
-                      letterSpacing: 0.8,
                     ),
-                  ),
-                ),
 
-                // Support Card (Multi-Item)
-                Container(
+                    const SizedBox(height: 12),
+
+                    // SUPPORT label
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12, bottom: 4),
+                      child: Text(
+                        l10n.profileSupport,
+                        style: TextStyle(
+                          fontFamily: 'Sora',
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          color: colors.textSecondary,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                    ),
+
+                    // Support Card (Multi-Item)
+                    Container(
                       decoration: BoxDecoration(
-                        color: colors.profileCard.withOpacity(colors.profileCardOpacity),
+                        color: colors.profileCard
+                            .withOpacity(colors.profileCardOpacity),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: const Color(0xFFFFFFFF).withOpacity(0.6),
@@ -1791,32 +1627,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ],
                       ),
-                ),
+                    ),
 
-                const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
-                // CONNECT ACCOUNT label (dimmed)
-                Padding(
-                  padding: const EdgeInsets.only(top: 16, bottom: 4),
-                  child: Opacity(
-                    opacity: 0.6,
-                    child: Text(
-                      l10n.profileConnectAccount,
-                      style: TextStyle(
-                        fontFamily: 'Sora',
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                        color: colors.textSecondary,
-                        letterSpacing: 0.8,
+                    // CONNECT ACCOUNT label (dimmed)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16, bottom: 4),
+                      child: Opacity(
+                        opacity: 0.6,
+                        child: Text(
+                          l10n.profileConnectAccount,
+                          style: TextStyle(
+                            fontFamily: 'Sora',
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: colors.textSecondary,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
 
-                // Sign-In Card (Multi-Button)
-                Container(
+                    // Sign-In Card (Multi-Button)
+                    Container(
                       decoration: BoxDecoration(
-                        color: colors.profileCard.withOpacity(colors.profileCardOpacity),
+                        color: colors.profileCard
+                            .withOpacity(colors.profileCardOpacity),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: const Color(0xFFFFFFFF).withOpacity(0.6),
@@ -1837,7 +1674,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             padding: const EdgeInsets.all(16),
                             onPressed: () async {
                               try {
-                                await AuthService.signInWithGoogle();
+                                final credential =
+                                    await AuthService.signInWithGoogle();
+                                if (credential?.user != null) {
+                                  await context
+                                      .read<RevenueCatService>()
+                                      .logIn(credential!.user!.uid);
+                                }
                               } catch (e) {
                                 // handle error
                               }
@@ -1873,7 +1716,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             padding: const EdgeInsets.all(16),
                             onPressed: () async {
                               try {
-                                await AuthService.signInWithApple();
+                                final credential =
+                                    await AuthService.signInWithApple();
+                                if (credential?.user != null) {
+                                  await context
+                                      .read<RevenueCatService>()
+                                      .logIn(credential!.user!.uid);
+                                }
                               } catch (e) {
                                 // handle error
                               }
@@ -1904,17 +1753,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ],
                       ),
-                ),
+                    ),
 
-                const SizedBox(height: 40),
+                    const SizedBox(height: 40),
 
-                // Footer Section
-                Column(
-                  children: [
-                    // Sign Out Button
-                    Container(
+                    // Footer Section
+                    Column(
+                      children: [
+                        // Sign Out Button
+                        Container(
                           decoration: BoxDecoration(
-                            color: colors.profileCard.withOpacity(colors.profileCardOpacity),
+                            color: colors.profileCard
+                                .withOpacity(colors.profileCardOpacity),
                             borderRadius: BorderRadius.circular(100),
                             border: Border.all(
                               color: const Color(0xFFFFFFFF).withOpacity(0.6),
@@ -1929,7 +1779,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ],
                           ),
                           child: CupertinoButton(
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 10),
                             onPressed: () async {
                               await AuthService.signOut();
                             },
@@ -1956,44 +1807,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
 
-                    const SizedBox(height: 32),
+                        const SizedBox(height: 32),
 
-                    // Delete Profile Data Link
-                    CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      onPressed: _deleteProfileData,
-                      child: Text(
-                        l10n.profileDeleteData,
-                        style: TextStyle(
-                          fontFamily: 'Sora',
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: colors.textSecondary,
+                        // Delete Profile Data Link
+                        CupertinoButton(
+                          padding: EdgeInsets.zero,
+                          onPressed: _deleteProfileData,
+                          child: Text(
+                            l10n.profileDeleteData,
+                            style: TextStyle(
+                              fontFamily: 'Sora',
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: colors.textSecondary,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
 
-                    const SizedBox(height: 32),
+                        const SizedBox(height: 32),
 
-                    // Version Label
-                    Text(
-                      l10n.profileVersion,
-                      style: TextStyle(
-                        fontFamily: 'Sora',
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: colors.textMutedBrown,
-                      ),
+                        // Version Label
+                        Text(
+                          l10n.profileVersion,
+                          style: TextStyle(
+                            fontFamily: 'Sora',
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: colors.textMutedBrown,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
+      ),
     );
   }
 }
@@ -2039,8 +1890,8 @@ class _ProfileButton extends StatelessWidget {
   const _ProfileButton({
     required this.iconContainer,
     required this.title,
-    this.subtitle,
     required this.onTap,
+    this.subtitle,
   });
 
   @override
@@ -2118,15 +1969,15 @@ class _FocusAreaChangeScreenState extends State<_FocusAreaChangeScreen> {
   ];
 
   Map<String, String> _localizedAreaNames(AppLocalizations l10n) => {
-    'Health': l10n.focusAreaHealth,
-    'Mood': l10n.focusAreaMood,
-    'Productivity': l10n.focusAreaProductivity,
-    'Home & organization': l10n.focusAreaHome,
-    'Relationships': l10n.focusAreaRelationships,
-    'Creativity': l10n.focusAreaCreativity,
-    'Finances': l10n.focusAreaFinances,
-    'Self-care': l10n.focusAreaSelfCare,
-  };
+        'Health': l10n.focusAreaHealth,
+        'Mood': l10n.focusAreaMood,
+        'Productivity': l10n.focusAreaProductivity,
+        'Home & organization': l10n.focusAreaHome,
+        'Relationships': l10n.focusAreaRelationships,
+        'Creativity': l10n.focusAreaCreativity,
+        'Finances': l10n.focusAreaFinances,
+        'Self-care': l10n.focusAreaSelfCare,
+      };
 
   @override
   void initState() {
@@ -2136,11 +1987,17 @@ class _FocusAreaChangeScreenState extends State<_FocusAreaChangeScreen> {
   }
 
   void _toggleArea(String area) {
+    final userState = context.read<UserState>();
+    final onboardingState = context.read<OnboardingState>();
+    final maxAreas = userState.hasSubscription
+        ? 8 // unlimited — all categories
+        : onboardingState.maxFocusAreas(hasBoost: userState.hasBoost);
+
     setState(() {
       if (_selectedAreas.contains(area)) {
         _selectedAreas.remove(area);
       } else {
-        if (_selectedAreas.length < 2) {
+        if (_selectedAreas.length < maxAreas) {
           _selectedAreas.add(area);
         }
       }
@@ -2148,12 +2005,14 @@ class _FocusAreaChangeScreenState extends State<_FocusAreaChangeScreen> {
   }
 
   Future<void> _saveAreas() async {
-    if (_selectedAreas.length < 1) return;
+    if (_selectedAreas.isEmpty) return;
 
     final onboardingState = context.read<OnboardingState>();
 
     // Use the changeFocusAreas method which handles everything
     await onboardingState.changeFocusAreas(_selectedAreas);
+    AnalyticsService.logFocusAreasChanged(_selectedAreas);
+    AnalyticsService.setFocusAreaCount(_selectedAreas.length);
 
     if (mounted) {
       Navigator.pop(context);
@@ -2247,7 +2106,7 @@ class _FocusAreaChangeScreenState extends State<_FocusAreaChangeScreen> {
                         ),
                       ),
                     );
-                  }).toList(),
+                  }),
                 ],
               ),
             ),
@@ -2259,7 +2118,8 @@ class _FocusAreaChangeScreenState extends State<_FocusAreaChangeScreen> {
                   color: _selectedAreas.isNotEmpty
                       ? colors.buttonDark
                       : colors.borderMedium,
-                  borderRadius: BorderRadius.circular(ComponentSizes.buttonRadius),
+                  borderRadius:
+                      BorderRadius.circular(ComponentSizes.buttonRadius),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   onPressed: _selectedAreas.isNotEmpty ? _saveAreas : null,
                   child: Text(

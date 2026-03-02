@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'daily_reminder_screen.dart';
 import 'onboarding_state.dart';
 import '../l10n/app_localizations.dart';
+import '../services/analytics_service.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme_provider.dart';
 
@@ -199,6 +200,10 @@ class FocusAreasScreen extends StatelessWidget {
 
   void _handleContinue(BuildContext context) {
     HapticFeedback.mediumImpact();
+
+    AnalyticsService.logScreenView('focus_areas');
+    AnalyticsService.logOnboardingStepCompleted('focus_areas');
+
     Navigator.push(
       context,
       PageRouteBuilder(

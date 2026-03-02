@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import '../l10n/app_localizations.dart';
 import '../main.dart';
 import '../models/share_card_type.dart';
-import '../services/app_usage_service.dart';
+import '../services/milestone_service.dart';
 import '../services/share_service.dart';
 import '../services/week_stats_service.dart';
 import '../state/user_state.dart';
@@ -16,30 +16,46 @@ import '../widgets/milestone_share_card.dart';
 
 class ShareCardScreen extends StatefulWidget {
   final WeekStats stats;
+  final ShareCardSelection selection;
+  final MilestoneData milestoneData;
 
-  const ShareCardScreen({super.key, required this.stats});
+  const ShareCardScreen({
+    super.key,
+    required this.stats,
+    required this.selection,
+    required this.milestoneData,
+  });
 
   @override
   State<ShareCardScreen> createState() => _ShareCardScreenState();
 }
 
-class _ShareCardScreenState extends State<ShareCardScreen> {
+class _ShareCardScreenState extends State<ShareCardScreen>
+    with SingleTickerProviderStateMixin {
   final GlobalKey _repaintKey = GlobalKey();
-  ShareCardType _selectedType = ShareCardType.intention;
-  int _weekCount = 1;
   bool _isSharing = false;
+  bool _cardReady = false;
+  late final AnimationController _shimmerController;
 
   @override
   void initState() {
     super.initState();
-    _loadWeekCount();
+    _shimmerController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat();
+    Future.delayed(const Duration(milliseconds: 1500), () {
+      if (mounted) {
+        _shimmerController.stop();
+        setState(() => _cardReady = true);
+      }
+    });
   }
 
-  Future<void> _loadWeekCount() async {
-    final count = await AppUsageService.getWeekCount();
-    if (mounted) {
-      setState(() => _weekCount = count);
-    }
+  @override
+  void dispose() {
+    _shimmerController.dispose();
+    super.dispose();
   }
 
   Future<void> _share() async {
@@ -62,8 +78,6 @@ class _ShareCardScreenState extends State<ShareCardScreen> {
   @override
   Widget build(BuildContext context) {
     final colors = context.watch<ThemeProvider>().colors;
-    final l10n = AppLocalizations.of(context);
-    final isPremium = context.watch<UserState>().hasSubscription;
 
     return CupertinoPageScaffold(
       backgroundColor: Colors.transparent,
@@ -90,15 +104,6 @@ class _ShareCardScreenState extends State<ShareCardScreen> {
                   ],
                 ),
               ),
-
-              // Card type selector (premium only)
-              if (isPremium) ...[
-                const SizedBox(height: 16),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: _buildSegmentedControl(colors, l10n),
-                ),
-              ],
 
               // Hidden full-size card for capture
               ClipRect(
@@ -127,13 +132,13 @@ class _ShareCardScreenState extends State<ShareCardScreen> {
                 ),
               ),
 
-              // Share button — solid warm brown
+              // Share button — theme-aware
               Padding(
                 padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
                 child: Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF5C4A3A),
+                    color: colors.buttonDark,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: CupertinoButton(
@@ -173,100 +178,46 @@ class _ShareCardScreenState extends State<ShareCardScreen> {
     );
   }
 
-  Widget _buildSegmentedControl(dynamic colors, AppLocalizations l10n) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(10),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-        child: Container(
-          padding: const EdgeInsets.all(3),
-          decoration: BoxDecoration(
-            color: colors.profileCard.withOpacity(colors.profileCardOpacity * 0.6),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: colors.cardBrowse.withOpacity(colors.cardBrowseOpacity * 0.5),
-              width: 1,
-            ),
-          ),
-          child: Row(
-            children: [
-              _buildSegmentTab(
-                label: l10n.shareCardWeeklyCheckin,
-                isSelected: _selectedType == ShareCardType.intention,
-                onTap: () => setState(() => _selectedType = ShareCardType.intention),
-                colors: colors,
-              ),
-              _buildSegmentTab(
-                label: l10n.shareCardMilestone,
-                isSelected: _selectedType == ShareCardType.milestone,
-                onTap: () => setState(() => _selectedType = ShareCardType.milestone),
-                colors: colors,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSegmentTab({
-    required String label,
-    required bool isSelected,
-    required VoidCallback onTap,
-    required dynamic colors,
-  }) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? colors.profileCard.withOpacity(colors.profileCardOpacity)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: colors.textPrimary.withOpacity(0.06),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ]
-                : null,
-          ),
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'DMSans',
-              fontSize: 14,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-              color: isSelected ? colors.textPrimary : colors.textSecondary,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildCaptureCard() {
     final l10n = AppLocalizations.of(context);
-    return _selectedType == ShareCardType.intention
-        ? IntentionShareCard(
-            completionCount: widget.stats.completionCount,
-            showedUpText: l10n.shareCardShowedUp,
-            timesText: l10n.shareCardTimes,
-            thisWeekText: l10n.shareCardThisWeek,
-            taglineText: l10n.shareCardTagline,
-          )
-        : MilestoneShareCard(
-            weekCount: _weekCount,
-            weeksText: l10n.shareCardWeeks,
-            subtitleText: l10n.shareCardMilestoneSubtext,
-            taglineText: l10n.shareCardMilestoneTagline,
-          );
+
+    if (!widget.selection.isMilestone) {
+      return IntentionShareCard(
+        completionCount: widget.stats.completionCount,
+        showedUpPhrase: l10n.shareCardShowedUpPhrase,
+        timesText: l10n.shareCardTimes,
+        descriptorText: l10n.shareCardDescriptor,
+        userName: userNameNotifier.value,
+      );
+    }
+
+    final variant = widget.selection.milestoneVariant!;
+    final data = widget.milestoneData;
+
+    final String heroText;
+    final String subtitleText;
+    switch (variant) {
+      case MilestoneVariant.showingUp:
+        heroText = l10n.milestoneShowingUpHero(data.weekCount);
+        subtitleText = l10n.milestoneShowingUpSubtitle;
+        break;
+      case MilestoneVariant.area:
+        heroText = l10n.milestoneAreaHero(data.topArea ?? '');
+        subtitleText = l10n.milestoneAreaSubtitle;
+        break;
+      case MilestoneVariant.identity:
+        heroText = l10n.milestoneIdentityHero(data.topHabitName ?? '');
+        subtitleText = l10n.milestoneIdentitySubtitle;
+        break;
+    }
+
+    return MilestoneShareCard(
+      heroText: heroText,
+      subtitleText: subtitleText,
+      descriptorText: l10n.shareCardDescriptor,
+      userName: userNameNotifier.value,
+      variant: variant,
+    );
   }
 
   Widget _buildCardPreview() {
@@ -288,30 +239,162 @@ class _ShareCardScreenState extends State<ShareCardScreen> {
           previewHeight = previewWidth / cardAspect;
         }
 
+        return AnimatedSwitcher(
+          duration: const Duration(milliseconds: 600),
+          child: _cardReady
+              ? _buildRevealCard(previewWidth, previewHeight)
+              : _buildShimmerSkeleton(previewWidth, previewHeight),
+        );
+      },
+    );
+  }
+
+  Widget _buildRevealCard(double width, double height) {
+    return TweenAnimationBuilder<double>(
+      key: const ValueKey('card'),
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: const Duration(milliseconds: 900),
+      curve: Curves.easeOut,
+      builder: (context, progress, child) {
+        final sigma = 20.0 * (1.0 - progress);
+        return Opacity(
+          opacity: progress,
+          child: sigma > 0.5
+              ? ImageFiltered(
+                  imageFilter: ImageFilter.blur(
+                    sigmaX: sigma,
+                    sigmaY: sigma,
+                    tileMode: TileMode.decal,
+                  ),
+                  child: child,
+                )
+              : child,
+        );
+      },
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.25),
+              blurRadius: 40,
+              spreadRadius: 2,
+              offset: const Offset(0, 12),
+            ),
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: FittedBox(
+            fit: BoxFit.contain,
+            child: _buildCaptureCard(),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShimmerSkeleton(double width, double height) {
+    return AnimatedBuilder(
+      key: const ValueKey('shimmer'),
+      animation: _shimmerController,
+      builder: (context, _) {
+        final pos = _shimmerController.value;
+        final themeColors = context.watch<ThemeProvider>().colors;
         return Container(
-          width: previewWidth,
-          height: previewHeight,
+          width: width,
+          height: height,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.25),
-                blurRadius: 40,
-                spreadRadius: 2,
-                offset: const Offset(0, 12),
-              ),
-              BoxShadow(
-                color: Colors.black.withOpacity(0.08),
-                blurRadius: 12,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                themeColors.surfaceLightest,
+                themeColors.surfaceLight,
+                themeColors.surfaceLightest,
+              ],
+            ),
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(24),
-            child: FittedBox(
-              fit: BoxFit.contain,
-              child: _buildCaptureCard(),
+            child: Stack(
+              children: [
+                // Shimmer sweep
+                Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment(-1.5 + 3.0 * pos, -0.3),
+                        end: Alignment(-0.5 + 3.0 * pos, 0.3),
+                        colors: const [
+                          Color(0x00FFFFFF),
+                          Color(0x55FFFFFF),
+                          Color(0x00FFFFFF),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                // Placeholder content bars
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: width * 0.12,
+                  ),
+                  child: Column(
+                    children: [
+                      const Spacer(flex: 3),
+                      // Hero number placeholder
+                      Container(
+                        width: width * 0.35,
+                        height: height * 0.07,
+                        decoration: BoxDecoration(
+                          color: const Color(0x15000000),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      SizedBox(height: height * 0.025),
+                      // Subtitle placeholder
+                      Container(
+                        width: width * 0.5,
+                        height: height * 0.022,
+                        decoration: BoxDecoration(
+                          color: const Color(0x0D000000),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      const Spacer(flex: 2),
+                      // Message placeholder
+                      Container(
+                        width: width * 0.65,
+                        height: height * 0.018,
+                        decoration: BoxDecoration(
+                          color: const Color(0x0D000000),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      ),
+                      const Spacer(flex: 3),
+                      // Branding placeholder
+                      Container(
+                        width: width * 0.38,
+                        height: height * 0.022,
+                        decoration: BoxDecoration(
+                          color: const Color(0x0D000000),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      SizedBox(height: height * 0.06),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         );

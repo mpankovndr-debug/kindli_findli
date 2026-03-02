@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 import 'habit_reveal_screen.dart';
 import '../l10n/app_localizations.dart';
+import '../services/analytics_service.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme_provider.dart';
 import '../widgets/theme_picker.dart';
@@ -38,6 +39,10 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
 
   void _handleContinue(BuildContext context) {
     HapticFeedback.mediumImpact();
+
+    AnalyticsService.logScreenView('theme_selection');
+    AnalyticsService.logOnboardingStepCompleted('theme_selection');
+
     Navigator.pushReplacement(
       context,
       PageRouteBuilder(

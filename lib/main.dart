@@ -1,13 +1,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/material.dart' show Colors, Material;
+import 'package:flutter/material.dart' show Colors;
 import 'dart:ui' show ImageFilter;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:math';
 import 'package:dotted_border/dotted_border.dart';
+import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'firebase_options.dart';
+import 'services/analytics_service.dart';
 
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/app_localizations.dart';
@@ -26,6 +29,8 @@ import 'utils/responsive_utils.dart';
 import 'utils/text_styles.dart';
 import 'utils/ios_version.dart';
 import 'services/notification_scheduler.dart';
+import 'services/revenue_cat_service.dart';
+import 'widgets/boost_offer_sheet.dart';
 
 // ✅ ADD THIS HELPER HERE (before the main() function):
 Future<T?> showIntendedModal<T>({
@@ -38,77 +43,81 @@ Future<T?> showIntendedModal<T>({
   return showCupertinoDialog<T>(
     context: context,
     barrierDismissible: true,
-    builder: (context) => Center(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(32),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                  colors: [
-                    colors.modalBg1.withOpacity(0.96),
-                    colors.modalBg2.withOpacity(0.96),
-                    colors.modalBg3.withOpacity(0.96),
-                  ],
-                  stops: const [0.0, 0.5, 1.0],
-                ),
-                borderRadius: BorderRadius.circular(32),
-                border: Border.all(
-                  color: const Color(0xFFFFFFFF).withOpacity(0.5),
-                  width: 1.5,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: colors.modalShadow.withOpacity(0.35),
-                    blurRadius: 70,
-                    offset: const Offset(0, 25),
-                  ),
-                  BoxShadow(
-                    color: const Color(0xFFFFFFFF).withOpacity(0.6),
-                    blurRadius: 0,
-                    offset: const Offset(0, 1),
-                    spreadRadius: 0,
-                    blurStyle: BlurStyle.inner,
-                  ),
-                  BoxShadow(
-                    color: colors.modalInnerShadow.withOpacity(0.15),
-                    blurRadius: 0,
-                    offset: const Offset(0, -1),
-                    spreadRadius: 0,
-                    blurStyle: BlurStyle.inner,
-                  ),
-                ],
-              ),
-              child: SafeArea(
-                child: Padding(
-                  padding: Spacing.modalPadding,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        title,
-                        style: AppTextStyles.h2(context),
-                        textAlign: TextAlign.center,
-                      ),
-
-                      if (subtitle != null) ...[
-                        const SizedBox(height: 12),
-                        Text(
-                          subtitle,
-                          style: AppTextStyles.body(context),
-                          textAlign: TextAlign.center,
-                        ),
+    builder: (context) => GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => Navigator.pop(context),
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: GestureDetector(
+            onTap: () {},
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(32),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                      colors: [
+                        colors.modalBg1.withOpacity(0.96),
+                        colors.modalBg2.withOpacity(0.96),
+                        colors.modalBg3.withOpacity(0.96),
                       ],
-
-                      const SizedBox(height: 32),
-
-                      ...actions,
+                      stops: const [0.0, 0.5, 1.0],
+                    ),
+                    borderRadius: BorderRadius.circular(32),
+                    border: Border.all(
+                      color: const Color(0xFFFFFFFF).withOpacity(0.5),
+                      width: 1.5,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: colors.modalShadow.withOpacity(0.35),
+                        blurRadius: 70,
+                        offset: const Offset(0, 25),
+                      ),
+                      BoxShadow(
+                        color: const Color(0xFFFFFFFF).withOpacity(0.6),
+                        blurRadius: 0,
+                        offset: const Offset(0, 1),
+                        spreadRadius: 0,
+                        blurStyle: BlurStyle.inner,
+                      ),
+                      BoxShadow(
+                        color: colors.modalInnerShadow.withOpacity(0.15),
+                        blurRadius: 0,
+                        offset: const Offset(0, -1),
+                        spreadRadius: 0,
+                        blurStyle: BlurStyle.inner,
+                      ),
                     ],
+                  ),
+                  child: SafeArea(
+                    child: Padding(
+                      padding: Spacing.modalPadding,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            title,
+                            style: AppTextStyles.h2(context),
+                            textAlign: TextAlign.center,
+                          ),
+                          if (subtitle != null) ...[
+                            const SizedBox(height: 12),
+                            Text(
+                              subtitle,
+                              style: AppTextStyles.body(context),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                          const SizedBox(height: 32),
+                          ...actions,
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -169,48 +178,55 @@ Future<T?> showStyledPopup<T>({
     context: context,
     barrierColor: Colors.black.withOpacity(0.5),
     filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-    builder: (context) => TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.0, end: 1.0),
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.easeOut,
-      builder: (context, value, animChild) {
-        return Opacity(
-          opacity: value,
-          child: Transform.scale(
-            scale: 0.95 + (0.05 * value),
-            child: animChild,
-          ),
-        );
-      },
-      child: Center(
-        child: Container(
-          margin: const EdgeInsets.all(20),
-          padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                colors.modalBg1,
-                colors.modalBg2,
-              ],
+    builder: (context) => GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => Navigator.pop(context),
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0.0, end: 1.0),
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+        builder: (context, value, animChild) {
+          return Opacity(
+            opacity: value,
+            child: Transform.scale(
+              scale: 0.95 + (0.05 * value),
+              child: animChild,
             ),
-            borderRadius: BorderRadius.circular(28),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.15),
-                blurRadius: 30,
-                offset: const Offset(0, 10),
+          );
+        },
+        child: Center(
+          child: GestureDetector(
+            onTap: () {},
+            child: Container(
+              margin: const EdgeInsets.all(20),
+              padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    colors.modalBg1,
+                    colors.modalBg2,
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(28),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.15),
+                    blurRadius: 30,
+                    offset: const Offset(0, 10),
+                  ),
+                  BoxShadow(
+                    color: Colors.white.withOpacity(0.8),
+                    blurRadius: 0,
+                    spreadRadius: 1,
+                    offset: const Offset(0, -1),
+                  ),
+                ],
               ),
-              BoxShadow(
-                color: Colors.white.withOpacity(0.8),
-                blurRadius: 0,
-                spreadRadius: 1,
-                offset: const Offset(0, -1),
-              ),
-            ],
+              child: child,
+            ),
           ),
-          child: child,
         ),
       ),
     ),
@@ -225,7 +241,8 @@ Widget styledPrimaryButton({
 }) {
   return Builder(
     builder: (ctx) {
-      final resolvedColor = color ?? Provider.of<ThemeProvider>(ctx, listen: false).colors.buttonDark;
+      final resolvedColor = color ??
+          Provider.of<ThemeProvider>(ctx, listen: false).colors.buttonDark;
       return Container(
         width: double.infinity,
         decoration: BoxDecoration(
@@ -383,9 +400,11 @@ class HabitTracker {
     final id = habitTitle
         .toLowerCase()
         .trim()
-        .replaceAll(RegExp(r'[^a-z0-9]+'), '_') // Replace non-alphanumeric with underscore
+        .replaceAll(RegExp(r'[^a-z0-9]+'),
+            '_') // Replace non-alphanumeric with underscore
         .replaceAll(RegExp(r'_+'), '_') // Remove duplicate underscores
-        .replaceAll(RegExp(r'^_|_$'), ''); // Remove leading/trailing underscores
+        .replaceAll(
+            RegExp(r'^_|_$'), ''); // Remove leading/trailing underscores
     return 'habit_done_${id}_$d';
   }
 
@@ -403,57 +422,74 @@ class HabitTracker {
   }
 }
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await NotificationScheduler.initialize();
-  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-  try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-  } catch (_) {
-    // Already initialized (e.g. hot restart)
-  }
-  await IOSVersion.init();
-  final prefs = await SharedPreferences.getInstance();
-  
-  // Check if this is first run
-  final isFirstRun = prefs.getBool('first_run') ?? true;
-  if (isFirstRun) {
-    // Clear all data on first run
-    await prefs.clear();
-    await prefs.setBool('first_run', false);
-  }
-  
-  // Load saved name
-  final savedName = prefs.getString('user_name');
-  
-  // VALIDATE SAVED NAME FOR PROFANITY
-  if (savedName != null && ProfanityFilter.containsProfanity(savedName)) {
-    await prefs.remove('user_name');
-    userNameNotifier.value = null;
-  } else {
-    userNameNotifier.value = savedName;
-  }
+void main() {
+  runZonedGuarded(
+    () async {
+      WidgetsFlutterBinding.ensureInitialized();
+      await NotificationScheduler.initialize();
+      await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+      try {
+        await Firebase.initializeApp(
+          options: DefaultFirebaseOptions.currentPlatform,
+        );
+      } catch (_) {
+        // Already initialized (e.g. hot restart)
+      }
 
-  // Create OnboardingState instance and load saved habits
-  final onboardingState = OnboardingState();
-  await onboardingState.loadUserHabits();
-  
-  // Sync the saved name to OnboardingState
-  if (savedName != null && savedName.isNotEmpty && !ProfanityFilter.containsProfanity(savedName)) {
-    onboardingState.setName(savedName);
-  }
+      FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
 
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider.value(value: onboardingState),
-        ChangeNotifierProvider(create: (_) => UserState()),
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
-      ],
-      child: const IntendedApp(),
-    ),
+      await IOSVersion.init();
+      final prefs = await SharedPreferences.getInstance();
+
+      // Check if this is first run
+      final isFirstRun = prefs.getBool('first_run') ?? true;
+      if (isFirstRun) {
+        // Clear all data on first run
+        await prefs.clear();
+        await prefs.setBool('first_run', false);
+      }
+
+      // Load saved name
+      final savedName = prefs.getString('user_name');
+
+      // VALIDATE SAVED NAME FOR PROFANITY
+      if (savedName != null && ProfanityFilter.containsProfanity(savedName)) {
+        await prefs.remove('user_name');
+        userNameNotifier.value = null;
+      } else {
+        userNameNotifier.value = savedName;
+      }
+
+      // Create OnboardingState instance and load saved habits
+      final onboardingState = OnboardingState();
+      await onboardingState.loadUserHabits();
+
+      // Sync the saved name to OnboardingState
+      if (savedName != null &&
+          savedName.isNotEmpty &&
+          !ProfanityFilter.containsProfanity(savedName)) {
+        onboardingState.setName(savedName);
+      }
+
+      final userState = UserState();
+      final revenueCatService = RevenueCatService(userState);
+      await revenueCatService.init();
+
+      runApp(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider.value(value: onboardingState),
+            ChangeNotifierProvider.value(value: userState),
+            ChangeNotifierProvider.value(value: revenueCatService),
+            ChangeNotifierProvider(create: (_) => ThemeProvider()),
+          ],
+          child: const IntendedApp(),
+        ),
+      );
+    },
+    (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    },
   );
 }
 
@@ -485,6 +521,10 @@ class IntendedApp extends StatelessWidget {
       home: Builder(
         builder: (context) {
           Responsive.init(context);
+          final onboarding = context.read<OnboardingState>();
+          if (onboarding.onboardingComplete) {
+            return const MainTabs();
+          }
           return const WelcomeV2Screen();
         },
       ),
@@ -563,11 +603,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             'assets/images/welcome_bg.png',
             fit: BoxFit.cover,
           ),
-
           Container(
             color: colors.surfaceLightest.withOpacity(0.45),
           ),
-
           FadeTransition(
             opacity: Tween<double>(begin: 1, end: 0).animate(_fadeController),
             child: SafeArea(
@@ -600,9 +638,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                           );
                         },
                       ),
-
                       const SizedBox(height: 22),
-
                       Text(
                         AppLocalizations.of(context).welcomeSubtitle,
                         textAlign: TextAlign.center,
@@ -672,7 +708,7 @@ class _MainTabsState extends State<MainTabs> {
             index: _currentIndex,
             children: [
               const HabitsScreen(),
-              ProgressScreen(),
+              ProgressScreen(isActive: _currentIndex == 1),
               const ProfileScreen(),
             ],
           ),
@@ -714,7 +750,160 @@ class _MainTabsState extends State<MainTabs> {
               },
             ),
           ),
+
+          // Welcome-back overlay for long-absence re-entry
+          const WelcomeBackOverlay(),
         ],
+      ),
+    );
+  }
+}
+
+/* --------------- WELCOME-BACK OVERLAY --------------- */
+
+class WelcomeBackOverlay extends StatefulWidget {
+  const WelcomeBackOverlay({super.key});
+
+  @override
+  State<WelcomeBackOverlay> createState() => _WelcomeBackOverlayState();
+}
+
+class _WelcomeBackOverlayState extends State<WelcomeBackOverlay>
+    with SingleTickerProviderStateMixin {
+  bool _show = false;
+  int _daysAbsent = 0;
+  late AnimationController _fadeController;
+  late Animation<double> _textFadeIn;
+
+  @override
+  void initState() {
+    super.initState();
+    _fadeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+    _textFadeIn = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _fadeController,
+        curve: const Interval(0.0, 0.75, curve: Curves.easeOut),
+      ),
+    );
+    _checkAbsence();
+  }
+
+  Future<void> _checkAbsence() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final justCompleted = prefs.getBool('just_completed_onboarding') ?? false;
+    if (justCompleted) return;
+
+    final lastDateStr = prefs.getString('last_card_animation_date');
+    if (lastDateStr == null) return;
+
+    final lastDate = DateTime.tryParse(lastDateStr);
+    if (lastDate == null) return;
+
+    final today = DateTime.now();
+    final days = DateTime(today.year, today.month, today.day)
+        .difference(DateTime(lastDate.year, lastDate.month, lastDate.day))
+        .inDays;
+
+    if (days < 3) return;
+
+    if (!mounted) return;
+    setState(() {
+      _show = true;
+      _daysAbsent = days;
+    });
+
+    // Fade in text
+    _fadeController.forward();
+
+    // Start fade-out after 2.5s
+    Future.delayed(const Duration(milliseconds: 2500), () {
+      if (!mounted) return;
+      setState(() => _show = false);
+    });
+  }
+
+  String _getMessage() {
+    if (_daysAbsent >= 14) return 'Hey, you. We kept the light on.';
+    if (_daysAbsent >= 7) {
+      final name = context.read<UserState>().name;
+      if (name != null && name.isNotEmpty) {
+        return 'Hi, $name! You came back — that\'s what\'s important.';
+      }
+      return 'Hi! You came back — that\'s what\'s important.';
+    }
+    return 'You\'re back. No catching up needed.';
+  }
+
+  @override
+  void dispose() {
+    _fadeController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_show) return const SizedBox.shrink();
+
+    final colors = context.watch<ThemeProvider>().colors;
+
+    return Positioned.fill(
+      child: IgnorePointer(
+        child: AnimatedOpacity(
+          opacity: _show ? 1.0 : 0.0,
+          duration: const Duration(milliseconds: 400),
+          onEnd: () {
+            if (!_show && mounted) setState(() {});
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: const Alignment(0.18, -1.0),
+                end: const Alignment(-0.18, 1.0),
+                colors: [
+                  colors.onboardingBg1,
+                  colors.onboardingBg2,
+                  colors.onboardingBg3,
+                  colors.onboardingBg4,
+                ],
+                stops: const [0.0, 0.35, 0.7, 1.0],
+              ),
+            ),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset(
+                    'assets/images/kindli_icon_transparent.png',
+                    width: 80,
+                    height: 80,
+                  ),
+                  const SizedBox(height: 24),
+                  FadeTransition(
+                    opacity: _textFadeIn,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 40),
+                      child: Text(
+                        _getMessage(),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: 'Sora',
+                          fontSize: 20,
+                          fontWeight: FontWeight.w500,
+                          color: colors.textPrimary,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -756,9 +945,24 @@ class _CustomTabBar extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _TabItem(icon: CupertinoIcons.checkmark_circle, iconSelected: CupertinoIcons.checkmark_circle_fill, index: 0, currentIndex: currentIndex, onTap: onTap),
-              _TabItem(icon: CupertinoIcons.chart_bar, iconSelected: CupertinoIcons.chart_bar_fill, index: 1, currentIndex: currentIndex, onTap: onTap),
-              _TabItem(icon: CupertinoIcons.person_circle, iconSelected: CupertinoIcons.person_circle_fill, index: 2, currentIndex: currentIndex, onTap: onTap),
+              _TabItem(
+                  icon: CupertinoIcons.checkmark_circle,
+                  iconSelected: CupertinoIcons.checkmark_circle_fill,
+                  index: 0,
+                  currentIndex: currentIndex,
+                  onTap: onTap),
+              _TabItem(
+                  icon: CupertinoIcons.chart_bar,
+                  iconSelected: CupertinoIcons.chart_bar_fill,
+                  index: 1,
+                  currentIndex: currentIndex,
+                  onTap: onTap),
+              _TabItem(
+                  icon: CupertinoIcons.person_circle,
+                  iconSelected: CupertinoIcons.person_circle_fill,
+                  index: 2,
+                  currentIndex: currentIndex,
+                  onTap: onTap),
             ],
           ),
         ),
@@ -798,9 +1002,7 @@ class _TabItem extends StatelessWidget {
             isSelected ? iconSelected : icon,
             key: ValueKey(isSelected),
             size: 24,
-            color: isSelected
-                ? colors.ctaPrimary
-                : colors.textDisabled,
+            color: isSelected ? colors.ctaPrimary : colors.textDisabled,
           ),
         ),
       ),
@@ -817,34 +1019,49 @@ class HabitsScreen extends StatefulWidget {
   State<HabitsScreen> createState() => _HabitsScreenState();
 }
 
-class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMixin {
-  bool _shouldAnimateCards = false;
+class _HabitsScreenState extends State<HabitsScreen>
+    with TickerProviderStateMixin {
+  String? _lastKnownPinned;
+  String? _justUnpinnedHabit;
 
   // "Hold for options" tooltip
   AnimationController? _tooltipController;
   Animation<double>? _tooltipOpacity;
-  bool _animationsInitialized = false;
-  List<AnimationController> _cardControllers = [];
-  List<Animation<double>> _cardFadeAnimations = [];
-  List<Animation<Offset>> _cardSlideAnimations = [];
 
-  // Greeting animation
-  late AnimationController _greetingController;
-  late Animation<double> _greetingFadeAnimation;
-  late Animation<Offset> _greetingSlideAnimation;
-  bool _greetingAnimationInitialized = false;
+  // Unified entrance animation (staggered, like welcome screen)
+  late AnimationController _entranceController;
+  late Animation<double> _fadeHeader;
+  late Animation<double> _fadeMiddle;
+  late Animation<double> _fadeContent;
+  late Animation<Offset> _slideContent;
 
   static List<String> _getDailyMessages(AppLocalizations l10n) => [
-    l10n.dailyMessage1, l10n.dailyMessage2, l10n.dailyMessage3,
-    l10n.dailyMessage4, l10n.dailyMessage5, l10n.dailyMessage6,
-    l10n.dailyMessage7, l10n.dailyMessage8, l10n.dailyMessage9,
-    l10n.dailyMessage10, l10n.dailyMessage11, l10n.dailyMessage12,
-    l10n.dailyMessage13, l10n.dailyMessage14, l10n.dailyMessage15,
-    l10n.dailyMessage16, l10n.dailyMessage17, l10n.dailyMessage18,
-    l10n.dailyMessage19, l10n.dailyMessage20, l10n.dailyMessage21,
-    l10n.dailyMessage22, l10n.dailyMessage23, l10n.dailyMessage24,
-    l10n.dailyMessage25,
-  ];
+        l10n.dailyMessage1,
+        l10n.dailyMessage2,
+        l10n.dailyMessage3,
+        l10n.dailyMessage4,
+        l10n.dailyMessage5,
+        l10n.dailyMessage6,
+        l10n.dailyMessage7,
+        l10n.dailyMessage8,
+        l10n.dailyMessage9,
+        l10n.dailyMessage10,
+        l10n.dailyMessage11,
+        l10n.dailyMessage12,
+        l10n.dailyMessage13,
+        l10n.dailyMessage14,
+        l10n.dailyMessage15,
+        l10n.dailyMessage16,
+        l10n.dailyMessage17,
+        l10n.dailyMessage18,
+        l10n.dailyMessage19,
+        l10n.dailyMessage20,
+        l10n.dailyMessage21,
+        l10n.dailyMessage22,
+        l10n.dailyMessage23,
+        l10n.dailyMessage24,
+        l10n.dailyMessage25,
+      ];
 
   String _getTodaysMessage(AppLocalizations l10n) {
     final messages = _getDailyMessages(l10n);
@@ -853,14 +1070,16 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
     return messages[dayOfYear % messages.length];
   }
 
-  Future<void> _checkAndTriggerCardAnimations() async {
+  Future<void> _checkAndTriggerEntrance() async {
     final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
 
     // Check if we just completed onboarding (skip animation)
-    final justCompletedOnboarding = prefs.getBool('just_completed_onboarding') ?? false;
+    final justCompletedOnboarding =
+        prefs.getBool('just_completed_onboarding') ?? false;
     if (justCompletedOnboarding) {
       await prefs.setBool('just_completed_onboarding', false);
-      return;
+      return; // controller already at 1.0
     }
 
     // Check last animation date
@@ -868,114 +1087,56 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
     final today = DateTime.now().toIso8601String().substring(0, 10);
 
     if (lastAnimationDate != today) {
-      // First open of the day - animate!
+      // First open of the day — reset to invisible, then animate in
       await prefs.setString('last_card_animation_date', today);
-      setState(() {
-        _shouldAnimateCards = true;
+      if (!mounted) return;
+      _entranceController.value = 0.0;
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (mounted) _entranceController.forward();
       });
     }
-  }
-
-  void _initializeCardAnimations(int cardCount) {
-    if (_animationsInitialized || !_shouldAnimateCards || cardCount == 0) return;
-
-    _animationsInitialized = true;
-
-    // Dispose any existing controllers
-    for (var controller in _cardControllers) {
-      controller.dispose();
-    }
-
-    _cardControllers = List.generate(
-      cardCount,
-      (index) => AnimationController(
-        vsync: this,
-        duration: const Duration(milliseconds: 300),
-      ),
-    );
-
-    _cardFadeAnimations = _cardControllers.map((controller) {
-      return Tween<double>(begin: 0.0, end: 1.0).animate(
-        CurvedAnimation(parent: controller, curve: Curves.easeOut),
-      );
-    }).toList();
-
-    _cardSlideAnimations = _cardControllers.map((controller) {
-      return Tween<Offset>(
-        begin: const Offset(0, 0.1),
-        end: Offset.zero,
-      ).animate(
-        CurvedAnimation(parent: controller, curve: Curves.easeOutCubic),
-      );
-    }).toList();
-
-    // Start staggered animations (80ms between each)
-    for (var i = 0; i < _cardControllers.length; i++) {
-      Future.delayed(Duration(milliseconds: i * 80), () {
-        if (mounted && i < _cardControllers.length) {
-          _cardControllers[i].forward();
-        }
-      });
-    }
-  }
-
-  Widget _buildAnimatedHabitCard(Widget card, int index) {
-    if (!_shouldAnimateCards || index >= _cardFadeAnimations.length) {
-      return card;
-    }
-
-    return FadeTransition(
-      opacity: _cardFadeAnimations[index],
-      child: SlideTransition(
-        position: _cardSlideAnimations[index],
-        child: card,
-      ),
-    );
+    // Otherwise controller stays at 1.0 (already visible, no flash)
   }
 
   @override
   void initState() {
     super.initState();
+    AnalyticsService.logScreenView('habits');
     _checkHoldTip();
-    _checkAndTriggerCardAnimations();
-    _initializeGreetingAnimation();
-  }
 
-  void _initializeGreetingAnimation() {
-    _greetingController = AnimationController(
+    _entranceController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 2000),
+      value: 1.0, // start visible — no flash on hot restart
     );
 
-    _greetingFadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _greetingController, curve: Curves.easeOut),
+    // Staggered intervals (gentle cascade with heavy overlap)
+    _fadeHeader = CurvedAnimation(
+      parent: _entranceController,
+      curve: const Interval(0.0, 0.45, curve: Curves.easeOut),
     );
-
-    _greetingSlideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.05), // 10px equivalent slide up
+    _fadeMiddle = CurvedAnimation(
+      parent: _entranceController,
+      curve: const Interval(0.35, 0.70, curve: Curves.easeOut),
+    );
+    _fadeContent = CurvedAnimation(
+      parent: _entranceController,
+      curve: const Interval(0.60, 1.0, curve: Curves.easeOut),
+    );
+    _slideContent = Tween<Offset>(
+      begin: const Offset(0, 0.08),
       end: Offset.zero,
-    ).animate(
-      CurvedAnimation(parent: _greetingController, curve: Curves.easeOut),
-    );
+    ).animate(CurvedAnimation(
+      parent: _entranceController,
+      curve: const Interval(0.60, 1.0, curve: Curves.easeOutCubic),
+    ));
 
-    _greetingAnimationInitialized = true;
-
-    // Small delay before starting
-    Future.delayed(const Duration(milliseconds: 100), () {
-      if (mounted) {
-        _greetingController.forward();
-      }
-    });
+    _checkAndTriggerEntrance();
   }
 
   @override
   void dispose() {
-    for (var controller in _cardControllers) {
-      controller.dispose();
-    }
-    if (_greetingAnimationInitialized) {
-      _greetingController.dispose();
-    }
+    _entranceController.dispose();
     _tooltipController?.dispose();
     super.dispose();
   }
@@ -985,10 +1146,10 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
     showCupertinoModalPopup(
       context: context,
       barrierColor: colors.textPrimary.withOpacity(0.08),
+      filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
       builder: (context) => const BrowseHabitsSheet(),
     );
   }
-
 
   Future<void> _checkHoldTip() async {
     final prefs = await SharedPreferences.getInstance();
@@ -1020,7 +1181,9 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
   }
 
   Future<void> _dismissHoldTip() async {
-    if (_tooltipController == null || !_tooltipController!.isAnimating && _tooltipController!.value == 0) return;
+    if (_tooltipController == null ||
+        !_tooltipController!.isAnimating && _tooltipController!.value == 0)
+      return;
 
     await _tooltipController!.reverse();
     if (!mounted) return;
@@ -1031,47 +1194,17 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
   }
 
   void _createCustomHabit(BuildContext context) {
-    final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
     final onboardingState = context.read<OnboardingState>();
-    
-    if (!onboardingState.canAddCustomHabit()) {
+    final userState = context.read<UserState>();
+
+    if (!userState.hasSubscription && !onboardingState.canAddCustomHabit(hasBoost: userState.hasBoost)) {
       final l10n = AppLocalizations.of(context);
-      showIntendedModal(
+      showBoostOfferSheet(
         context: context,
-        title: l10n.customHabitLimitTitle,
-        subtitle: l10n.customHabitLimitMessage,
-        actions: [
-          SizedBox(
-            width: double.infinity,
-            child: CupertinoButton(
-              onPressed: () {
-                Navigator.pop(context);
-                showCupertinoModalPopup(
-                  context: context,
-                  barrierColor: Colors.black.withOpacity(0.5),
-                  filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                  builder: (context) => const PaywallScreen(),
-                );
-              },
-              color: colors.buttonDark,
-              borderRadius: BorderRadius.circular(ComponentSizes.buttonRadius),
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: Text(
-                l10n.appUnlockPlus,
-                style: AppTextStyles.buttonPrimary(context),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          CupertinoButton(
-            padding: EdgeInsets.zero,
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              l10n.commonNotNow,
-              style: AppTextStyles.buttonSecondary(context),
-            ),
-          ),
-        ],
+        title: l10n.boostOfferHabitTitle,
+        description: l10n.boostOfferHabitDesc,
+        showBoostOption: !userState.hasBoost,
+        source: 'custom_habit_limit',
       );
       return;
     }
@@ -1097,18 +1230,38 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
     final allHabits = onboardingState.userHabits;
     final pinnedHabit = onboardingState.pinnedHabit;
 
+    // Detect pin/unpin transitions (for arrival animations)
+    final isNewPin = pinnedHabit != null && pinnedHabit != _lastKnownPinned;
+    final isNewUnpin = pinnedHabit == null && _lastKnownPinned != null;
+    final unpinnedHabit = isNewUnpin ? _lastKnownPinned : _justUnpinnedHabit;
+    if (pinnedHabit != _lastKnownPinned) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (isNewUnpin) {
+          _justUnpinnedHabit = _lastKnownPinned;
+          HapticFeedback.lightImpact();
+        } else {
+          _justUnpinnedHabit = null;
+        }
+        _lastKnownPinned = pinnedHabit;
+        if (isNewPin) HapticFeedback.lightImpact();
+      });
+    }
+
     // Split habits into pinned and unpinned
     final pinned = pinnedHabit != null && allHabits.contains(pinnedHabit)
         ? [pinnedHabit]
         : <String>[];
     final unpinnedAll = allHabits.where((h) => h != pinnedHabit).toList();
     // Sort: unpinned custom habits first, then standard/completed
-    final unpinnedCustom = unpinnedAll.where((h) => onboardingState.isCustomHabit(h)).toList();
-    final unpinnedStandard = unpinnedAll.where((h) => !onboardingState.isCustomHabit(h)).toList();
+    final unpinnedCustom =
+        unpinnedAll.where((h) => onboardingState.isCustomHabit(h)).toList();
+    final unpinnedStandard =
+        unpinnedAll.where((h) => !onboardingState.isCustomHabit(h)).toList();
     final unpinned = [...unpinnedCustom, ...unpinnedStandard];
 
     final now = DateTime.now();
-    final dateStr = '${_getDayName(now.weekday, l10n)}, ${_getMonthName(now.month, l10n)} ${now.day}';
+    final dateStr =
+        '${_getDayName(now.weekday, l10n)}, ${_getMonthName(now.month, l10n)} ${now.day}';
 
     return CupertinoPageScaffold(
       backgroundColor: Colors.transparent,
@@ -1116,19 +1269,16 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
         child: SafeArea(
           top: false,
           bottom: false,
-          child: Column(
+          child: Stack(
             children: [
-              // Header with date (animated)
-              FadeTransition(
-                opacity: _greetingAnimationInitialized
-                    ? _greetingFadeAnimation
-                    : const AlwaysStoppedAnimation(1.0),
-                child: SlideTransition(
-                  position: _greetingAnimationInitialized
-                      ? _greetingSlideAnimation
-                      : const AlwaysStoppedAnimation(Offset.zero),
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(24, MediaQuery.of(context).padding.top + 24, 24, 32),
+              Column(
+                children: [
+                  // Header with date (stagger 1: fades in first)
+                  FadeTransition(
+                    opacity: _fadeHeader,
+                    child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                        24, MediaQuery.of(context).padding.top + 24, 24, 32),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -1154,78 +1304,28 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
                       ],
                     ),
                   ),
-                ),
-              ),
+                  ),
 
-              // "Hold for options" tooltip
-              if (_tooltipController != null && _tooltipOpacity != null)
-                AnimatedBuilder(
-                  animation: _tooltipOpacity!,
-                  builder: (context, child) {
-                    if (_tooltipOpacity!.value == 0) return const SizedBox.shrink();
-                    return GestureDetector(
-                      onTap: _dismissHoldTip,
-                      child: Opacity(
-                        opacity: _tooltipOpacity!.value,
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(32, 4, 32, 8),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(14),
-                            child: BackdropFilter(
-                              filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                                decoration: BoxDecoration(
-                                  color: colors.modalBg1.withOpacity(0.75),
-                                  borderRadius: BorderRadius.circular(14),
-                                  border: Border.all(
-                                    color: Colors.white.withOpacity(0.35),
-                                    width: 0.8,
-                                  ),
-                                ),
-                                child: Text(
-                                  l10n.habitsHoldForOptions,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontFamily: 'Sora',
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    color: colors.ctaPrimary,
-                                    letterSpacing: -0.1,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-
-              // Habits content
+                  // Habits content
               if (allHabits.isEmpty)
                 Expanded(
-                  child: Center(
-                    child: Text(
-                      l10n.habitsCompleteOnboarding,
-                      style: AppTextStyles.buttonSecondary(context),
+                  child: FadeTransition(
+                    opacity: _fadeContent,
+                    child: Center(
+                      child: Text(
+                        l10n.habitsCompleteOnboarding,
+                        style: AppTextStyles.buttonSecondary(context),
+                      ),
                     ),
                   ),
                 )
               else ...[
-                // Initialize card animations if needed
-                if (_shouldAnimateCards && !_animationsInitialized)
-                  Builder(builder: (context) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      _initializeCardAnimations(allHabits.length);
-                    });
-                    return const SizedBox.shrink();
-                  }),
 
-                // Pinned section (stays fixed, not scrollable)
+                // Pinned section (stagger 2: fades in second)
                 if (pinned.isNotEmpty)
-                  Padding(
+                  FadeTransition(
+                    opacity: _fadeMiddle,
+                    child: Padding(
                     padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1245,16 +1345,33 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
                         ),
                         const SizedBox(height: 12),
                         ...pinned.asMap().entries.map((entry) {
-                          final index = entry.key;
                           final habit = entry.value;
-                          return _buildAnimatedHabitCard(
-                            _HabitCard(
-                              key: ValueKey(habit),
-                              habitTitle: habit,
-                              isPinned: true,
-                              accentColor: colors.accentPinned,  // Terracotta
-                            ),
-                            index,
+                          final habitCard = _HabitCard(
+                            key: ValueKey(habit),
+                            habitTitle: habit,
+                            isPinned: true,
+                            accentColor: colors.accentPinned,
+                          );
+                          if (!isNewPin) return habitCard;
+                          // Arrival animation: slide up + scale + fade in
+                          return TweenAnimationBuilder<double>(
+                            key: ValueKey('pin_arrive_$habit'),
+                            tween: Tween(begin: 0.0, end: 1.0),
+                            duration: const Duration(milliseconds: 550),
+                            curve: Curves.easeOutBack,
+                            builder: (context, progress, child) {
+                              return Transform.translate(
+                                offset: Offset(0, 60 * (1 - progress)),
+                                child: Opacity(
+                                  opacity: progress.clamp(0.0, 1.0),
+                                  child: Transform.scale(
+                                    scale: 0.88 + 0.12 * progress,
+                                    child: child,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: habitCard,
                           );
                         }),
                         const SizedBox(height: 24),
@@ -1265,69 +1382,176 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
                       ],
                     ),
                   ),
+                  ),
 
-                // Scrollable section (suggestions + browse + create)
+                // Scrollable section (stagger 3: fades + slides in last)
                 Expanded(
-                  child: Listener(
-                    onPointerDown: (_) => _dismissHoldTip(),
-                    child: ListView(
-                    padding: EdgeInsets.fromLTRB(
-                      24, pinned.isNotEmpty ? 24 : 16, 24, 140,
-                    ),
-                    children: [
-                      // Today's Suggestions section
-                      if (unpinned.isNotEmpty) ...[
-                        Padding(
-                          padding: const EdgeInsets.only(left: 16),
-                          child: Text(
-                            l10n.habitsSuggestions,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: colors.ctaPrimary,
-                              letterSpacing: 1.0,
-                              fontFamily: 'Sora',
+                  child: FadeTransition(
+                    opacity: _fadeContent,
+                    child: SlideTransition(
+                      position: _slideContent,
+                      child: Listener(
+                        onPointerDown: (_) => _dismissHoldTip(),
+                        child: ListView(
+                      padding: EdgeInsets.fromLTRB(
+                        24,
+                        pinned.isNotEmpty ? 24 : 16,
+                        24,
+                        140,
+                      ),
+                      children: [
+                        // Today's Suggestions section
+                        if (unpinned.isNotEmpty) ...[
+                          Padding(
+                            padding: const EdgeInsets.only(left: 16),
+                            child: Text(
+                              l10n.habitsSuggestions,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: colors.ctaPrimary,
+                                letterSpacing: 1.0,
+                                fontFamily: 'Sora',
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 12),
-                        ...unpinned.asMap().entries.map((entry) {
-                          final index = entry.key;
-                          final habit = entry.value;
-                          final animationIndex = pinned.length + index; // Offset by pinned count
-                          return _buildAnimatedHabitCard(
-                            _HabitCard(
+                          const SizedBox(height: 12),
+                          ...unpinned.asMap().entries.map((entry) {
+                            final habit = entry.value;
+                            final habitCard = _HabitCard(
                               key: ValueKey(habit),
                               habitTitle: habit,
-                              accentColor: colors.accentRegular,  // Warm taupe
-                            ),
-                            animationIndex,
-                          );
-                        }),
-                      ],
+                              accentColor: colors.accentRegular, // Warm taupe
+                            );
+                            if (habit != unpinnedHabit) return habitCard;
+                            // Arrival animation for card returning from pinned section
+                            return TweenAnimationBuilder<double>(
+                              key: ValueKey('unpin_arrive_$habit'),
+                              tween: Tween(begin: 0.0, end: 1.0),
+                              duration: const Duration(milliseconds: 500),
+                              curve: Curves.easeOutBack,
+                              builder: (context, progress, child) {
+                                return Transform.translate(
+                                  offset: Offset(0, -60 * (1 - progress)),
+                                  child: Opacity(
+                                    opacity: progress.clamp(0.0, 1.0),
+                                    child: Transform.scale(
+                                      scale: 0.88 + 0.12 * progress,
+                                      child: child,
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: habitCard,
+                            );
+                          }),
+                        ],
 
-                      // CREATE CUSTOM HABIT BUTTON / LOCKED SLOT
-                      const SizedBox(height: 16),
+                        // CREATE CUSTOM HABIT BUTTON / LOCKED SLOT
+                        const SizedBox(height: 16),
 
-                      Builder(builder: (context) {
-                        final customCount = onboardingState.customHabits.length;
-                        final isSubscribed = context.read<UserState>().hasSubscription;
+                        Builder(builder: (context) {
+                          final customCount =
+                              onboardingState.customHabits.length;
+                          final userSt = context.read<UserState>();
+                          final maxCustom = onboardingState.maxCustomHabits(hasBoost: userSt.hasBoost);
 
-                        if (customCount < 2 || isSubscribed)
+                          if (customCount < maxCustom || userSt.hasSubscription) {
+                            return Padding(
+                              padding: const EdgeInsets.only(left: 16),
+                              child: GestureDetector(
+                                onTap: () => _createCustomHabit(context),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(24),
+                                  child: BackdropFilter(
+                                    filter: ImageFilter.blur(
+                                        sigmaX: 12, sigmaY: 12),
+                                    child: DottedBorder(
+                                      borderType: BorderType.RRect,
+                                      radius: const Radius.circular(24),
+                                      dashPattern: const [8, 4],
+                                      color:
+                                          colors.ctaPrimary.withOpacity(0.20),
+                                      strokeWidth: 2,
+                                      child: Container(
+                                        width: double.infinity,
+                                        height: 96,
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                            colors: [
+                                              colors.modalBg1.withOpacity(0.40),
+                                              colors.modalBg1.withOpacity(0.20),
+                                            ],
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(24),
+                                        ),
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Container(
+                                              width: 36,
+                                              height: 36,
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: const Color(0xFFFFFFFF)
+                                                    .withOpacity(0.50),
+                                              ),
+                                              child: Icon(
+                                                CupertinoIcons.add,
+                                                size: 18,
+                                                color: colors.ctaPrimary,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              l10n.habitsCreateCustom,
+                                              style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w600,
+                                                color: colors.ctaPrimary,
+                                                fontFamily: 'Sora',
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
+
+                          // Limit reached & not subscribed: show locked slot
                           return Padding(
                             padding: const EdgeInsets.only(left: 16),
                             child: GestureDetector(
-                              onTap: () => _createCustomHabit(context),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(24),
-                                child: BackdropFilter(
-                                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                                  child: DottedBorder(
-                                    borderType: BorderType.RRect,
-                                    radius: const Radius.circular(24),
-                                    dashPattern: const [8, 4],
-                                    color: colors.ctaPrimary.withOpacity(0.20),
-                                    strokeWidth: 2,
+                              onTap: () {
+                                showCupertinoModalPopup(
+                                  context: context,
+                                  barrierColor: Colors.black.withOpacity(0.5),
+                                  filter:
+                                      ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                                  builder: (context) => const PaywallScreen(source: 'browse_habits'),
+                                );
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(24),
+                                  border: Border.all(
+                                    color: colors.ctaPrimary.withOpacity(0.10),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(24),
+                                  child: BackdropFilter(
+                                    filter: ImageFilter.blur(
+                                        sigmaX: 12, sigmaY: 12),
                                     child: Container(
                                       width: double.infinity,
                                       height: 96,
@@ -1336,36 +1560,84 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
                                           begin: Alignment.topLeft,
                                           end: Alignment.bottomRight,
                                           colors: [
-                                            colors.modalBg1.withOpacity(0.40),
-                                            colors.modalBg1.withOpacity(0.20),
+                                            colors.modalBg1.withOpacity(0.9),
+                                            colors.modalBg1.withOpacity(0.7),
                                           ],
                                         ),
                                         borderRadius: BorderRadius.circular(24),
+                                        border: Border.all(
+                                          color: const Color(0xFFFFFFFF)
+                                              .withOpacity(0.6),
+                                          width: 1.5,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: colors.ctaPrimary
+                                                .withOpacity(0.10),
+                                            blurRadius: 32,
+                                          ),
+                                          BoxShadow(
+                                            color: colors.ctaPrimary
+                                                .withOpacity(0.10),
+                                            blurRadius: 0,
+                                            spreadRadius: 1,
+                                          ),
+                                        ],
                                       ),
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                      child: Stack(
+                                        clipBehavior: Clip.hardEdge,
                                         children: [
-                                          Container(
-                                            width: 36,
-                                            height: 36,
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              color: const Color(0xFFFFFFFF).withOpacity(0.50),
-                                            ),
-                                            child: Icon(
-                                              CupertinoIcons.add,
-                                              size: 18,
-                                              color: colors.ctaPrimary,
+                                          Positioned(
+                                            bottom: -20,
+                                            right: -20,
+                                            child: Container(
+                                              width: 128,
+                                              height: 128,
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                gradient: RadialGradient(
+                                                  colors: [
+                                                    colors.ctaPrimary
+                                                        .withOpacity(0.10),
+                                                    colors.ctaPrimary
+                                                        .withOpacity(0.0),
+                                                  ],
+                                                ),
+                                              ),
                                             ),
                                           ),
-                                          const SizedBox(height: 8),
-                                          Text(
-                                            l10n.habitsCreateCustom,
-                                            style: TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.w600,
-                                              color: colors.ctaPrimary,
-                                              fontFamily: 'Sora',
+                                          Center(
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Container(
+                                                  width: 36,
+                                                  height: 36,
+                                                  decoration: BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    color:
+                                                        const Color(0xFFFFFFFF)
+                                                            .withOpacity(0.5),
+                                                  ),
+                                                  child: Icon(
+                                                    CupertinoIcons.lock,
+                                                    size: 16,
+                                                    color: colors.ctaPrimary,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 6),
+                                                Text(
+                                                  l10n.habitsCreateCustom,
+                                                  style: TextStyle(
+                                                    fontSize: 15,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: colors.textPrimary
+                                                        .withOpacity(0.60),
+                                                    fontFamily: 'Sora',
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           ),
                                         ],
@@ -1376,208 +1648,179 @@ class _HabitsScreenState extends State<HabitsScreen> with TickerProviderStateMix
                               ),
                             ),
                           );
+                        }),
 
-                        // Limit reached & not subscribed: show locked slot
-                        return Padding(
+                        // BROWSE ALL HABITS CARD
+                        const SizedBox(height: 16),
+
+                        Padding(
                           padding: const EdgeInsets.only(left: 16),
                           child: GestureDetector(
-                            onTap: () {
-                              showCupertinoModalPopup(
-                                context: context,
-                                barrierColor: Colors.black.withOpacity(0.5),
-                                filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                                builder: (context) => const PaywallScreen(),
-                              );
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(24),
-                                border: Border.all(
-                                  color: colors.ctaPrimary.withOpacity(0.10),
-                                  width: 1,
-                                ),
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(24),
-                                child: BackdropFilter(
-                                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                                  child: Container(
-                                    width: double.infinity,
-                                    height: 96,
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                        colors: [
-                                          colors.modalBg1.withOpacity(0.9),
-                                          colors.modalBg1.withOpacity(0.7),
-                                        ],
-                                      ),
-                                      borderRadius: BorderRadius.circular(24),
-                                      border: Border.all(
-                                        color: const Color(0xFFFFFFFF).withOpacity(0.6),
-                                        width: 1.5,
-                                      ),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: colors.ctaPrimary.withOpacity(0.10),
-                                          blurRadius: 32,
-                                        ),
-                                        BoxShadow(
-                                          color: colors.ctaPrimary.withOpacity(0.10),
-                                          blurRadius: 0,
-                                          spreadRadius: 1,
-                                        ),
-                                      ],
+                            onTap: () => _showBrowseHabits(context),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: BackdropFilter(
+                                filter:
+                                    ImageFilter.blur(sigmaX: 22, sigmaY: 22),
+                                child: Container(
+                                  padding: const EdgeInsets.all(20),
+                                  decoration: BoxDecoration(
+                                    color: colors.cardBrowse
+                                        .withOpacity(colors.cardBrowseOpacity),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: const Color(0xFFFFFFFF)
+                                          .withOpacity(0.20),
+                                      width: 1,
                                     ),
-                                    child: Stack(
-                                      clipBehavior: Clip.hardEdge,
-                                      children: [
-                                        Positioned(
-                                          bottom: -20,
-                                          right: -20,
-                                          child: Container(
-                                            width: 128,
-                                            height: 128,
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              gradient: RadialGradient(
-                                                colors: [
-                                                  colors.ctaPrimary.withOpacity(0.10),
-                                                  colors.ctaPrimary.withOpacity(0.0),
-                                                ],
-                                              ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: colors.textPrimary
+                                            .withOpacity(0.04),
+                                        blurRadius: 16,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            l10n.habitsBrowseAll,
+                                            style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w600,
+                                              color: colors.textPrimary,
+                                              fontFamily: 'Sora',
                                             ),
                                           ),
-                                        ),
-                                        Center(
-                                          child: Column(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              Container(
-                                                width: 36,
-                                                height: 36,
-                                                decoration: BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  color: const Color(0xFFFFFFFF).withOpacity(0.5),
-                                                ),
-                                                child: Icon(
-                                                  CupertinoIcons.lock,
-                                                  size: 16,
-                                                  color: colors.ctaPrimary,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 6),
-                                              Text(
-                                                l10n.habitsCreateCustom,
-                                                style: TextStyle(
-                                                  fontSize: 15,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: colors.textPrimary.withOpacity(0.60),
-                                                  fontFamily: 'Sora',
-                                                ),
-                                              ),
-                                            ],
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            l10n.habitsMoreAvailable(
+                                                _getAvailableHabitsCount(
+                                                    context)),
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w500,
+                                              color: colors.textSecondary,
+                                              fontFamily: 'Sora',
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
+                                        ],
+                                      ),
+                                      Icon(
+                                        CupertinoIcons.chevron_right,
+                                        size: 18,
+                                        color: colors.textSecondary,
+                                      ),
+                                    ],
                                   ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      }),
-
-                      // BROWSE ALL HABITS CARD
-                      const SizedBox(height: 16),
-
-                      Padding(
-                        padding: const EdgeInsets.only(left: 16),
-                        child: GestureDetector(
-                          onTap: () => _showBrowseHabits(context),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(16),
-                            child: BackdropFilter(
-                              filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
-                              child: Container(
-                                padding: const EdgeInsets.all(20),
-                                decoration: BoxDecoration(
-                                  color: colors.cardBrowse.withOpacity(colors.cardBrowseOpacity),
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: const Color(0xFFFFFFFF).withOpacity(0.20),
-                                    width: 1,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: colors.textPrimary.withOpacity(0.04),
-                                      blurRadius: 16,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          l10n.habitsBrowseAll,
-                                          style: TextStyle(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.w600,
-                                            color: colors.textPrimary,
-                                            fontFamily: 'Sora',
-                                          ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          l10n.habitsMoreAvailable(_getAvailableHabitsCount(context)),
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w500,
-                                            color: colors.textSecondary,
-                                            fontFamily: 'Sora',
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Icon(
-                                      CupertinoIcons.chevron_right,
-                                      size: 18,
-                                      color: colors.textSecondary,
-                                    ),
-                                  ],
                                 ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
+                  ),
                   ),
                   ),
                 ),
               ],
             ],
           ),
+
+          // "Hold for options" floating tooltip (overlays content, doesn't push layout)
+          if (_tooltipController != null && _tooltipOpacity != null)
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 100,
+              left: 32,
+              right: 32,
+              child: AnimatedBuilder(
+                animation: _tooltipOpacity!,
+                builder: (context, child) {
+                  if (_tooltipOpacity!.value == 0)
+                    return const SizedBox.shrink();
+                  return IgnorePointer(
+                    ignoring: false,
+                    child: GestureDetector(
+                      onTap: _dismissHoldTip,
+                      child: Opacity(
+                        opacity: _tooltipOpacity!.value,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(14),
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 18, vertical: 12),
+                              decoration: BoxDecoration(
+                                color: colors.modalBg1.withOpacity(0.75),
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.35),
+                                  width: 0.8,
+                                ),
+                              ),
+                              child: Text(
+                                l10n.habitsHoldForOptions,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontFamily: 'Sora',
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: colors.ctaPrimary,
+                                  letterSpacing: -0.1,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
         ),
       ),
     );
   }
 
   String _getDayName(int weekday, AppLocalizations l10n) {
-    final days = [l10n.dayMonday, l10n.dayTuesday, l10n.dayWednesday, l10n.dayThursday, l10n.dayFriday, l10n.daySaturday, l10n.daySunday];
+    final days = [
+      l10n.dayMonday,
+      l10n.dayTuesday,
+      l10n.dayWednesday,
+      l10n.dayThursday,
+      l10n.dayFriday,
+      l10n.daySaturday,
+      l10n.daySunday
+    ];
     return days[weekday - 1];
   }
 
   String _getMonthName(int month, AppLocalizations l10n) {
     final months = [
-      l10n.monthJanuary, l10n.monthFebruary, l10n.monthMarch, l10n.monthApril, l10n.monthMay, l10n.monthJune,
-      l10n.monthJuly, l10n.monthAugust, l10n.monthSeptember, l10n.monthOctober, l10n.monthNovember, l10n.monthDecember,
+      l10n.monthJanuary,
+      l10n.monthFebruary,
+      l10n.monthMarch,
+      l10n.monthApril,
+      l10n.monthMay,
+      l10n.monthJune,
+      l10n.monthJuly,
+      l10n.monthAugust,
+      l10n.monthSeptember,
+      l10n.monthOctober,
+      l10n.monthNovember,
+      l10n.monthDecember,
     ];
     return months[month - 1];
   }
@@ -1591,7 +1834,8 @@ class _CreateCustomHabitScreen extends StatefulWidget {
   const _CreateCustomHabitScreen();
 
   @override
-  State<_CreateCustomHabitScreen> createState() => _CreateCustomHabitScreenState();
+  State<_CreateCustomHabitScreen> createState() =>
+      _CreateCustomHabitScreenState();
 }
 
 class _CreateCustomHabitScreenState extends State<_CreateCustomHabitScreen> {
@@ -1599,12 +1843,12 @@ class _CreateCustomHabitScreenState extends State<_CreateCustomHabitScreen> {
 
   bool get _canSave {
     final text = _controller.text.trim();
-    return text.isNotEmpty && 
-           text.length >= 3 && 
-           text.length <= 50 &&
-           !ProfanityFilter.containsProfanity(text);
+    return text.isNotEmpty &&
+        text.length >= 3 &&
+        text.length <= 50 &&
+        !ProfanityFilter.containsProfanity(text);
   }
-  
+
   @override
   void dispose() {
     _controller.dispose();
@@ -1620,6 +1864,7 @@ class _CreateCustomHabitScreenState extends State<_CreateCustomHabitScreen> {
     final navContext = navigator.context;
 
     await onboardingState.addCustomHabit(habitTitle);
+    AnalyticsService.logCustomHabitCreated(habitTitle);
 
     if (!mounted) return;
 
@@ -1676,7 +1921,8 @@ class _CreateCustomHabitScreenState extends State<_CreateCustomHabitScreen> {
                   children: [
                     // Cancel button
                     CupertinoButton(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
                       onPressed: () => Navigator.pop(context),
                       child: Text(
                         l10n.commonCancel,
@@ -1850,7 +2096,8 @@ class _HabitCard extends StatefulWidget {
   State<_HabitCard> createState() => _HabitCardState();
 }
 
-class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
+class _HabitCardState extends State<_HabitCard>
+    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 
@@ -1858,6 +2105,11 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin, A
   bool _isAnimating = false;
   late AnimationController _scaleController;
   late Animation<double> _scaleAnimation;
+
+  // Pin departure animation controllers
+  late AnimationController _departureController;
+  late Animation<double> _departureScale;
+  late Animation<double> _departureFade;
 
   // Checkmark animation controllers
   late AnimationController _checkmarkController;
@@ -1877,6 +2129,19 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin, A
 
     _scaleAnimation = Tween<double>(begin: 1.0, end: 0.98).animate(
       CurvedAnimation(parent: _scaleController, curve: Curves.easeOut),
+    );
+
+    _departureController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+
+    _departureScale = Tween<double>(begin: 1.0, end: 0.82).animate(
+      CurvedAnimation(parent: _departureController, curve: Curves.easeIn),
+    );
+
+    _departureFade = Tween<double>(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(parent: _departureController, curve: Curves.easeIn),
     );
 
     // Checkmark animation (scale from 80% to 100% with easeOutBack curve)
@@ -1901,6 +2166,7 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin, A
   @override
   void dispose() {
     _scaleController.dispose();
+    _departureController.dispose();
     _checkmarkController.dispose();
     super.dispose();
   }
@@ -1962,116 +2228,127 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin, A
     showCupertinoModalPopup(
       context: context,
       barrierColor: colors.barrierColor.withOpacity(0.28),
-      builder: (context) => Container(
-        color: Colors.transparent,
+      builder: (context) => GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => Navigator.pop(context),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Container(
-                margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                constraints: const BoxConstraints(maxWidth: 420),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: const Alignment(-0.3, -0.5),
-                          end: const Alignment(0.3, 0.5),
-                          colors: [
-                            colors.modalBg1.withOpacity(0.96),
-                            colors.modalBg2.withOpacity(0.93),
-                            colors.modalBg3.withOpacity(0.95),
-                          ],
-                          stops: const [0.0, 0.5, 1.0],
-                        ),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.5),
-                          width: 1.0,
-                        ),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Pin / Unpin
-                          _buildActionRow(
-                            icon: isPinned ? CupertinoIcons.pin_slash : CupertinoIcons.pin,
-                            label: isPinned ? l10n.menuUnpin : l10n.menuPinToTop,
-                            onTap: () {
-                              Navigator.pop(context);
-                              _handlePinToggle();
-                            },
+              GestureDetector(
+                onTap: () {},
+                child: Container(
+                  margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                  constraints: const BoxConstraints(maxWidth: 420),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: const Alignment(-0.3, -0.5),
+                            end: const Alignment(0.3, 0.5),
+                            colors: [
+                              colors.modalBg1.withOpacity(0.96),
+                              colors.modalBg2.withOpacity(0.93),
+                              colors.modalBg3.withOpacity(0.95),
+                            ],
+                            stops: const [0.0, 0.5, 1.0],
                           ),
-
-                          // Swap — only for curated habits with a category
-                          if (category != null)
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.5),
+                            width: 1.0,
+                          ),
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Pin / Unpin
                             _buildActionRow(
-                              icon: CupertinoIcons.arrow_2_squarepath,
-                              label: l10n.menuSwap,
+                              icon: isPinned
+                                  ? CupertinoIcons.pin_slash
+                                  : CupertinoIcons.pin,
+                              label:
+                                  isPinned ? l10n.menuUnpin : l10n.menuPinToTop,
                               onTap: () {
                                 Navigator.pop(context);
-                                _handleSwap();
+                                _handlePinToggle();
                               },
-                              showDivider: true,
                             ),
 
-                          // Delete — only for custom habits
-                          if (isCustom)
-                            _buildActionRow(
-                              icon: CupertinoIcons.trash,
-                              label: l10n.commonDelete,
-                              isDestructive: true,
-                              onTap: () {
-                                Navigator.pop(context);
-                                _showDeleteConfirmation();
-                              },
-                              showDivider: true,
-                            ),
-                        ],
+                            // Swap — only for curated habits with a category
+                            if (category != null)
+                              _buildActionRow(
+                                icon: CupertinoIcons.arrow_2_squarepath,
+                                label: l10n.menuSwap,
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  _handleSwap();
+                                },
+                                showDivider: true,
+                              ),
+
+                            // Delete — only for custom habits
+                            if (isCustom)
+                              _buildActionRow(
+                                icon: CupertinoIcons.trash,
+                                label: l10n.commonDelete,
+                                isDestructive: true,
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  _showDeleteConfirmation();
+                                },
+                                showDivider: true,
+                              ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
               // Cancel button — separate pill
-              Container(
-                margin: EdgeInsets.fromLTRB(16, 8, 16, MediaQuery.of(context).padding.bottom + 12),
-                constraints: const BoxConstraints(maxWidth: 420),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-                    child: Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: const Alignment(-0.3, -0.5),
-                          end: const Alignment(0.3, 0.5),
-                          colors: [
-                            colors.modalBg1.withOpacity(0.97),
-                            colors.modalBg2.withOpacity(0.95),
-                          ],
+              GestureDetector(
+                onTap: () {},
+                child: Container(
+                  margin: EdgeInsets.fromLTRB(
+                      16, 8, 16, MediaQuery.of(context).padding.bottom + 12),
+                  constraints: const BoxConstraints(maxWidth: 420),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+                      child: Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: const Alignment(-0.3, -0.5),
+                            end: const Alignment(0.3, 0.5),
+                            colors: [
+                              colors.modalBg1.withOpacity(0.97),
+                              colors.modalBg2.withOpacity(0.95),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.5),
+                            width: 1.0,
+                          ),
                         ),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.5),
-                          width: 1.0,
-                        ),
-                      ),
-                      child: CupertinoButton(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        onPressed: () => Navigator.pop(context),
-                        child: Text(
-                          l10n.commonCancel,
-                          style: TextStyle(
-                            fontFamily: 'Sora',
-                            fontSize: 17,
-                            fontWeight: FontWeight.w600,
-                            color: colors.textPrimary,
+                        child: CupertinoButton(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          onPressed: () => Navigator.pop(context),
+                          child: Text(
+                            l10n.commonCancel,
+                            style: TextStyle(
+                              fontFamily: 'Sora',
+                              fontSize: 17,
+                              fontWeight: FontWeight.w600,
+                              color: colors.textPrimary,
+                            ),
                           ),
                         ),
                       ),
@@ -2137,10 +2414,7 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin, A
     final isPinned = onboardingState.pinnedHabit == widget.habitTitle;
 
     if (isPinned) {
-      await onboardingState.unpinHabit();
-      if (mounted) {
-        HapticFeedback.lightImpact();
-      }
+      await _animateUnpin();
     } else {
       final isPremium = context.read<UserState>().hasSubscription;
       if (onboardingState.pinnedHabit != null) {
@@ -2173,26 +2447,43 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin, A
     HapticFeedback.mediumImpact();
 
     // Small pause at the "lifted" state
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future.delayed(const Duration(milliseconds: 80));
     if (!mounted) return;
 
-    // Pin the habit (triggers Hero animation via rebuild)
-    // This may dispose this widget as the card moves to the pinned section
+    // Departure: shrink + fade out
+    await _departureController.forward();
+    if (!mounted) return;
+
+    // Pin the habit — triggers parent rebuild, this widget may be disposed
     await onboardingState.pinHabit(widget.habitTitle);
-    if (!mounted) return;
+    AnalyticsService.logHabitPinned();
+    // Widget likely disposed after this — don't access state
+  }
 
-    // Let Hero animation complete
-    await Future.delayed(const Duration(milliseconds: 300));
-    if (!mounted) return;
-
-    await _scaleController.reverse();
-    if (!mounted) return;
+  Future<void> _animateUnpin() async {
+    if (_isAnimating || !mounted) return;
 
     setState(() {
-      _isAnimating = false;
+      _isAnimating = true;
     });
 
-    HapticFeedback.lightImpact();
+    final onboardingState = context.read<OnboardingState>();
+
+    // Lift
+    await _scaleController.forward();
+    if (!mounted) return;
+    HapticFeedback.mediumImpact();
+
+    await Future.delayed(const Duration(milliseconds: 80));
+    if (!mounted) return;
+
+    // Departure: shrink + fade out (same animation as pin)
+    await _departureController.forward();
+    if (!mounted) return;
+
+    // Unpin — triggers parent rebuild, this widget may be disposed
+    await onboardingState.unpinHabit();
+    AnalyticsService.logHabitUnpinned();
   }
 
   Future<void> _showReplacePinConfirmation() async {
@@ -2204,57 +2495,60 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin, A
     final confirmed = await showCupertinoModalPopup<bool>(
       context: context,
       barrierColor: colors.barrierColor.withOpacity(0.28),
-      builder: (context) => Container(
-        color: Colors.transparent,
+      builder: (context) => GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => Navigator.pop(context),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
           child: Center(
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 24),
-              constraints: const BoxConstraints(maxWidth: 384),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(32),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-                  child: Container(
-                    padding: const EdgeInsets.fromLTRB(28, 32, 28, 36),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: const Alignment(0.0, 2.41),
-                        end: const Alignment(0.0, -2.41),
-                        colors: [
-                          colors.modalBg1.withOpacity(0.96),
-                          colors.modalBg2.withOpacity(0.93),
-                          colors.modalBg3.withOpacity(0.95),
+            child: GestureDetector(
+              onTap: () {},
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 24),
+                constraints: const BoxConstraints(maxWidth: 384),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(32),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(28, 32, 28, 36),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: const Alignment(0.0, 2.41),
+                          end: const Alignment(0.0, -2.41),
+                          colors: [
+                            colors.modalBg1.withOpacity(0.96),
+                            colors.modalBg2.withOpacity(0.93),
+                            colors.modalBg3.withOpacity(0.95),
+                          ],
+                          stops: const [0.0, 0.5, 1.0],
+                        ),
+                        borderRadius: BorderRadius.circular(32),
+                        border: Border.all(
+                          color: const Color(0xFFFFFFFF).withOpacity(0.5),
+                          width: 1.5,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: colors.modalShadow.withOpacity(0.4),
+                            blurRadius: 70,
+                            offset: const Offset(0, 25),
+                          ),
+                          BoxShadow(
+                            color: const Color(0xFFFFFFFF).withOpacity(0.6),
+                            blurRadius: 0,
+                            offset: const Offset(0, 1),
+                            spreadRadius: 0,
+                            blurStyle: BlurStyle.inner,
+                          ),
                         ],
-                        stops: const [0.0, 0.5, 1.0],
                       ),
-                      borderRadius: BorderRadius.circular(32),
-                      border: Border.all(
-                        color: const Color(0xFFFFFFFF).withOpacity(0.5),
-                        width: 1.5,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: colors.modalShadow.withOpacity(0.4),
-                          blurRadius: 70,
-                          offset: const Offset(0, 25),
-                        ),
-                        BoxShadow(
-                          color: const Color(0xFFFFFFFF).withOpacity(0.6),
-                          blurRadius: 0,
-                          offset: const Offset(0, 1),
-                          spreadRadius: 0,
-                          blurStyle: BlurStyle.inner,
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Title
-                        Text(
-                          l10n.replacePinTitle,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Title
+                          Text(
+                            l10n.replacePinTitle,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontFamily: 'Sora',
@@ -2268,7 +2562,8 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin, A
                         const SizedBox(height: 12),
 
                         Text(
-                          l10n.replacePinDescription(currentPinned!, widget.habitTitle),
+                          l10n.replacePinDescription(
+                              currentPinned!, widget.habitTitle),
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontFamily: 'DM Sans',
@@ -2332,7 +2627,8 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin, A
                             ),
                           ),
                         ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -2365,7 +2661,8 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin, A
               onPressed: () => Navigator.pop(context),
               child: Builder(
                 builder: (ctx) {
-                  final clr = Provider.of<ThemeProvider>(ctx, listen: false).colors;
+                  final clr =
+                      Provider.of<ThemeProvider>(ctx, listen: false).colors;
                   return Text(
                     l10n.commonOk,
                     style: TextStyle(
@@ -2385,13 +2682,15 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin, A
     }
 
     final isPremium = context.read<UserState>().hasSubscription;
-    if (!isPremium && !onboardingState.canSwapInCategory(category)) {
+    final hasBoost = context.read<UserState>().hasBoost;
+    if (!isPremium && !onboardingState.canSwapInCategory(category, hasBoost: hasBoost)) {
       _showSwapLimitDialog(category);
       return;
     }
 
-    final alternatives = onboardingState.getAlternativeHabits(widget.habitTitle);
-    
+    final alternatives =
+        onboardingState.getAlternativeHabits(widget.habitTitle);
+
     if (alternatives.isEmpty) {
       _showNoAlternativesDialog();
       return;
@@ -2403,64 +2702,68 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin, A
   void _showSwapDialog(String category, List<String> alternatives) {
     final onboardingState = context.read<OnboardingState>();
     final isPremium = context.read<UserState>().hasSubscription;
-    final remaining = onboardingState.getRemainingSwaps(category);
+    final hasBoost = context.read<UserState>().hasBoost;
+    final remaining = onboardingState.getRemainingSwaps(category, hasBoost: hasBoost);
     final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
     final l10n = AppLocalizations.of(context);
 
     showCupertinoModalPopup(
       context: context,
       barrierColor: colors.barrierColor.withOpacity(0.28),
-      builder: (context) => Container(
-        color: Colors.transparent,
+      builder: (context) => GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => Navigator.pop(context),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
           child: Center(
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 24),
-              constraints: const BoxConstraints(maxWidth: 384),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(32),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-                  child: Container(
-                    padding: const EdgeInsets.fromLTRB(28, 32, 28, 36),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: const Alignment(0.0, 2.41),
-                        end: const Alignment(0.0, -2.41),
-                        colors: [
-                          colors.modalBg1.withOpacity(0.96),
-                          colors.modalBg2.withOpacity(0.93),
-                          colors.modalBg3.withOpacity(0.95),
+            child: GestureDetector(
+              onTap: () {},
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 24),
+                constraints: const BoxConstraints(maxWidth: 384),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(32),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(28, 32, 28, 36),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: const Alignment(0.0, 2.41),
+                          end: const Alignment(0.0, -2.41),
+                          colors: [
+                            colors.modalBg1.withOpacity(0.96),
+                            colors.modalBg2.withOpacity(0.93),
+                            colors.modalBg3.withOpacity(0.95),
+                          ],
+                          stops: const [0.0, 0.5, 1.0],
+                        ),
+                        borderRadius: BorderRadius.circular(32),
+                        border: Border.all(
+                          color: const Color(0xFFFFFFFF).withOpacity(0.5),
+                          width: 1.5,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: colors.modalShadow.withOpacity(0.4),
+                            blurRadius: 70,
+                            offset: const Offset(0, 25),
+                          ),
+                          BoxShadow(
+                            color: const Color(0xFFFFFFFF).withOpacity(0.6),
+                            blurRadius: 0,
+                            offset: const Offset(0, 1),
+                            spreadRadius: 0,
+                            blurStyle: BlurStyle.inner,
+                          ),
                         ],
-                        stops: const [0.0, 0.5, 1.0],
                       ),
-                      borderRadius: BorderRadius.circular(32),
-                      border: Border.all(
-                        color: const Color(0xFFFFFFFF).withOpacity(0.5),
-                        width: 1.5,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: colors.modalShadow.withOpacity(0.4),
-                          blurRadius: 70,
-                          offset: const Offset(0, 25),
-                        ),
-                        BoxShadow(
-                          color: const Color(0xFFFFFFFF).withOpacity(0.6),
-                          blurRadius: 0,
-                          offset: const Offset(0, 1),
-                          spreadRadius: 0,
-                          blurStyle: BlurStyle.inner,
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Title
-                        Text(
-                          l10n.swapTitle(widget.habitTitle),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Title
+                          Text(
+                            l10n.swapTitle(widget.habitTitle),
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontFamily: 'Sora',
@@ -2490,77 +2793,86 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin, A
 
                         // Habit alternatives buttons
                         ...alternatives.map((habit) => Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(18),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: colors.buttonDark.withOpacity(0.1),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 3),
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: SizedBox(
+                                width: double.infinity,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(18),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color:
+                                            colors.buttonDark.withOpacity(0.1),
+                                        blurRadius: 12,
+                                        offset: const Offset(0, 3),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(18),
-                                child: BackdropFilter(
-                                  filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                        colors: [
-                                          Colors.white.withOpacity(0.65),
-                                          colors.surfaceLight.withOpacity(0.50),
-                                        ],
-                                      ),
-                                      border: Border(
-                                        top: BorderSide(
-                                          color: Colors.white.withOpacity(0.5),
-                                          width: 1.5,
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(18),
+                                    child: BackdropFilter(
+                                      filter: ImageFilter.blur(
+                                          sigmaX: 20, sigmaY: 20),
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                            colors: [
+                                              Colors.white.withOpacity(0.65),
+                                              colors.surfaceLight
+                                                  .withOpacity(0.50),
+                                            ],
+                                          ),
+                                          border: Border(
+                                            top: BorderSide(
+                                              color:
+                                                  Colors.white.withOpacity(0.5),
+                                              width: 1.5,
+                                            ),
+                                            left: BorderSide(
+                                              color:
+                                                  Colors.white.withOpacity(0.4),
+                                              width: 1.5,
+                                            ),
+                                            right: BorderSide(
+                                              color:
+                                                  Colors.white.withOpacity(0.4),
+                                              width: 1.5,
+                                            ),
+                                            bottom: BorderSide(
+                                              color:
+                                                  Colors.white.withOpacity(0.4),
+                                              width: 1.5,
+                                            ),
+                                          ),
                                         ),
-                                        left: BorderSide(
-                                          color: Colors.white.withOpacity(0.4),
-                                          width: 1.5,
+                                        child: CupertinoButton(
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                            _performSwap(habit);
+                                          },
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 16, horizontal: 20),
+                                          borderRadius:
+                                              BorderRadius.circular(18),
+                                          child: Text(
+                                            habit,
+                                            style: TextStyle(
+                                              fontFamily: 'Sora',
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w500,
+                                              color: colors.textPrimary,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
                                         ),
-                                        right: BorderSide(
-                                          color: Colors.white.withOpacity(0.4),
-                                          width: 1.5,
-                                        ),
-                                        bottom: BorderSide(
-                                          color: Colors.white.withOpacity(0.4),
-                                          width: 1.5,
-                                        ),
-                                      ),
-                                    ),
-                                    child: CupertinoButton(
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                        _performSwap(habit);
-                                      },
-                                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-                                      borderRadius: BorderRadius.circular(18),
-                                      child: Text(
-                                        habit,
-                                        style: TextStyle(
-                                          fontFamily: 'Sora',
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w500,
-                                          color: colors.textPrimary,
-                                        ),
-                                        textAlign: TextAlign.center,
                                       ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ),
-                        )),
+                            )),
 
                         const SizedBox(height: 28),
 
@@ -2595,7 +2907,8 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin, A
                             ),
                           ),
                         ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -2609,16 +2922,24 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin, A
 
   Future<void> _performSwap(String newHabit) async {
     final onboardingState = context.read<OnboardingState>();
-    final isPremium = context.read<UserState>().hasSubscription;
-    final success = await onboardingState.swapHabit(widget.habitTitle, newHabit, isPremium: isPremium);
+    final userState = context.read<UserState>();
+    final isPremium = userState.hasSubscription;
+    final hasBoost = userState.hasBoost;
+    // Capture context values before await — the card may be deactivated
+    // after swapHabit calls notifyListeners() and the parent rebuilds.
+    final navigator = Navigator.of(context);
+    final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
+    final l10n = AppLocalizations.of(context);
 
-    if (success && mounted) {
+    final success = await onboardingState.swapHabit(widget.habitTitle, newHabit,
+        isPremium: isPremium, hasBoost: hasBoost);
+
+    if (success) {
+      AnalyticsService.logHabitSwapped();
       HapticFeedback.mediumImpact();
-      final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
-      final l10n = AppLocalizations.of(context);
 
-      showCupertinoDialog(
-        context: context,
+      navigator.push(CupertinoDialogRoute(
+        context: navigator.context,
         barrierDismissible: true,
         builder: (context) => Container(
           color: colors.barrierColor.withOpacity(0.28),
@@ -2661,7 +2982,8 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin, A
                         ),
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 28, vertical: 32),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -2718,7 +3040,8 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin, A
                                 ],
                               ),
                               child: CupertinoButton(
-                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
                                 onPressed: () => Navigator.pop(context),
                                 child: Text(
                                   l10n.commonGreat,
@@ -2741,184 +3064,20 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin, A
             ),
           ),
         ),
-      );
-    } else if (mounted) {
-      final l10n = AppLocalizations.of(context);
-      showIntendedModal(
-        context: context,
-        title: l10n.swapErrorTitle,
-        subtitle: l10n.swapErrorMessage,
-        actions: [
-          CupertinoButton(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            onPressed: () => Navigator.pop(context),
-            child: Builder(
-              builder: (ctx) {
-                final clr = Provider.of<ThemeProvider>(ctx, listen: false).colors;
-                return Text(
-                  l10n.commonOk,
-                  style: TextStyle(
-                    fontFamily: 'Sora',
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
-                    color: clr.ctaPrimary,
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      );
+      ));
     }
   }
 
   void _showSwapLimitDialog(String category) {
-    final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
+    AnalyticsService.logHabitSwapLimitReached();
     final l10n = AppLocalizations.of(context);
-    showCupertinoModalPopup(
+    final userState = context.read<UserState>();
+    showBoostOfferSheet(
       context: context,
-      barrierColor: colors.barrierColor.withOpacity(0.28),
-      builder: (context) => Container(
-        color: Colors.transparent,
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-          child: Center(
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 24),
-              constraints: const BoxConstraints(maxWidth: 384),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(32),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-                  child: Container(
-                    padding: const EdgeInsets.fromLTRB(28, 32, 28, 36),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: const Alignment(0.0, 2.41),
-                        end: const Alignment(0.0, -2.41),
-                        colors: [
-                          colors.modalBg1.withOpacity(0.96),
-                          colors.modalBg2.withOpacity(0.93),
-                          colors.modalBg3.withOpacity(0.95),
-                        ],
-                        stops: const [0.0, 0.5, 1.0],
-                      ),
-                      borderRadius: BorderRadius.circular(32),
-                      border: Border.all(
-                        color: const Color(0xFFFFFFFF).withOpacity(0.5),
-                        width: 1.5,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: colors.modalShadow.withOpacity(0.4),
-                          blurRadius: 70,
-                          offset: const Offset(0, 25),
-                        ),
-                        BoxShadow(
-                          color: const Color(0xFFFFFFFF).withOpacity(0.6),
-                          blurRadius: 0,
-                          offset: const Offset(0, 1),
-                          spreadRadius: 0,
-                          blurStyle: BlurStyle.inner,
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Title
-                        Text(
-                          l10n.swapLimitTitle,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: 'Sora',
-                            fontSize: 27,
-                            fontWeight: FontWeight.w600,
-                            color: colors.textPrimary,
-                            letterSpacing: -0.4,
-                            height: 1.25,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-
-                        // Description (DM Sans)
-                        Text(
-                          l10n.swapLimitMessage,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: 'DM Sans',
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                            color: colors.ctaPrimary,
-                            height: 1.5,
-                          ),
-                        ),
-
-                        const SizedBox(height: 36),
-
-                        // Primary button (Unlock Intended+)
-                        Container(
-                          width: double.infinity,
-                          margin: const EdgeInsets.only(bottom: 14),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                colors.ctaPrimary.withOpacity(0.92),
-                                colors.ctaSecondary.withOpacity(0.88),
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: colors.textPrimary.withOpacity(0.25),
-                                blurRadius: 12,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: CupertinoButton(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            onPressed: () {
-                              Navigator.pop(context);
-                              _showUpgradeScreen();
-                            },
-                            child: Text(
-                              l10n.appUnlockPlus,
-                              style: const TextStyle(
-                                fontFamily: 'Sora',
-                                fontSize: 17,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        // Cancel button (ghost)
-                        CupertinoButton(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          onPressed: () => Navigator.pop(context),
-                          child: Text(
-                            l10n.commonCancel,
-                            style: TextStyle(
-                              fontFamily: 'Sora',
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: colors.textTertiary,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
+      title: l10n.boostOfferSwapTitle,
+      description: l10n.boostOfferSwapDesc,
+      showBoostOption: !userState.hasBoost,
+      source: 'swap_limit',
     );
   }
 
@@ -2937,15 +3096,6 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin, A
     );
   }
 
-  void _showUpgradeScreen() {
-    showCupertinoModalPopup(
-      context: context,
-      barrierColor: Colors.black.withOpacity(0.5),
-      filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-      builder: (context) => const PaywallScreen(),
-    );
-  }
-
   void _showDeleteConfirmation() {
     final onboardingState = context.read<OnboardingState>();
     final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
@@ -2955,21 +3105,26 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin, A
       context: context,
       barrierColor: Colors.black.withOpacity(0.5),
       filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-      builder: (context) => Center(
-        child: Container(
-          margin: const EdgeInsets.all(24),
-          constraints: const BoxConstraints(maxWidth: 384),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(32),
-            boxShadow: [
-              BoxShadow(
-                color: colors.modalShadow.withOpacity(0.4),
-                blurRadius: 70,
-                offset: const Offset(0, 25),
+      builder: (context) => GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => Navigator.pop(context),
+        child: Center(
+          child: GestureDetector(
+            onTap: () {},
+            child: Container(
+              margin: const EdgeInsets.all(24),
+              constraints: const BoxConstraints(maxWidth: 384),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(32),
+                boxShadow: [
+                  BoxShadow(
+                    color: colors.modalShadow.withOpacity(0.4),
+                    blurRadius: 70,
+                    offset: const Offset(0, 25),
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: ClipRRect(
+              child: ClipRRect(
             borderRadius: BorderRadius.circular(32),
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
@@ -2992,7 +3147,8 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin, A
                   ),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -3052,7 +3208,9 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin, A
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           onPressed: () async {
                             Navigator.pop(context);
-                            await onboardingState.removeCustomHabit(widget.habitTitle);
+                            await onboardingState
+                                .removeCustomHabit(widget.habitTitle);
+                            AnalyticsService.logCustomHabitRemoved();
                           },
                           child: Text(
                             l10n.commonDelete,
@@ -3086,7 +3244,8 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin, A
                             child: BackdropFilter(
                               filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                               child: Container(
-                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
                                     begin: Alignment.topLeft,
@@ -3125,6 +3284,8 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin, A
           ),
         ),
       ),
+    ),
+  ),
     );
   }
 
@@ -3132,51 +3293,24 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin, A
   Widget build(BuildContext context) {
     super.build(context); // Required by AutomaticKeepAliveClientMixin
     final colors = context.watch<ThemeProvider>().colors;
-    final isCustom = context.read<OnboardingState>().isCustomHabit(widget.habitTitle);
+    final isCustom =
+        context.read<OnboardingState>().isCustomHabit(widget.habitTitle);
 
     // Determine accent color based on state
     final Color effectiveAccentColor;
     if (isCustom) {
-      effectiveAccentColor = colors.accentCustom;  // Dusty rose
+      effectiveAccentColor = colors.accentCustom; // Dusty rose
     } else if (widget.isPinned) {
-      effectiveAccentColor = colors.accentPinned;  // Terracotta
+      effectiveAccentColor = colors.pinnedAccent; // Theme-aware pinned accent
     } else {
-      effectiveAccentColor = widget.accentColor ?? colors.accentRegular;  // Warm taupe
+      effectiveAccentColor =
+          widget.accentColor ?? colors.accentRegular; // Warm taupe
     }
 
-    Widget card = Hero(
-      tag: 'habit_card_${widget.habitTitle}',
-      flightShuttleBuilder: (
-        BuildContext flightContext,
-        Animation<double> animation,
-        HeroFlightDirection flightDirection,
-        BuildContext fromHeroContext,
-        BuildContext toHeroContext,
-      ) {
-        return AnimatedBuilder(
-          animation: animation,
-          builder: (context, child) {
-            return Material(
-              color: Colors.transparent,
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: colors.textPrimary.withOpacity(
-                        0.04 + (0.12 * animation.value),
-                      ),
-                      blurRadius: 16 + (20 * animation.value),
-                      offset: Offset(0, 2 + (6 * animation.value)),
-                    ),
-                  ],
-                ),
-                child: toHeroContext.widget,
-              ),
-            );
-          },
-        );
-      },
+    Widget card = FadeTransition(
+      opacity: _departureFade,
+      child: ScaleTransition(
+        scale: _departureScale,
       child: GestureDetector(
         onTap: _handleTap,
         onLongPress: _handleLongPress,
@@ -3198,10 +3332,10 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin, A
                       ),
                     ),
                   ),
-                
+
                 // Spacing between accent bar and card
                 SizedBox(width: _isDoneToday ? 20 : 16),
-                
+
                 // CARD
                 Expanded(
                   child: ClipRRect(
@@ -3218,9 +3352,10 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin, A
                           vertical: _isDoneToday ? 20 : 24,
                         ),
                         decoration: BoxDecoration(
-                          // Glassmorphism background (pinned = lighter/cooler, regular = warmer)
+                          // Glassmorphism background (pinned = lighter/cooler + accent tint, regular = warmer)
                           color: _isDoneToday
-                              ? colors.cardDone.withOpacity(colors.cardDoneOpacity)
+                              ? colors.cardDone
+                                  .withOpacity(colors.cardDoneOpacity)
                               : widget.isPinned
                                   ? colors.cardPinned.withOpacity(0.78)
                                   : colors.cardBackground.withOpacity(0.82),
@@ -3228,22 +3363,38 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin, A
                           border: Border.all(
                             color: _isDoneToday
                                 ? const Color(0xFFFFFFFF).withOpacity(0.10)
-                                : colors.borderCard.withOpacity(colors.borderCardOpacity),
+                                : colors.borderCard
+                                    .withOpacity(colors.borderCardOpacity),
                             width: 0.5,
                           ),
                           boxShadow: [
                             // Outer shadow for depth
                             BoxShadow(
                               color: colors.textPrimary.withOpacity(
-                                _isDoneToday ? 0.02 : widget.isPinned ? 0.06 : 0.04,
+                                _isDoneToday
+                                    ? 0.02
+                                    : widget.isPinned
+                                        ? 0.06
+                                        : 0.04,
                               ),
-                              blurRadius: _isDoneToday ? 8 : widget.isPinned ? 20 : 16,
-                              offset: Offset(0, _isDoneToday ? 1 : widget.isPinned ? 4 : 2),
+                              blurRadius: _isDoneToday
+                                  ? 8
+                                  : widget.isPinned
+                                      ? 20
+                                      : 16,
+                              offset: Offset(
+                                  0,
+                                  _isDoneToday
+                                      ? 1
+                                      : widget.isPinned
+                                          ? 4
+                                          : 2),
                             ),
                             // Top-edge bevel: white highlight
                             if (!_isDoneToday)
                               BoxShadow(
-                                color: const Color(0xFFFFFFFF).withOpacity(0.70),
+                                color:
+                                    const Color(0xFFFFFFFF).withOpacity(0.70),
                                 blurRadius: 2,
                                 offset: const Offset(0, 2),
                                 blurStyle: BlurStyle.inner,
@@ -3271,7 +3422,8 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin, A
                                     height: 20,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color: colors.checkmarkBackground.withOpacity(0.40),
+                                      color: colors.checkmarkBackground
+                                          .withOpacity(0.40),
                                     ),
                                     child: Icon(
                                       CupertinoIcons.checkmark,
@@ -3290,7 +3442,9 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin, A
                                 animation: _textFadeAnimation,
                                 builder: (context, child) {
                                   return Opacity(
-                                    opacity: _isDoneToday ? _textFadeAnimation.value : 1.0,
+                                    opacity: _isDoneToday
+                                        ? _textFadeAnimation.value
+                                        : 1.0,
                                     child: Text(
                                       widget.habitTitle,
                                       style: TextStyle(
@@ -3321,6 +3475,7 @@ class _HabitCardState extends State<_HabitCard> with TickerProviderStateMixin, A
           ),
         ),
       ),
+    ),
     );
 
     final wrappedCard = Padding(
@@ -3372,15 +3527,21 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
 
   // Category accent colors — static theme-independent
   static const Map<String, Color> categoryColors = {
-    'Health': AppColors.catHealth,                 // Terracotta
-    'Mood': AppColors.catMood,                     // Dusty Plum
-    'Productivity': AppColors.catProductivity,     // Dusty Olive
-    'Home & organization': AppColors.catHome,      // Warm Sage
-    'Relationships': AppColors.catRelationships,   // Soft Clay
-    'Creativity': AppColors.catCreativity,         // Dusty Mauve
-    'Finances': AppColors.catFinances,             // Warm Amber
-    'Self-care': AppColors.catSelfCare,            // Warm Sand
+    'Health': AppColors.catHealth, // Terracotta
+    'Mood': AppColors.catMood, // Dusty Plum
+    'Productivity': AppColors.catProductivity, // Dusty Olive
+    'Home & organization': AppColors.catHome, // Warm Sage
+    'Relationships': AppColors.catRelationships, // Soft Clay
+    'Creativity': AppColors.catCreativity, // Dusty Mauve
+    'Finances': AppColors.catFinances, // Warm Amber
+    'Self-care': AppColors.catSelfCare, // Warm Sand
   };
+
+  @override
+  void initState() {
+    super.initState();
+    AnalyticsService.logScreenView('browse_habits');
+  }
 
   @override
   void dispose() {
@@ -3428,57 +3589,20 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
 
   void _showSwapConfirmation(String newHabit) {
     final onboardingState = context.read<OnboardingState>();
-    final isPremium = context.read<UserState>().hasSubscription;
-    final canSwap = isPremium || onboardingState.canSwapFromBrowse();
-    final remainingSwaps = onboardingState.getRemainingBrowseSwaps();
+    final userState = context.read<UserState>();
+    final isPremium = userState.hasSubscription;
+    final hasBoost = userState.hasBoost;
+    final canSwap = isPremium || onboardingState.canSwapFromBrowse(hasBoost: hasBoost);
+    final remainingSwaps = onboardingState.getRemainingBrowseSwaps(hasBoost: hasBoost);
     final l10n = AppLocalizations.of(context);
 
     if (!canSwap) {
-      // Show upgrade modal when limit reached
-      showStyledPopup(
+      showBoostOfferSheet(
         context: context,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              l10n.browseSwapLimitTitle,
-              style: AppTextStyles.h2(context),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              l10n.swapLimitMessage,
-              style: AppTextStyles.body(context),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            styledPrimaryButton(
-              label: l10n.appUnlockPlus,
-              onPressed: () {
-                Navigator.pop(context);
-                _showUpgradeScreen();
-              },
-            ),
-            const SizedBox(height: 12),
-            CupertinoButton(
-              padding: EdgeInsets.zero,
-              onPressed: () => Navigator.pop(context),
-              child: Builder(
-                builder: (ctx) {
-                  final clr = Provider.of<ThemeProvider>(ctx, listen: false).colors;
-                  return Text(
-                    l10n.commonCancel,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: clr.ctaPrimary,
-                      fontFamily: 'Sora',
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
+        title: l10n.boostOfferSwapTitle,
+        description: l10n.boostOfferSwapDesc,
+        showBoostOption: !hasBoost,
+        source: 'browse_swap_limit',
       );
       return;
     }
@@ -3515,7 +3639,8 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
             onPressed: () => Navigator.pop(context),
             child: Builder(
               builder: (ctx) {
-                final clr = Provider.of<ThemeProvider>(ctx, listen: false).colors;
+                final clr =
+                    Provider.of<ThemeProvider>(ctx, listen: false).colors;
                 return Text(
                   l10n.commonCancel,
                   style: TextStyle(
@@ -3556,37 +3681,38 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
           ),
           const SizedBox(height: 24),
           ...currentHabits.map((oldHabit) => Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: CupertinoButton(
-              padding: EdgeInsets.zero,
-              onPressed: () {
-                Navigator.pop(context);
-                _performSwap(oldHabit, newHabit);
-              },
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFFFFF).withOpacity(0.45),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: const Color(0xFFFFFFFF).withOpacity(0.3),
-                    width: 1,
+                padding: const EdgeInsets.only(bottom: 12),
+                child: CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _performSwap(oldHabit, newHabit);
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFFFFF).withOpacity(0.45),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: const Color(0xFFFFFFFF).withOpacity(0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Text(
+                      oldHabit,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Sora',
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                        color: colors.textPrimary,
+                      ),
+                    ),
                   ),
                 ),
-                child: Text(
-                  oldHabit,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: 'Sora',
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
-                    color: colors.textPrimary,
-                  ),
-                ),
-              ),
-            ),
-          )),
+              )),
           const SizedBox(height: 12),
           CupertinoButton(
             padding: EdgeInsets.zero,
@@ -3607,10 +3733,12 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
 
   Future<void> _performSwap(String oldHabit, String newHabit) async {
     final onboardingState = context.read<OnboardingState>();
-    final isPremium = context.read<UserState>().hasSubscription;
-    final success = await onboardingState.swapHabit(oldHabit, newHabit, isPremium: isPremium);
+    final userState = context.read<UserState>();
+    final success = await onboardingState.swapHabit(oldHabit, newHabit,
+        isPremium: userState.hasSubscription, hasBoost: userState.hasBoost);
 
     if (success && mounted) {
+      AnalyticsService.logHabitSwapped();
       HapticFeedback.mediumImpact();
       final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
       final l10n = AppLocalizations.of(context);
@@ -3702,7 +3830,8 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(20),
                               child: BackdropFilter(
-                                filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                                filter:
+                                    ImageFilter.blur(sigmaX: 15, sigmaY: 15),
                                 child: Container(
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
@@ -3720,12 +3849,14 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
                                     ),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: colors.textPrimary.withOpacity(0.3),
+                                        color:
+                                            colors.textPrimary.withOpacity(0.3),
                                         blurRadius: 24,
                                         offset: const Offset(0, 6),
                                       ),
                                       BoxShadow(
-                                        color: const Color(0xFFFFFFFF).withOpacity(0.15),
+                                        color: const Color(0xFFFFFFFF)
+                                            .withOpacity(0.15),
                                         blurRadius: 0,
                                         offset: const Offset(0, 1),
                                         spreadRadius: 0,
@@ -3735,7 +3866,8 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
                                   ),
                                   child: CupertinoButton(
                                     onPressed: () => Navigator.pop(context),
-                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 16),
                                     borderRadius: BorderRadius.circular(20),
                                     child: Text(
                                       l10n.commonGreat,
@@ -3828,15 +3960,6 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
     });
   }
 
-  void _showUpgradeScreen() {
-    showCupertinoModalPopup(
-      context: context,
-      barrierColor: Colors.black.withOpacity(0.5),
-      filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-      builder: (context) => const PaywallScreen(),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final colors = context.watch<ThemeProvider>().colors;
@@ -3845,8 +3968,9 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
 
     // Get habits organized by category
     // Adjust this based on your actual data model
-    final Map<String, List<String>> habitsByCategory = _getHabitsByCategory(onboardingState);
-    
+    final Map<String, List<String>> habitsByCategory =
+        _getHabitsByCategory(onboardingState);
+
     // Filter by search query
     final filteredCategories = <String, List<String>>{};
     for (final entry in habitsByCategory.entries) {
@@ -3871,8 +3995,8 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            colors.surfaceLight,  // Sheet top
-            colors.modalBg2,  // Sheet bottom
+            colors.surfaceLight, // Sheet top
+            colors.modalBg2, // Sheet bottom
           ],
         ),
         borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
@@ -3962,7 +4086,8 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
                     color: const Color(0xFFFFFFFF).withOpacity(0.5),
                     borderRadius: BorderRadius.circular(16),
@@ -4028,13 +4153,16 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
               itemCount: filteredCategories.length,
               itemBuilder: (context, categoryIndex) {
-                final category = filteredCategories.keys.elementAt(categoryIndex);
+                final category =
+                    filteredCategories.keys.elementAt(categoryIndex);
                 final habits = filteredCategories[category]!;
-                final accentColor = categoryColors[category] ?? colors.accentMuted;
+                final accentColor =
+                    categoryColors[category] ?? colors.accentMuted;
 
                 return Padding(
                   padding: EdgeInsets.only(
-                    bottom: categoryIndex < filteredCategories.length - 1 ? 32 : 0,
+                    bottom:
+                        categoryIndex < filteredCategories.length - 1 ? 32 : 0,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -4053,16 +4181,16 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
                           ),
                         ),
                       ),
-                      
+
                       // Habit cards
                       ...habits.map((habit) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _BrowseHabitCard(
-                          habitTitle: habit,
-                          accentColor: accentColor,
-                          onAdd: () => _addHabit(habit),
-                        ),
-                      )),
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: _BrowseHabitCard(
+                              habitTitle: habit,
+                              accentColor: accentColor,
+                              onAdd: () => _addHabit(habit),
+                            ),
+                          )),
                     ],
                   ),
                 );
@@ -4086,9 +4214,8 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
       final habits = OnboardingState.habitsByCategory[category];
       if (habits != null) {
         // Filter out habits the user already has
-        final availableHabits = habits
-            .where((habit) => !state.userHabits.contains(habit))
-            .toList();
+        final availableHabits =
+            habits.where((habit) => !state.userHabits.contains(habit)).toList();
 
         if (availableHabits.isNotEmpty) {
           result[category] = availableHabits;
@@ -4146,67 +4273,67 @@ class _BrowseHabitCard extends StatelessWidget {
 
               // Card content with gradient background
               Expanded(
-              child: Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      const Color(0xFFFFFFFF).withOpacity(0.7),
-                      const Color(0xFFFFFFFF).withOpacity(0.5),
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        const Color(0xFFFFFFFF).withOpacity(0.7),
+                        const Color(0xFFFFFFFF).withOpacity(0.5),
+                      ],
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      // Habit title
+                      Expanded(
+                        child: Text(
+                          habitTitle,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: colors.textPrimary,
+                            height: 1.5,
+                            fontFamily: 'DMSans',
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+
+                      // Add button
+                      GestureDetector(
+                        onTap: onAdd,
+                        child: Container(
+                          width: 42,
+                          height: 42,
+                          decoration: BoxDecoration(
+                            color: colors.ctaPrimary,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: colors.ctaPrimary.withOpacity(0.3),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          alignment: Alignment.center,
+                          child: const Icon(
+                            CupertinoIcons.plus,
+                            size: 20,
+                            color: Color(0xFFFFFFFF),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
-                child: Row(
-                  children: [
-                    // Habit title
-                    Expanded(
-                      child: Text(
-                        habitTitle,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: colors.textPrimary,
-                          height: 1.5,
-                          fontFamily: 'DMSans',
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-
-                    // Add button
-                    GestureDetector(
-                      onTap: onAdd,
-                      child: Container(
-                        width: 42,
-                        height: 42,
-                        decoration: BoxDecoration(
-                          color: colors.ctaPrimary,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: colors.ctaPrimary.withOpacity(0.3),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        alignment: Alignment.center,
-                        child: const Icon(
-                          CupertinoIcons.plus,
-                          size: 20,
-                          color: Color(0xFFFFFFFF),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
               ),
-            ),
-          ],
+            ],
           ),
         ),
       ),
@@ -4242,22 +4369,23 @@ class _HabitActionScreenState extends State<HabitActionScreen> {
 
   Future<void> _markAsDone() async {
     if (_isProcessing) return;
-    
+
     // Pick random support word
     final random = Random();
     _supportWord = _supportWords[random.nextInt(_supportWords.length)];
-    
+
     setState(() {
       _isProcessing = true;
       _isDone = true;
     });
-    
+
     HapticFeedback.heavyImpact();
     await HabitTracker.markDone(widget.habitTitle);
-    
+    AnalyticsService.logHabitCompleted(widget.habitTitle);
+
     // Show heart + support for 1 second
     await Future.delayed(const Duration(milliseconds: 1000));
-    
+
     if (mounted) {
       Navigator.pop(context);
     }
@@ -4304,15 +4432,13 @@ class _HabitActionScreenState extends State<HabitActionScreen> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
-
                   AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
                     curve: Curves.easeOut,
                     child: CupertinoButton(
-                      color: _isDone
-                          ? colors.success
-                          : colors.buttonDark,
-                      borderRadius: BorderRadius.circular(ComponentSizes.buttonRadius),
+                      color: _isDone ? colors.success : colors.buttonDark,
+                      borderRadius:
+                          BorderRadius.circular(ComponentSizes.buttonRadius),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 32,
                         vertical: 16,
@@ -4345,13 +4471,12 @@ class _HabitActionScreenState extends State<HabitActionScreen> {
                             ),
                     ),
                   ),
-
                   const SizedBox(height: 14),
-
                   if (!_isDone)
                     CupertinoButton(
                       color: colors.surfaceLightest,
-                      borderRadius: BorderRadius.circular(ComponentSizes.buttonRadius),
+                      borderRadius:
+                          BorderRadius.circular(ComponentSizes.buttonRadius),
                       onPressed: _skipForToday,
                       child: Text(
                         'Not today',

@@ -54,6 +54,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appPlanCore => 'Core';
 
   @override
+  String get appPlanBoost => 'Boost';
+
+  @override
   String get appUnlockPlus => 'Unlock Intended+';
 
   @override
@@ -191,7 +194,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get themeSelectionPremiumHint =>
-      'Clear Sky and Morning Slate are available with Intended+. You can unlock them after setup.';
+      'Clear Sky and Morning Slate are available with Intended+. Try it free for 7 days after setup.';
 
   @override
   String get habitRevealTitle => 'Here\'s what we picked for you';
@@ -217,7 +220,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get habitRevealBegin => 'Let\'s begin';
 
   @override
-  String get habitsHoldForOptions => 'Hold for options';
+  String get habitsHoldForOptions => 'Long press a habit for options';
 
   @override
   String get habitsCompleteOnboarding => 'Complete onboarding to get started';
@@ -443,7 +446,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get customHabitLimitMessage =>
-      'Intended: 2 custom habits\nIntended+: Unlimited custom habits';
+      'Core: 2 custom habits\nBoost: 3 custom habits\nIntended+: Unlimited custom habits';
 
   @override
   String get menuUnpin => 'Unpin';
@@ -507,7 +510,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get swapLimitMessage =>
-      'You\'ve used your 2 free swaps this month.\n\nIntended+: Unlimited swaps';
+      'You\'ve used all your free swaps this month.\n\nBoost: 3 swaps/month\nIntended+: Unlimited swaps';
 
   @override
   String get swapNoAltTitle => 'No alternatives';
@@ -1324,6 +1327,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get momentsYesterday => 'Yesterday';
 
   @override
+  String monthSummaryMoments(int count, String month) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count moments in $month',
+      one: '1 moment in $month',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String monthSummaryIntentions(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count intentions this month',
+      one: '1 intention this month',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String monthSummaryTopIntention(String intention) {
+    return 'Your most frequent intention: $intention';
+  }
+
+  @override
   String get paywallTitle => 'Intended+';
 
   @override
@@ -1337,7 +1367,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallFeature2 => 'Change your habits whenever life changes';
 
   @override
-  String get paywallFeature3 => 'Shareable weekly progress cards';
+  String get paywallFeature3 => 'Shareable milestone achievement cards';
 
   @override
   String get paywallFeature4 => 'Adjust your focus areas as often as you need';
@@ -1346,7 +1376,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallMonthly => 'Monthly';
 
   @override
-  String get paywallMonthlyPrice => '€4.99';
+  String get paywallMonthlyPrice => '€6.99';
 
   @override
   String get paywallMonthlyPeriod => 'per month';
@@ -1355,34 +1385,51 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallYearly => 'Yearly';
 
   @override
-  String get paywallYearlyPrice => '€39.99';
+  String get paywallYearlyPrice => '€49.99';
 
   @override
   String get paywallYearlyPeriod => 'per year';
 
   @override
-  String get paywallYearlySave => 'Save 33%';
+  String get paywallYearlySave => 'Save 40%';
 
   @override
   String get paywallLifetime => 'Lifetime';
 
   @override
-  String get paywallLifetimePrice => '€69.99';
+  String get paywallLifetimePrice => '€89.99';
 
   @override
   String get paywallLifetimePeriod => 'one-time';
 
   @override
-  String get paywallLifetimeBadge => 'Launch special';
+  String get paywallLifetimeBadge => 'Launch price';
 
   @override
-  String get paywallCta => 'Start your 7-day free trial';
+  String get paywallCtaTrial => 'Start 7-day free trial';
+
+  @override
+  String get paywallCtaLifetime => 'Get lifetime access';
+
+  @override
+  String paywallTrialHint(String price) {
+    return '7 days free, then $price. Cancel anytime.';
+  }
+
+  @override
+  String get paywallLifetimeHint => 'One-time purchase. No subscription.';
 
   @override
   String get paywallContinueFree => 'Continue with Core';
 
   @override
-  String get paywallUpgradeHint => 'You can upgrade anytime from your profile.';
+  String get paywallRestorePurchases => 'Restore Purchases';
+
+  @override
+  String get paywallTerms => 'Terms';
+
+  @override
+  String get paywallPrivacy => 'Privacy';
 
   @override
   String get subscriptionTitle => 'Intended+';
@@ -1485,7 +1532,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profilePrivacy => 'Privacy Policy';
 
   @override
-  String get profileTerms => 'Terms of Service';
+  String get profileTerms => 'Terms of Use';
 
   @override
   String get profileConnectAccount => 'CONNECT ACCOUNT';
@@ -1528,7 +1575,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileFocusLimitOptions =>
-      '• One-time: €0.99\n• Intended+: Unlimited';
+      '• Boost: Extra changes\n• Intended+: Unlimited';
 
   @override
   String get profilePayAmount => 'Pay €0.99';
@@ -1953,4 +2000,121 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get habitDoNothing => 'Do absolutely nothing for 30 seconds';
+
+  @override
+  String get shareCardWeeklyCheckin => 'Weekly check-in';
+
+  @override
+  String get shareCardMilestone => 'Milestone';
+
+  @override
+  String get shareCardShowedUpPhrase => 'I showed up for myself this week';
+
+  @override
+  String get shareCardTimes => 'times';
+
+  @override
+  String get shareCardTagline => 'intention, not perfection';
+
+  @override
+  String get shareCardWeeks => 'weeks';
+
+  @override
+  String get shareCardMilestoneSubtext => 'of being gentle with myself';
+
+  @override
+  String get shareCardDescriptor => 'intention, not perfection';
+
+  @override
+  String get sharePickerTitle => 'What would you like to share?';
+
+  @override
+  String get shareWeeklySubtitle => 'how many times you showed up this week';
+
+  @override
+  String get shareShowingUpSubtitle => 'your own way, your own pace';
+
+  @override
+  String get shareFocusAreaSubtitle => 'the area you keep returning to';
+
+  @override
+  String get shareYourThingSubtitle => 'the habit that\'s sticking';
+
+  @override
+  String get milestoneShowingUpLabel => 'Showing up';
+
+  @override
+  String get milestoneAreaLabel => 'Focus area';
+
+  @override
+  String get milestoneIdentityLabel => 'Your thing';
+
+  @override
+  String milestoneShowingUpHero(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'weeks',
+      one: 'week',
+    );
+    return '$count $_temp0';
+  }
+
+  @override
+  String get milestoneShowingUpSubtitle => 'of showing up — in your own way';
+
+  @override
+  String milestoneAreaHero(String area) {
+    return '$area';
+  }
+
+  @override
+  String get milestoneAreaSubtitle => 'you keep coming back to what matters';
+
+  @override
+  String milestoneIdentityHero(String habit) {
+    return '$habit';
+  }
+
+  @override
+  String get milestoneIdentitySubtitle => 'is becoming your thing';
+
+  @override
+  String get boostCardTitle => 'Intended Boost — €1.99 one-time';
+
+  @override
+  String get boostCardSubtitle => '+1 habit, +1 focus area, share cards';
+
+  @override
+  String get boostOrDivider => 'or';
+
+  @override
+  String get boostGoUnlimited => 'Go unlimited with Intended+';
+
+  @override
+  String get boostPurchaseError => 'Something went wrong with the purchase. Please try again.';
+
+  @override
+  String get boostOfferHabitTitle => 'Want one more habit?';
+
+  @override
+  String get boostOfferHabitDesc => 'Create one more habit that fits your life.';
+
+  @override
+  String get boostOfferFocusTitle => 'Need another focus area?';
+
+  @override
+  String get boostOfferFocusDesc => 'Add one more area to focus on what matters.';
+
+  @override
+  String get boostOfferSwapTitle => 'Out of swaps this month?';
+
+  @override
+  String get boostOfferSwapDesc => 'Get a few more swaps to find the right habits.';
+
+  @override
+  String get boostOfferShareTitle => 'Share your progress?';
+
+  @override
+  String get boostOfferShareDesc => 'Unlock shareable milestone cards.';
 }

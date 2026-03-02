@@ -6,12 +6,6 @@ class AuthService {
   static final FirebaseAuth _auth = FirebaseAuth.instance;
   static final GoogleSignIn _googleSignIn = GoogleSignIn();
 
-  static User? get currentUser => _auth.currentUser;
-  static bool get isSignedIn => currentUser != null && !currentUser!.isAnonymous;
-  static bool get isGuest => currentUser != null && currentUser!.isAnonymous;
-
-  static Stream<User?> get authStateChanges => _auth.authStateChanges();
-
   static Future<UserCredential?> signInWithGoogle() async {
     final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
     if (googleUser == null) return null;
@@ -35,10 +29,6 @@ class AuthService {
       accessToken: appleCredential.authorizationCode,
     );
     return await _auth.signInWithCredential(oauthCredential);
-  }
-
-  static Future<UserCredential?> signInAsGuest() async {
-    return await _auth.signInAnonymously();
   }
 
   static Future<void> signOut() async {

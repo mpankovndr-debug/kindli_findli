@@ -49,3 +49,9 @@ ios/build/
 
 # Backup files
 *.bak
+
+# Firebase config (contains API keys)
+lib/firebase_options.dart
+ios/Runner/GoogleService-Info.plist
+ios/Runner/GoogleService-Info 2.plist
+ios/firebase_app_id_file.json

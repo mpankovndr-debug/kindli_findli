@@ -2,8 +2,6 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Colors;
-import 'package:flutter/services.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
 import '../l10n/app_localizations.dart';
@@ -12,6 +10,7 @@ import '../utils/profanity_filter.dart';
 import 'focus_areas_screen.dart';
 import 'onboarding_state.dart';
 import '../state/user_state.dart';
+import '../services/analytics_service.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme_provider.dart';
 
@@ -72,6 +71,9 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
     });
 
     controller.addListener(_onTextChanged);
+
+    AnalyticsService.logScreenView('welcome');
+    AnalyticsService.logOnboardingStarted();
   }
 
   void _onTextChanged() {
@@ -102,6 +104,8 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
     }
 
     state.markWelcomeSeen();
+
+    AnalyticsService.logOnboardingStepCompleted('name_entry');
 
     Navigator.pushReplacement(
       context,
@@ -192,12 +196,13 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
                 padding: const EdgeInsets.symmetric(horizontal: 28),
                 child: SingleChildScrollView(
                   physics: const ClampingScrollPhysics(),
-                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
-                      minHeight: MediaQuery.of(context).size.height
-                          - MediaQuery.of(context).padding.top
-                          - MediaQuery.of(context).padding.bottom,
+                      minHeight: MediaQuery.of(context).size.height -
+                          MediaQuery.of(context).padding.top -
+                          MediaQuery.of(context).padding.bottom,
                     ),
                     child: IntrinsicHeight(
                       child: Column(
@@ -213,7 +218,8 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(32),
                                   child: BackdropFilter(
-                                    filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+                                    filter: ImageFilter.blur(
+                                        sigmaX: 30, sigmaY: 30),
                                     child: Container(
                                       width: 160,
                                       height: 160,
@@ -223,23 +229,28 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
                                           begin: Alignment.topLeft,
                                           end: Alignment.bottomRight,
                                           colors: [
-                                            const Color(0xFFFFFFFF).withOpacity(0.2),
-                                            colors.surfaceLight.withOpacity(0.12),
+                                            const Color(0xFFFFFFFF)
+                                                .withOpacity(0.2),
+                                            colors.surfaceLight
+                                                .withOpacity(0.12),
                                           ],
                                         ),
                                         borderRadius: BorderRadius.circular(32),
                                         border: Border.all(
-                                          color: const Color(0xFFFFFFFF).withOpacity(0.25),
+                                          color: const Color(0xFFFFFFFF)
+                                              .withOpacity(0.25),
                                           width: 1.5,
                                         ),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: colors.textPrimary.withOpacity(0.06),
+                                            color: colors.textPrimary
+                                                .withOpacity(0.06),
                                             blurRadius: 32,
                                             offset: const Offset(0, 8),
                                           ),
                                           BoxShadow(
-                                            color: const Color(0xFFFFFFFF).withOpacity(0.4),
+                                            color: const Color(0xFFFFFFFF)
+                                                .withOpacity(0.4),
                                             blurRadius: 0,
                                             offset: const Offset(0, 1),
                                             blurStyle: BlurStyle.inner,
@@ -302,111 +313,133 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
                             child: SlideTransition(
                               position: _slideInput,
                               child: Column(
-                              children: [
-                                // Name input (glassmorphic)
-                                Container(
-                                  constraints: const BoxConstraints(maxWidth: 384),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(20),
-                                    child: BackdropFilter(
-                                      filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                            colors: [
-                                              const Color(0xFFFFFFFF).withOpacity(0.45),
-                                              colors.surfaceLight.withOpacity(0.3),
-                                            ],
-                                          ),
-                                          borderRadius: BorderRadius.circular(20),
-                                          border: Border.all(
-                                            color: const Color(0xFFFFFFFF).withOpacity(0.35),
-                                            width: 1.5,
-                                          ),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: colors.textPrimary.withOpacity(0.08),
-                                              blurRadius: 16,
-                                              offset: const Offset(0, 4),
-                                            ),
-                                          ],
-                                        ),
-                                        child: CupertinoTextField(
-                                          controller: controller,
-                                          placeholder: l10n.onboardingNamePrompt,
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                            fontFamily: 'Sora',
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w500,
-                                            color: colors.textPrimary,
-                                          ),
-                                          placeholderStyle: TextStyle(
-                                            fontFamily: 'Sora',
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w500,
-                                            color: colors.textPrimary.withOpacity(0.4),
-                                          ),
-                                          decoration: const BoxDecoration(),
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 24,
-                                            vertical: 16,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-
-                                const SizedBox(height: 20),
-
-                                // Continue button (tinted glass)
-                                AnimatedOpacity(
-                                  opacity: _isEnabled ? 1.0 : 0.45,
-                                  duration: const Duration(milliseconds: 250),
-                                  child: Container(
-                                    constraints: const BoxConstraints(maxWidth: 384),
-                                    width: double.infinity,
+                                children: [
+                                  // Name input (glassmorphic)
+                                  Container(
+                                    constraints:
+                                        const BoxConstraints(maxWidth: 384),
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(20),
                                       child: BackdropFilter(
-                                        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                                        filter: ImageFilter.blur(
+                                            sigmaX: 25, sigmaY: 25),
                                         child: Container(
                                           decoration: BoxDecoration(
                                             gradient: LinearGradient(
                                               begin: Alignment.topLeft,
                                               end: Alignment.bottomRight,
                                               colors: [
-                                                colors.ctaPrimary.withOpacity(0.75),
-                                                colors.ctaSecondary.withOpacity(0.65),
+                                                const Color(0xFFFFFFFF)
+                                                    .withOpacity(0.45),
+                                                colors.surfaceLight
+                                                    .withOpacity(0.3),
                                               ],
                                             ),
-                                            borderRadius: BorderRadius.circular(20),
+                                            borderRadius:
+                                                BorderRadius.circular(20),
                                             border: Border.all(
-                                              color: colors.ctaPrimary.withOpacity(0.3),
-                                              width: 1,
+                                              color: const Color(0xFFFFFFFF)
+                                                  .withOpacity(0.35),
+                                              width: 1.5,
                                             ),
                                             boxShadow: [
                                               BoxShadow(
-                                                color: colors.textPrimary.withOpacity(0.2),
-                                                blurRadius: 20,
+                                                color: colors.textPrimary
+                                                    .withOpacity(0.08),
+                                                blurRadius: 16,
                                                 offset: const Offset(0, 4),
                                               ),
                                             ],
                                           ),
-                                          child: CupertinoButton(
-                                            onPressed: _isEnabled ? _handleContinue : null,
-                                            padding: const EdgeInsets.symmetric(vertical: 16),
-                                            borderRadius: BorderRadius.circular(20),
-                                            child: Text(
-                                              l10n.commonContinue,
-                                              style: TextStyle(
-                                                fontFamily: 'Sora',
-                                                fontSize: 17,
-                                                fontWeight: FontWeight.w600,
-                                                color: Color(0xFFFFFFFF),
+                                          child: CupertinoTextField(
+                                            controller: controller,
+                                            placeholder:
+                                                l10n.onboardingNamePrompt,
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              fontFamily: 'Sora',
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w500,
+                                              color: colors.textPrimary,
+                                            ),
+                                            placeholderStyle: TextStyle(
+                                              fontFamily: 'Sora',
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w500,
+                                              color: colors.textPrimary
+                                                  .withOpacity(0.4),
+                                            ),
+                                            decoration: const BoxDecoration(),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 24,
+                                              vertical: 16,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+
+                                  const SizedBox(height: 20),
+
+                                  // Continue button (tinted glass)
+                                  AnimatedOpacity(
+                                    opacity: _isEnabled ? 1.0 : 0.45,
+                                    duration: const Duration(milliseconds: 250),
+                                    child: Container(
+                                      constraints:
+                                          const BoxConstraints(maxWidth: 384),
+                                      width: double.infinity,
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(20),
+                                        child: BackdropFilter(
+                                          filter: ImageFilter.blur(
+                                              sigmaX: 20, sigmaY: 20),
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              gradient: LinearGradient(
+                                                begin: Alignment.topLeft,
+                                                end: Alignment.bottomRight,
+                                                colors: [
+                                                  colors.ctaPrimary
+                                                      .withOpacity(0.75),
+                                                  colors.ctaSecondary
+                                                      .withOpacity(0.65),
+                                                ],
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              border: Border.all(
+                                                color: colors.ctaPrimary
+                                                    .withOpacity(0.3),
+                                                width: 1,
+                                              ),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: colors.textPrimary
+                                                      .withOpacity(0.2),
+                                                  blurRadius: 20,
+                                                  offset: const Offset(0, 4),
+                                                ),
+                                              ],
+                                            ),
+                                            child: CupertinoButton(
+                                              onPressed: _isEnabled
+                                                  ? _handleContinue
+                                                  : null,
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      vertical: 16),
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              child: Text(
+                                                l10n.commonContinue,
+                                                style: TextStyle(
+                                                  fontFamily: 'Sora',
+                                                  fontSize: 17,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: Color(0xFFFFFFFF),
+                                                ),
                                               ),
                                             ),
                                           ),
@@ -414,28 +447,27 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
                                       ),
                                     ),
                                   ),
-                                ),
 
-                                const SizedBox(height: 16),
+                                  const SizedBox(height: 16),
 
-                                // Skip button
-                                CupertinoButton(
-                                  padding: const EdgeInsets.all(12),
-                                  onPressed: () => _navigateToFocusAreas(),
-                                  child: Text(
-                                    l10n.onboardingSkipForNow,
-                                    style: TextStyle(
-                                      fontFamily: 'Sora',
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w500,
-                                      color: colors.textTertiary,
+                                  // Skip button
+                                  CupertinoButton(
+                                    padding: const EdgeInsets.all(12),
+                                    onPressed: () => _navigateToFocusAreas(),
+                                    child: Text(
+                                      l10n.onboardingSkipForNow,
+                                      style: TextStyle(
+                                        fontFamily: 'Sora',
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w500,
+                                        color: colors.textTertiary,
+                                      ),
                                     ),
                                   ),
-                                ),
 
-                                const SizedBox(height: 32),
-                              ],
-                            ),
+                                  const SizedBox(height: 32),
+                                ],
+                              ),
                             ),
                           ),
                         ],
@@ -556,7 +588,6 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
       ],
     );
   }
-
 }
 
 class _FloatingCards extends StatefulWidget {
@@ -920,8 +951,10 @@ class _FloatingParticlesState extends State<_FloatingParticles>
           builder: (_, __) {
             return Stack(
               children: _particles.map((p) {
-                final dx = sin((_controller.value * 2 * pi * p.speed) + p.phase) * 35;
-                final dy = cos((_controller.value * 2 * pi * p.speed) + p.phase) * 35;
+                final dx =
+                    sin((_controller.value * 2 * pi * p.speed) + p.phase) * 35;
+                final dy =
+                    cos((_controller.value * 2 * pi * p.speed) + p.phase) * 35;
 
                 return Positioned(
                   left: p.base.dx * size.width + dx - p.radius,
@@ -941,7 +974,8 @@ class _FloatingParticlesState extends State<_FloatingParticles>
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF9FB5A3).withOpacity(p.opacity * 0.5),
+                          color: const Color(0xFF9FB5A3)
+                              .withOpacity(p.opacity * 0.5),
                           blurRadius: p.radius * 1.0,
                           spreadRadius: 2,
                         ),

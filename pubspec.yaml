@@ -31,6 +31,10 @@ dependencies:
   firebase_crashlytics: ^4.3.10
   flutter_local_notifications: ^18.0.0
   timezone: ^0.9.0
+  purchases_flutter: ^9.12.3
+  purchases_ui_flutter: ^9.12.3
+  path_provider: ^2.1.5
+  share_plus: ^12.0.1
 
 dev_dependencies:
   flutter_launcher_icons: ^0.14.3
@@ -64,7 +68,7 @@ flutter:
       - asset: assets/fonts/Sora-Bold.ttf
         weight: 700
         
-  - family: DMSans            # ← ADD THIS SECTION
+  - family: DMSans
     fonts:
       - asset: assets/fonts/DMSans-Regular.ttf
         weight: 400
@@ -72,3 +76,7 @@ flutter:
         weight: 500
       - asset: assets/fonts/DMSans-SemiBold.ttf
         weight: 600
+
+  - family: InstrumentSans
+    fonts:
+      - asset: assets/fonts/InstrumentSans-Variable.ttf

@@ -78,6 +78,7 @@ class AppColorScheme {
   final Color completionHeart;
   final Color heartHighlight;
   final Color heartDeep;
+  final Color pinnedAccent;
 
   const AppColorScheme({
     required this.bgGradientTop,
@@ -155,6 +156,7 @@ class AppColorScheme {
     required this.completionHeart,
     required this.heartHighlight,
     required this.heartDeep,
+    required this.pinnedAccent,
   });
 }
 
@@ -244,6 +246,7 @@ class AppColors {
     completionHeart: Color(0xFFC4908A),
     heartHighlight:  Color(0xFFE5B5B0),
     heartDeep:       Color(0xFFC99090),
+    pinnedAccent:    Color(0xFFD46A2A),
   );
 
   static const AppColorScheme iris = AppColorScheme(
@@ -322,6 +325,7 @@ class AppColors {
     completionHeart: Color(0xFF9888C8),
     heartHighlight:  Color(0xFFBFB0E8),
     heartDeep:       Color(0xFF9070C8),
+    pinnedAccent:    Color(0xFF7B5EA7),
   );
 
   static const AppColorScheme clearSky = AppColorScheme(
@@ -400,6 +404,7 @@ class AppColors {
     completionHeart: Color(0xFF82B0D4),
     heartHighlight:  Color(0xFFAAD0E8),
     heartDeep:       Color(0xFF6AA0C8),
+    pinnedAccent:    Color(0xFF2E86AB),
   );
 
   static const AppColorScheme morningSlate = AppColorScheme(
@@ -478,6 +483,7 @@ class AppColors {
     completionHeart: Color(0xFF8DB5B0),
     heartHighlight:  Color(0xFFAAC8C4),
     heartDeep:       Color(0xFF6A9E99),
+    pinnedAccent:    Color(0xFF4A7C59),
   );
 
   static AppColorScheme of(AppTheme theme) {

@@ -54,6 +54,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get appPlanCore => 'Core';
 
   @override
+  String get appPlanBoost => 'Boost';
+
+  @override
   String get appUnlockPlus => 'Перейти на Intended+';
 
   @override
@@ -190,7 +193,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get themeSelectionPremiumHint =>
-      'Clear Sky и Morning Slate доступны с Intended+. Их можно открыть после настройки.';
+      'Clear Sky и Morning Slate доступны с Intended+. Попробуй бесплатно 7 дней после настройки.';
 
   @override
   String get habitRevealTitle => 'Вот что мы подобрали для тебя';
@@ -216,7 +219,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get habitRevealBegin => 'Начнём';
 
   @override
-  String get habitsHoldForOptions => 'Удерживай для опций';
+  String get habitsHoldForOptions => 'Удерживай привычку для опций';
 
   @override
   String get habitsCompleteOnboarding => 'Заверши настройку, чтобы начать';
@@ -443,7 +446,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get customHabitLimitMessage =>
-      'Intended: 2 свои привычки\nIntended+: без ограничений';
+      'Core: 2 свои привычки\nBoost: 3 свои привычки\nIntended+: без ограничений';
 
   @override
   String get menuUnpin => 'Открепить';
@@ -507,7 +510,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get swapLimitMessage =>
-      'Ты уже использовал 2 бесплатные замены в этом месяце.\n\nIntended+: без ограничений';
+      'Ты использовал все бесплатные замены в этом месяце.\n\nBoost: 3 замены/мес.\nIntended+: без ограничений';
 
   @override
   String get swapNoAltTitle => 'Нет альтернатив';
@@ -1314,6 +1317,35 @@ class AppLocalizationsRu extends AppLocalizations {
   String get momentsYesterday => 'Вчера';
 
   @override
+  String monthSummaryMoments(int count, String month) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count моментов в $month',
+      few: '$count момента в $month',
+      one: '1 момент в $month',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String monthSummaryIntentions(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count намерений в этом месяце',
+      few: '$count намерения в этом месяце',
+      one: '1 намерение в этом месяце',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String monthSummaryTopIntention(String intention) {
+    return 'Чаще всего: $intention';
+  }
+
+  @override
   String get paywallTitle => 'Intended+';
 
   @override
@@ -1328,7 +1360,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get paywallFeature2 => 'Меняй привычки, когда меняется жизнь';
 
   @override
-  String get paywallFeature3 => 'Карточки недельного прогресса для друзей';
+  String get paywallFeature3 => 'Карточки достижений для друзей';
 
   @override
   String get paywallFeature4 => 'Меняй направления так часто, как нужно';
@@ -1337,7 +1369,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get paywallMonthly => 'Ежемесячно';
 
   @override
-  String get paywallMonthlyPrice => '€4,99';
+  String get paywallMonthlyPrice => '€6,99';
 
   @override
   String get paywallMonthlyPeriod => 'в месяц';
@@ -1346,35 +1378,51 @@ class AppLocalizationsRu extends AppLocalizations {
   String get paywallYearly => 'Ежегодно';
 
   @override
-  String get paywallYearlyPrice => '€39,99';
+  String get paywallYearlyPrice => '€49,99';
 
   @override
   String get paywallYearlyPeriod => 'в год';
 
   @override
-  String get paywallYearlySave => 'Экономия 33%';
+  String get paywallYearlySave => 'Экономия 40%';
 
   @override
   String get paywallLifetime => 'Навсегда';
 
   @override
-  String get paywallLifetimePrice => '€69,99';
+  String get paywallLifetimePrice => '€89,99';
 
   @override
   String get paywallLifetimePeriod => 'один раз';
 
   @override
-  String get paywallLifetimeBadge => 'Спецпредложение';
+  String get paywallLifetimeBadge => 'Цена запуска';
 
   @override
-  String get paywallCta => 'Начать 7-дневный пробный период';
+  String get paywallCtaTrial => 'Начать 7-дневный пробный период';
+
+  @override
+  String get paywallCtaLifetime => 'Получить навсегда';
+
+  @override
+  String paywallTrialHint(String price) {
+    return '7 дней бесплатно, затем $price. Отмена в любое время.';
+  }
+
+  @override
+  String get paywallLifetimeHint => 'Разовая покупка. Без подписки.';
 
   @override
   String get paywallContinueFree => 'Продолжить с Core';
 
   @override
-  String get paywallUpgradeHint =>
-      'Перейти на Intended+ можно в любой момент в профиле.';
+  String get paywallRestorePurchases => 'Восстановить покупки';
+
+  @override
+  String get paywallTerms => 'Условия';
+
+  @override
+  String get paywallPrivacy => 'Конфиденциальность';
 
   @override
   String get subscriptionTitle => 'Intended+';
@@ -1520,7 +1568,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get profileFocusLimitOptions =>
-      '• Разово: €0,99\n• Intended+: без ограничений';
+      '• Boost: Доп. смены\n• Intended+: без ограничений';
 
   @override
   String get profilePayAmount => 'Оплатить €0,99';
@@ -1945,4 +1993,123 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get habitDoNothing => 'Ничего не делай 30 секунд';
+
+  @override
+  String get shareCardWeeklyCheckin => 'За неделю';
+
+  @override
+  String get shareCardMilestone => 'Достижение';
+
+  @override
+  String get shareCardShowedUpPhrase => 'На этой неделе я позаботился о себе';
+
+  @override
+  String get shareCardTimes => 'раз';
+
+  @override
+  String get shareCardTagline => 'намерение, а не совершенство';
+
+  @override
+  String get shareCardWeeks => 'недель';
+
+  @override
+  String get shareCardMilestoneSubtext => 'бережного отношения к себе';
+
+  @override
+  String get shareCardDescriptor => 'намерение, а не совершенство';
+
+  @override
+  String get sharePickerTitle => 'Чем бы ты хотел поделиться?';
+
+  @override
+  String get shareWeeklySubtitle =>
+      'сколько раз ты позаботился о себе на этой неделе';
+
+  @override
+  String get shareShowingUpSubtitle => 'по-своему, в своём темпе';
+
+  @override
+  String get shareFocusAreaSubtitle => 'то, к чему ты возвращаешься';
+
+  @override
+  String get shareYourThingSubtitle => 'привычка, которая приживается';
+
+  @override
+  String get milestoneShowingUpLabel => 'Ты здесь';
+
+  @override
+  String get milestoneAreaLabel => 'Фокус';
+
+  @override
+  String get milestoneIdentityLabel => 'Твоё';
+
+  @override
+  String milestoneShowingUpHero(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'недель',
+      few: 'недели',
+      one: 'неделя',
+    );
+    return '$count $_temp0';
+  }
+
+  @override
+  String get milestoneShowingUpSubtitle => 'ты продолжаешь по-своему';
+
+  @override
+  String milestoneAreaHero(String area) {
+    return '$area';
+  }
+
+  @override
+  String get milestoneAreaSubtitle => 'ты возвращаешься к тому, что важно';
+
+  @override
+  String milestoneIdentityHero(String habit) {
+    return '$habit';
+  }
+
+  @override
+  String get milestoneIdentitySubtitle => 'становится твоей привычкой';
+
+  @override
+  String get boostCardTitle => 'Intended Boost — €1,99 разово';
+
+  @override
+  String get boostCardSubtitle => '+1 привычка, +1 направление, карточки для друзей';
+
+  @override
+  String get boostOrDivider => 'или';
+
+  @override
+  String get boostGoUnlimited => 'Безлимит с Intended+';
+
+  @override
+  String get boostPurchaseError => 'Что-то пошло не так с покупкой. Попробуй ещё раз.';
+
+  @override
+  String get boostOfferHabitTitle => 'Хочешь ещё одну привычку?';
+
+  @override
+  String get boostOfferHabitDesc => 'Создай ещё одну привычку, которая подходит тебе.';
+
+  @override
+  String get boostOfferFocusTitle => 'Нужно ещё одно направление?';
+
+  @override
+  String get boostOfferFocusDesc => 'Добавь ещё одну область, которая тебе важна.';
+
+  @override
+  String get boostOfferSwapTitle => 'Замены закончились?';
+
+  @override
+  String get boostOfferSwapDesc => 'Получи ещё несколько замен, чтобы найти нужные привычки.';
+
+  @override
+  String get boostOfferShareTitle => 'Поделиться прогрессом?';
+
+  @override
+  String get boostOfferShareDesc => 'Открой карточки достижений для друзей.';
 }

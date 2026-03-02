@@ -5,6 +5,7 @@ import '../l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import '../models/moment.dart';
 import '../services/moments_service.dart';
+import '../services/analytics_service.dart';
 import '../widgets/warmth_toast_overlay.dart';
 import '../main.dart';
 import '../utils/completion_messages.dart';
@@ -180,6 +181,7 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
 
     // Mark as done
     await HabitTracker.markDone(widget.habitTitle);
+    AnalyticsService.logHabitCompleted(widget.habitTitle);
 
     // Record the moment
     await MomentsService.record(

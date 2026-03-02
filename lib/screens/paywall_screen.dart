@@ -1,15 +1,18 @@
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Colors;
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../l10n/app_localizations.dart';
+import '../services/analytics_service.dart';
+import '../services/revenue_cat_service.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme_provider.dart';
 
 class PaywallScreen extends StatefulWidget {
-  const PaywallScreen({super.key});
+  final String source;
+  const PaywallScreen({super.key, this.source = 'unknown'});
 
   @override
   State<PaywallScreen> createState() => _PaywallScreenState();
@@ -18,12 +21,15 @@ class PaywallScreen extends StatefulWidget {
 class _PaywallScreenState extends State<PaywallScreen>
     with SingleTickerProviderStateMixin {
   String _selectedPlan = 'yearly'; // monthly, yearly, lifetime
+  bool _isLoading = false;
   late final AnimationController _bulletController;
   late final List<Animation<double>> _bulletAnimations;
 
   @override
   void initState() {
     super.initState();
+    AnalyticsService.logScreenView('paywall');
+    AnalyticsService.logPaywallShown(widget.source);
     _bulletController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 600),
@@ -150,6 +156,8 @@ class _PaywallScreenState extends State<PaywallScreen>
                             _buildPricingOptions(colors, l10n),
                             const SizedBox(height: 20),
                             _buildCTAButton(colors, l10n),
+                            const SizedBox(height: 8),
+                            _buildDisclaimer(colors, l10n),
                             const SizedBox(height: 12),
                             _buildContinueFreeSection(colors, l10n),
                           ],
@@ -245,10 +253,13 @@ class _PaywallScreenState extends State<PaywallScreen>
           child: SizedBox(
             width: 48,
             height: 48,
-            child: SvgPicture.asset(
-              'assets/images/tulip_logo.svg',
-              width: 48,
-              height: 48,
+            child: ColorFiltered(
+              colorFilter: ColorFilter.mode(colors.ctaPrimary, BlendMode.srcIn),
+              child: Image.asset(
+                'assets/images/kindli_icon_transparent.png',
+                width: 48,
+                height: 48,
+              ),
             ),
           ),
         ),
@@ -493,26 +504,79 @@ class _PaywallScreenState extends State<PaywallScreen>
           child: CupertinoButton(
             padding: const EdgeInsets.symmetric(vertical: 16),
             borderRadius: BorderRadius.circular(20),
-            onPressed: () {
-              // TODO: Implement purchase flow
-              Navigator.pop(context);
-            },
-            child: Text(
-              l10n.paywallCta,
-              style: const TextStyle(
-                fontFamily: 'Sora',
-                fontSize: 17,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFFFFFFFF),
-              ),
-            ),
+            onPressed: _isLoading
+                ? null
+                : () async {
+                    setState(() => _isLoading = true);
+                    AnalyticsService.logPurchaseStarted(_selectedPlan);
+                    try {
+                      final success = await context
+                          .read<RevenueCatService>()
+                          .purchasePlan(_selectedPlan);
+                      if (mounted && success) {
+                        AnalyticsService.logPurchaseCompleted(_selectedPlan);
+                        Navigator.pop(context);
+                      } else {
+                        AnalyticsService.logPurchaseCancelled();
+                      }
+                    } catch (_) {
+                      AnalyticsService.logPurchaseFailed();
+                    } finally {
+                      if (mounted) setState(() => _isLoading = false);
+                    }
+                  },
+            child: _isLoading
+                ? const CupertinoActivityIndicator(color: Color(0xFFFFFFFF))
+                : Text(
+                    _selectedPlan == 'lifetime'
+                        ? l10n.paywallCtaLifetime
+                        : l10n.paywallCtaTrial,
+                    style: const TextStyle(
+                      fontFamily: 'Sora',
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFFFFFFFF),
+                    ),
+                  ),
           ),
         ),
       ),
     );
   }
 
+  Widget _buildDisclaimer(AppColorScheme colors, AppLocalizations l10n) {
+    final text = _selectedPlan == 'lifetime'
+        ? l10n.paywallLifetimeHint
+        : l10n.paywallTrialHint(
+            _selectedPlan == 'yearly'
+                ? '${l10n.paywallYearlyPrice}/${l10n.paywallYearly.toLowerCase()}'
+                : '${l10n.paywallMonthlyPrice}/${l10n.paywallMonthly.toLowerCase()}',
+          );
+    return Text(
+      text,
+      style: TextStyle(
+        fontFamily: 'Sora',
+        fontSize: 13,
+        fontWeight: FontWeight.w400,
+        color: colors.textTertiary,
+      ),
+      textAlign: TextAlign.center,
+    );
+  }
+
   Widget _buildContinueFreeSection(AppColorScheme colors, AppLocalizations l10n) {
+    final separatorStyle = TextStyle(
+      fontFamily: 'Sora',
+      fontSize: 12,
+      color: colors.textDisabled.withValues(alpha: 0.6),
+    );
+    final linkStyle = TextStyle(
+      fontFamily: 'Sora',
+      fontSize: 12,
+      fontWeight: FontWeight.w400,
+      color: colors.textDisabled,
+    );
+
     return Column(
       children: [
         CupertinoButton(
@@ -528,16 +592,54 @@ class _PaywallScreenState extends State<PaywallScreen>
             ),
           ),
         ),
-        const SizedBox(height: 4),
-        Text(
-          l10n.paywallUpgradeHint,
-          style: TextStyle(
-            fontFamily: 'Sora',
-            fontSize: 12,
-            fontWeight: FontWeight.w400,
-            color: colors.textDisabled.withOpacity(0.8),
-          ),
-          textAlign: TextAlign.center,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CupertinoButton(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+              minimumSize: Size.zero,
+              onPressed: _isLoading
+                  ? null
+                  : () async {
+                      setState(() => _isLoading = true);
+                      AnalyticsService.logRestoreStarted();
+                      try {
+                        final success = await context
+                            .read<RevenueCatService>()
+                            .restorePurchases();
+                        if (mounted && success) {
+                          AnalyticsService.logRestoreCompleted();
+                          Navigator.pop(context);
+                        }
+                      } catch (_) {
+                        // Restore error
+                      } finally {
+                        if (mounted) setState(() => _isLoading = false);
+                      }
+                    },
+              child: Text(l10n.paywallRestorePurchases, style: linkStyle),
+            ),
+            Text(' · ', style: separatorStyle),
+            CupertinoButton(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+              minimumSize: Size.zero,
+              onPressed: () => launchUrl(
+                Uri.parse('https://intendedapp.com/terms'),
+                mode: LaunchMode.externalApplication,
+              ),
+              child: Text(l10n.paywallTerms, style: linkStyle),
+            ),
+            Text(' · ', style: separatorStyle),
+            CupertinoButton(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+              minimumSize: Size.zero,
+              onPressed: () => launchUrl(
+                Uri.parse('https://intendedapp.com/privacy'),
+                mode: LaunchMode.externalApplication,
+              ),
+              child: Text(l10n.paywallPrivacy, style: linkStyle),
+            ),
+          ],
         ),
       ],
     );

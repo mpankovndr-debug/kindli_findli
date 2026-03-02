@@ -2,15 +2,26 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
+import '../state/user_state.dart';
+import 'analytics_service.dart';
+
 class RevenueCatService extends ChangeNotifier {
   static const _appleApiKey = 'appl_RPNUxXhvXrpnWAiTvMswDDrigtJ';
   static const _entitlementId = 'Intended+';
+  static const _boostEntitlementId = 'Intended Boost';
+  static const _boostProductId = 'com.intendedapp.boost';
+
+  final UserState _userState;
 
   bool _isPremium = false;
+  bool _hasBoost = false;
   Offerings? _offerings;
   bool _isInitialized = false;
 
+  RevenueCatService(this._userState);
+
   bool get isPremium => _isPremium;
+  bool get hasBoost => _hasBoost;
   Offerings? get offerings => _offerings;
 
   /// Initialize RevenueCat SDK (iOS only for now)
@@ -44,10 +55,17 @@ class RevenueCatService extends ChangeNotifier {
 
   void _updatePremiumStatus(CustomerInfo customerInfo) {
     final entitlement = customerInfo.entitlements.all[_entitlementId];
+    final boostEntitlement = customerInfo.entitlements.all[_boostEntitlementId];
     final wasPremium = _isPremium;
+    final hadBoost = _hasBoost;
     _isPremium = entitlement?.isActive ?? false;
+    _hasBoost = boostEntitlement?.isActive ?? false;
 
-    if (wasPremium != _isPremium) {
+    if (wasPremium != _isPremium || hadBoost != _hasBoost) {
+      _userState.setSubscription(_isPremium);
+      _userState.setBoost(_hasBoost);
+      final status = _isPremium ? 'premium' : _hasBoost ? 'boost' : 'free';
+      AnalyticsService.setSubscriptionStatus(status);
       notifyListeners();
     }
   }
@@ -92,8 +110,8 @@ class RevenueCatService extends ChangeNotifier {
   /// Returns true if purchase succeeded, false otherwise.
   Future<bool> purchasePackage(Package package) async {
     try {
-      final customerInfo = await Purchases.purchasePackage(package);
-      _updatePremiumStatus(customerInfo);
+      final result = await Purchases.purchasePackage(package);
+      _updatePremiumStatus(result.customerInfo);
       return _isPremium;
     } on PurchasesErrorCode catch (e) {
       if (e == PurchasesErrorCode.purchaseCancelledError) {
@@ -101,6 +119,28 @@ class RevenueCatService extends ChangeNotifier {
         return false;
       }
       debugPrint('RevenueCat: Purchase error: $e');
+      rethrow;
+    }
+  }
+
+  /// Purchase the Intended Boost (one-time, non-consumable).
+  /// Returns true if the boost entitlement is active after purchase.
+  Future<bool> purchaseBoost() async {
+    final package = getPackageByProductId(_boostProductId);
+    if (package == null) {
+      debugPrint('RevenueCat: Boost package not found for $_boostProductId');
+      return false;
+    }
+
+    try {
+      final result = await Purchases.purchasePackage(package);
+      _updatePremiumStatus(result.customerInfo);
+      return _hasBoost;
+    } on PurchasesErrorCode catch (e) {
+      if (e == PurchasesErrorCode.purchaseCancelledError) {
+        return false;
+      }
+      debugPrint('RevenueCat: Boost purchase error: $e');
       rethrow;
     }
   }
@@ -122,6 +162,17 @@ class RevenueCatService extends ChangeNotifier {
     }
 
     return purchasePackage(package);
+  }
+
+  /// Log in to RevenueCat with a user identifier (device ID or Firebase UID)
+  Future<void> logIn(String userId) async {
+    if (!_isInitialized) return;
+    try {
+      final result = await Purchases.logIn(userId);
+      _updatePremiumStatus(result.customerInfo);
+    } catch (e) {
+      debugPrint('RevenueCat: logIn failed: $e');
+    }
   }
 
   /// Restore purchases

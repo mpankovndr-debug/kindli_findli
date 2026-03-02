@@ -1,6 +1,5 @@
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart' show Colors;
 import 'package:provider/provider.dart';
 
@@ -9,12 +8,16 @@ import '../main.dart';
 import '../onboarding_v2/onboarding_state.dart';
 import '../models/moment.dart';
 import '../services/moments_service.dart';
+import '../services/analytics_service.dart';
+import '../services/week_stats_service.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme_provider.dart';
 import 'moments_collection_screen.dart';
+import 'share_card_picker_screen.dart';
 
 class ProgressScreen extends StatefulWidget {
-  const ProgressScreen({super.key});
+  final bool isActive;
+  const ProgressScreen({super.key, this.isActive = true});
 
   @override
   State<ProgressScreen> createState() => _ProgressScreenState();
@@ -22,8 +25,26 @@ class ProgressScreen extends StatefulWidget {
 
 class _ProgressScreenState extends State<ProgressScreen> {
   bool _showAllHabits = false;
-  Future<_WeekStats>? _weekStatsFuture;
-  List<String>? _lastHabits;
+
+  @override
+  void initState() {
+    super.initState();
+    AnalyticsService.logScreenView('progress');
+  }
+
+  @override
+  void didUpdateWidget(covariant ProgressScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isActive && !oldWidget.isActive) {
+      // Tab became active — refresh stats
+      final userHabits = context.read<OnboardingState>().userHabits;
+      if (userHabits.isNotEmpty) {
+        _refreshStats(userHabits);
+      }
+    }
+  }
+
+  Future<WeekStats>? _weekStatsFuture;
 
   List<String> _getAffirmations(AppLocalizations l10n) => [
     l10n.affirmation1, l10n.affirmation2, l10n.affirmation3,
@@ -47,47 +68,10 @@ class _ProgressScreenState extends State<ProgressScreen> {
     return affirmations[dayOfYear % affirmations.length];
   }
 
-  Future<_WeekStats> _calculateWeekStats(List<String> habits, DateTime now) async {
-    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
-
-    int totalCompletions = 0;
-    final Map<String, int> habitCounts = {};
-    final List<bool> dailyActivity = List.filled(7, false);
-
-    for (int i = 0; i < 7; i++) {
-      final date = startOfWeek.add(Duration(days: i));
-      bool hadActivityToday = false;
-
-      for (final habit in habits) {
-        final wasDone = await HabitTracker.wasDone(habit, date);
-        if (wasDone) {
-          totalCompletions++;
-          habitCounts[habit] = (habitCounts[habit] ?? 0) + 1;
-          hadActivityToday = true;
-        }
-      }
-
-      dailyActivity[i] = hadActivityToday;
-    }
-
-    final completedHabits = <String>[];
-    final sortedHabits = habitCounts.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
-
-    for (final entry in sortedHabits) {
-      completedHabits.add(entry.key);
-    }
-
-    return _WeekStats(
-      completionCount: totalCompletions,
-      completedHabits: completedHabits,
-      dailyActivity: dailyActivity,
-    );
-  }
-
   void _refreshStats(List<String> habits) {
-    _lastHabits = List.of(habits);
-    _weekStatsFuture = _calculateWeekStats(habits, DateTime.now());
+    setState(() {
+      _weekStatsFuture = WeekStatsService.calculate(habits, DateTime.now());
+    });
   }
 
   @override
@@ -97,8 +81,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
     final colors = context.watch<ThemeProvider>().colors;
     final l10n = AppLocalizations.of(context);
 
-    // Only recalculate when habits list actually changes
-    if (_weekStatsFuture == null || !listEquals(userHabits, _lastHabits)) {
+    if (_weekStatsFuture == null) {
       _refreshStats(userHabits);
     }
 
@@ -120,7 +103,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                       ),
                     ),
                   )
-                : FutureBuilder<_WeekStats>(
+                : FutureBuilder<WeekStats>(
                     future: _weekStatsFuture,
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) {
@@ -137,14 +120,44 @@ class _ProgressScreenState extends State<ProgressScreen> {
                           // 1. Header (fixed)
                           Padding(
                             padding: EdgeInsets.fromLTRB(24, MediaQuery.of(context).padding.top + 24, 24, 20),
-                            child: Text(
-                              l10n.progressTitle,
-                              style: TextStyle(
-                                fontFamily: 'Sora',
-                                fontSize: 32,
-                                fontWeight: FontWeight.w600,
-                                color: colors.textPrimary,
-                              ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  l10n.progressTitle,
+                                  style: TextStyle(
+                                    fontFamily: 'Sora',
+                                    fontSize: 32,
+                                    fontWeight: FontWeight.w600,
+                                    color: colors.textPrimary,
+                                  ),
+                                ),
+                                if (stats.completionCount > 0)
+                                  CupertinoButton(
+                                    padding: EdgeInsets.zero,
+                                    onPressed: () {
+                                      Navigator.of(context, rootNavigator: true).push(
+                                        PageRouteBuilder(
+                                          pageBuilder: (_, __, ___) => ShareCardPickerScreen(stats: stats),
+                                          transitionDuration: const Duration(milliseconds: 280),
+                                          reverseTransitionDuration: const Duration(milliseconds: 200),
+                                          transitionsBuilder: (_, animation, __, child) {
+                                            final curved = CurvedAnimation(
+                                              parent: animation,
+                                              curve: Curves.easeInOut,
+                                            );
+                                            return FadeTransition(opacity: curved, child: child);
+                                          },
+                                        ),
+                                      );
+                                    },
+                                    child: Icon(
+                                      CupertinoIcons.share,
+                                      size: 22,
+                                      color: colors.textSecondary,
+                                    ),
+                                  ),
+                              ],
                             ),
                           ),
 
@@ -200,7 +213,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
     );
   }
 
-  Widget _buildMainCard(_WeekStats stats, AppColorScheme colors, AppLocalizations l10n) {
+  Widget _buildMainCard(WeekStats stats, AppColorScheme colors, AppLocalizations l10n) {
     final habitsToShow = _showAllHabits
         ? stats.completedHabits
         : stats.completedHabits.take(3).toList();
@@ -472,17 +485,6 @@ class _ProgressScreenState extends State<ProgressScreen> {
   }
 }
 
-class _WeekStats {
-  final int completionCount;
-  final List<String> completedHabits;
-  final List<bool> dailyActivity;
-
-  _WeekStats({
-    required this.completionCount,
-    required this.completedHabits,
-    required this.dailyActivity,
-  });
-}
 
 class _AnimatedWeekDots extends StatefulWidget {
   final List<bool> dailyActivity;

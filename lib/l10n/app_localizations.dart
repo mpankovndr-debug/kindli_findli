@@ -188,6 +188,12 @@ abstract class AppLocalizations {
   /// **'Core'**
   String get appPlanCore;
 
+  /// No description provided for @appPlanBoost.
+  ///
+  /// In en, this message translates to:
+  /// **'Boost'**
+  String get appPlanBoost;
+
   /// No description provided for @appUnlockPlus.
   ///
   /// In en, this message translates to:
@@ -431,7 +437,7 @@ abstract class AppLocalizations {
   /// No description provided for @themeSelectionPremiumHint.
   ///
   /// In en, this message translates to:
-  /// **'Clear Sky and Morning Slate are available with Intended+. You can unlock them after setup.'**
+  /// **'Clear Sky and Morning Slate are available with Intended+. Try it free for 7 days after setup.'**
   String get themeSelectionPremiumHint;
 
   /// No description provided for @habitRevealTitle.
@@ -473,7 +479,7 @@ abstract class AppLocalizations {
   /// No description provided for @habitsHoldForOptions.
   ///
   /// In en, this message translates to:
-  /// **'Hold for options'**
+  /// **'Long press a habit for options'**
   String get habitsHoldForOptions;
 
   /// No description provided for @habitsCompleteOnboarding.
@@ -911,7 +917,7 @@ abstract class AppLocalizations {
   /// No description provided for @customHabitLimitMessage.
   ///
   /// In en, this message translates to:
-  /// **'Intended: 2 custom habits\nIntended+: Unlimited custom habits'**
+  /// **'Core: 2 custom habits\nBoost: 3 custom habits\nIntended+: Unlimited custom habits'**
   String get customHabitLimitMessage;
 
   /// No description provided for @menuUnpin.
@@ -1013,7 +1019,7 @@ abstract class AppLocalizations {
   /// No description provided for @swapLimitMessage.
   ///
   /// In en, this message translates to:
-  /// **'You\'ve used your 2 free swaps this month.\n\nIntended+: Unlimited swaps'**
+  /// **'You\'ve used all your free swaps this month.\n\nBoost: 3 swaps/month\nIntended+: Unlimited swaps'**
   String get swapLimitMessage;
 
   /// No description provided for @swapNoAltTitle.
@@ -2414,6 +2420,24 @@ abstract class AppLocalizations {
   /// **'Yesterday'**
   String get momentsYesterday;
 
+  /// No description provided for @monthSummaryMoments.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 moment in {month}} other{{count} moments in {month}}}'**
+  String monthSummaryMoments(int count, String month);
+
+  /// No description provided for @monthSummaryIntentions.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 intention this month} other{{count} intentions this month}}'**
+  String monthSummaryIntentions(int count);
+
+  /// No description provided for @monthSummaryTopIntention.
+  ///
+  /// In en, this message translates to:
+  /// **'Your most frequent intention: {intention}'**
+  String monthSummaryTopIntention(String intention);
+
   /// No description provided for @paywallTitle.
   ///
   /// In en, this message translates to:
@@ -2441,7 +2465,7 @@ abstract class AppLocalizations {
   /// No description provided for @paywallFeature3.
   ///
   /// In en, this message translates to:
-  /// **'Shareable weekly progress cards'**
+  /// **'Shareable milestone achievement cards'**
   String get paywallFeature3;
 
   /// No description provided for @paywallFeature4.
@@ -2459,7 +2483,7 @@ abstract class AppLocalizations {
   /// No description provided for @paywallMonthlyPrice.
   ///
   /// In en, this message translates to:
-  /// **'€4.99'**
+  /// **'€6.99'**
   String get paywallMonthlyPrice;
 
   /// No description provided for @paywallMonthlyPeriod.
@@ -2477,7 +2501,7 @@ abstract class AppLocalizations {
   /// No description provided for @paywallYearlyPrice.
   ///
   /// In en, this message translates to:
-  /// **'€39.99'**
+  /// **'€49.99'**
   String get paywallYearlyPrice;
 
   /// No description provided for @paywallYearlyPeriod.
@@ -2489,7 +2513,7 @@ abstract class AppLocalizations {
   /// No description provided for @paywallYearlySave.
   ///
   /// In en, this message translates to:
-  /// **'Save 33%'**
+  /// **'Save 40%'**
   String get paywallYearlySave;
 
   /// No description provided for @paywallLifetime.
@@ -2501,7 +2525,7 @@ abstract class AppLocalizations {
   /// No description provided for @paywallLifetimePrice.
   ///
   /// In en, this message translates to:
-  /// **'€69.99'**
+  /// **'€89.99'**
   String get paywallLifetimePrice;
 
   /// No description provided for @paywallLifetimePeriod.
@@ -2513,14 +2537,32 @@ abstract class AppLocalizations {
   /// No description provided for @paywallLifetimeBadge.
   ///
   /// In en, this message translates to:
-  /// **'Launch special'**
+  /// **'Launch price'**
   String get paywallLifetimeBadge;
 
-  /// No description provided for @paywallCta.
+  /// No description provided for @paywallCtaTrial.
   ///
   /// In en, this message translates to:
-  /// **'Start your 7-day free trial'**
-  String get paywallCta;
+  /// **'Start 7-day free trial'**
+  String get paywallCtaTrial;
+
+  /// No description provided for @paywallCtaLifetime.
+  ///
+  /// In en, this message translates to:
+  /// **'Get lifetime access'**
+  String get paywallCtaLifetime;
+
+  /// No description provided for @paywallTrialHint.
+  ///
+  /// In en, this message translates to:
+  /// **'7 days free, then {price}. Cancel anytime.'**
+  String paywallTrialHint(String price);
+
+  /// No description provided for @paywallLifetimeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'One-time purchase. No subscription.'**
+  String get paywallLifetimeHint;
 
   /// No description provided for @paywallContinueFree.
   ///
@@ -2528,11 +2570,23 @@ abstract class AppLocalizations {
   /// **'Continue with Core'**
   String get paywallContinueFree;
 
-  /// No description provided for @paywallUpgradeHint.
+  /// No description provided for @paywallRestorePurchases.
   ///
   /// In en, this message translates to:
-  /// **'You can upgrade anytime from your profile.'**
-  String get paywallUpgradeHint;
+  /// **'Restore Purchases'**
+  String get paywallRestorePurchases;
+
+  /// No description provided for @paywallTerms.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms'**
+  String get paywallTerms;
+
+  /// No description provided for @paywallPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy'**
+  String get paywallPrivacy;
 
   /// No description provided for @subscriptionTitle.
   ///
@@ -2717,7 +2771,7 @@ abstract class AppLocalizations {
   /// No description provided for @profileTerms.
   ///
   /// In en, this message translates to:
-  /// **'Terms of Service'**
+  /// **'Terms of Use'**
   String get profileTerms;
 
   /// No description provided for @profileConnectAccount.
@@ -2795,7 +2849,7 @@ abstract class AppLocalizations {
   /// No description provided for @profileFocusLimitOptions.
   ///
   /// In en, this message translates to:
-  /// **'• One-time: €0.99\n• Intended+: Unlimited'**
+  /// **'• Boost: Extra changes\n• Intended+: Unlimited'**
   String get profileFocusLimitOptions;
 
   /// No description provided for @profilePayAmount.
@@ -3595,6 +3649,216 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Do absolutely nothing for 30 seconds'**
   String get habitDoNothing;
+
+  /// No description provided for @shareCardWeeklyCheckin.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly check-in'**
+  String get shareCardWeeklyCheckin;
+
+  /// No description provided for @shareCardMilestone.
+  ///
+  /// In en, this message translates to:
+  /// **'Milestone'**
+  String get shareCardMilestone;
+
+  /// No description provided for @shareCardShowedUpPhrase.
+  ///
+  /// In en, this message translates to:
+  /// **'I showed up for myself this week'**
+  String get shareCardShowedUpPhrase;
+
+  /// No description provided for @shareCardTimes.
+  ///
+  /// In en, this message translates to:
+  /// **'times'**
+  String get shareCardTimes;
+
+  /// No description provided for @shareCardTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'intention, not perfection'**
+  String get shareCardTagline;
+
+  /// No description provided for @shareCardWeeks.
+  ///
+  /// In en, this message translates to:
+  /// **'weeks'**
+  String get shareCardWeeks;
+
+  /// No description provided for @shareCardMilestoneSubtext.
+  ///
+  /// In en, this message translates to:
+  /// **'of being gentle with myself'**
+  String get shareCardMilestoneSubtext;
+
+  /// No description provided for @shareCardDescriptor.
+  ///
+  /// In en, this message translates to:
+  /// **'intention, not perfection'**
+  String get shareCardDescriptor;
+
+  /// No description provided for @sharePickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What would you like to share?'**
+  String get sharePickerTitle;
+
+  /// No description provided for @shareWeeklySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'how many times you showed up this week'**
+  String get shareWeeklySubtitle;
+
+  /// No description provided for @shareShowingUpSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'your own way, your own pace'**
+  String get shareShowingUpSubtitle;
+
+  /// No description provided for @shareFocusAreaSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'the area you keep returning to'**
+  String get shareFocusAreaSubtitle;
+
+  /// No description provided for @shareYourThingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'the habit that\'s sticking'**
+  String get shareYourThingSubtitle;
+
+  /// No description provided for @milestoneShowingUpLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing up'**
+  String get milestoneShowingUpLabel;
+
+  /// No description provided for @milestoneAreaLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus area'**
+  String get milestoneAreaLabel;
+
+  /// No description provided for @milestoneIdentityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Your thing'**
+  String get milestoneIdentityLabel;
+
+  /// No description provided for @milestoneShowingUpHero.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} {count, plural, =1{week} other{weeks}}'**
+  String milestoneShowingUpHero(int count);
+
+  /// No description provided for @milestoneShowingUpSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'of showing up — in your own way'**
+  String get milestoneShowingUpSubtitle;
+
+  /// No description provided for @milestoneAreaHero.
+  ///
+  /// In en, this message translates to:
+  /// **'{area}'**
+  String milestoneAreaHero(String area);
+
+  /// No description provided for @milestoneAreaSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'you keep coming back to what matters'**
+  String get milestoneAreaSubtitle;
+
+  /// No description provided for @milestoneIdentityHero.
+  ///
+  /// In en, this message translates to:
+  /// **'{habit}'**
+  String milestoneIdentityHero(String habit);
+
+  /// No description provided for @milestoneIdentitySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'is becoming your thing'**
+  String get milestoneIdentitySubtitle;
+
+  /// No description provided for @boostCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Intended Boost — €1.99 one-time'**
+  String get boostCardTitle;
+
+  /// No description provided for @boostCardSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'+1 habit, +1 focus area, share cards'**
+  String get boostCardSubtitle;
+
+  /// No description provided for @boostOrDivider.
+  ///
+  /// In en, this message translates to:
+  /// **'or'**
+  String get boostOrDivider;
+
+  /// No description provided for @boostGoUnlimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Go unlimited with Intended+'**
+  String get boostGoUnlimited;
+
+  /// No description provided for @boostPurchaseError.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong with the purchase. Please try again.'**
+  String get boostPurchaseError;
+
+  /// No description provided for @boostOfferHabitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Want one more habit?'**
+  String get boostOfferHabitTitle;
+
+  /// No description provided for @boostOfferHabitDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Create one more habit that fits your life.'**
+  String get boostOfferHabitDesc;
+
+  /// No description provided for @boostOfferFocusTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Need another focus area?'**
+  String get boostOfferFocusTitle;
+
+  /// No description provided for @boostOfferFocusDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Add one more area to focus on what matters.'**
+  String get boostOfferFocusDesc;
+
+  /// No description provided for @boostOfferSwapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of swaps this month?'**
+  String get boostOfferSwapTitle;
+
+  /// No description provided for @boostOfferSwapDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Get a few more swaps to find the right habits.'**
+  String get boostOfferSwapDesc;
+
+  /// No description provided for @boostOfferShareTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Share your progress?'**
+  String get boostOfferShareTitle;
+
+  /// No description provided for @boostOfferShareDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock shareable milestone cards.'**
+  String get boostOfferShareDesc;
 }
 
 class _AppLocalizationsDelegate

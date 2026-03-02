@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 import 'theme_selection_screen.dart';
 import 'onboarding_state.dart';
+import '../services/analytics_service.dart';
 import '../services/notification_scheduler.dart';
 import '../services/notification_preferences_service.dart';
 import '../theme/app_colors.dart';
@@ -31,6 +32,8 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
     _timeController = TextEditingController(
       text: state.reminderTime ?? '09:00',
     );
+
+    AnalyticsService.logScreenView('daily_reminder');
   }
 
   @override
@@ -43,6 +46,8 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
     HapticFeedback.mediumImpact();
 
     final state = context.read<OnboardingState>();
+    AnalyticsService.logOnboardingStepCompleted('daily_reminder');
+    AnalyticsService.logDailyReminderToggled(state.dailyReminderEnabled);
 
     // Navigate to Habit Reveal screen
     Navigator.push(
@@ -129,7 +134,8 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(20),
                               child: BackdropFilter(
-                                filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                                filter:
+                                    ImageFilter.blur(sigmaX: 15, sigmaY: 15),
                                 child: Container(
                                   width: 40,
                                   height: 40,
@@ -138,18 +144,22 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                                       begin: Alignment.topLeft,
                                       end: Alignment.bottomRight,
                                       colors: [
-                                        const Color(0xFFFFFFFF).withOpacity(0.35),
-                                        const Color(0xFFFFFFFF).withOpacity(0.2),
+                                        const Color(0xFFFFFFFF)
+                                            .withOpacity(0.35),
+                                        const Color(0xFFFFFFFF)
+                                            .withOpacity(0.2),
                                       ],
                                     ),
                                     borderRadius: BorderRadius.circular(20),
                                     border: Border.all(
-                                      color: const Color(0xFFFFFFFF).withOpacity(0.3),
+                                      color: const Color(0xFFFFFFFF)
+                                          .withOpacity(0.3),
                                       width: 1,
                                     ),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: colors.textPrimary.withOpacity(0.08),
+                                        color: colors.textPrimary
+                                            .withOpacity(0.08),
                                         blurRadius: 10,
                                         offset: const Offset(0, 2),
                                       ),
@@ -213,9 +223,11 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                             _buildWeeklySummaryCard(state, colors, l10n),
 
                             // Helper message when OFF
-                            if (!state.dailyReminderEnabled && !_permissionDenied)
+                            if (!state.dailyReminderEnabled &&
+                                !_permissionDenied)
                               Padding(
-                                padding: const EdgeInsets.only(top: 4, bottom: 20),
+                                padding:
+                                    const EdgeInsets.only(top: 4, bottom: 20),
                                 child: Center(
                                   child: Text(
                                     l10n.reminderSwitchHint,
@@ -234,7 +246,8 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                             // Permission denied message
                             if (_permissionDenied)
                               Padding(
-                                padding: const EdgeInsets.only(top: 4, bottom: 20),
+                                padding:
+                                    const EdgeInsets.only(top: 4, bottom: 20),
                                 child: Center(
                                   child: Text(
                                     l10n.reminderNoWorries,
@@ -320,9 +333,12 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                               ),
                               child: CupertinoButton(
                                 onPressed: _handleContinue,
-                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
                                 child: Text(
-                                  hasName ? l10n.reminderLetsGo(userName!) : l10n.commonStart,
+                                  hasName
+                                      ? l10n.reminderLetsGo(userName)
+                                      : l10n.commonStart,
                                   style: const TextStyle(
                                     fontFamily: 'Sora',
                                     fontSize: 17,
@@ -417,7 +433,8 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
     );
   }
 
-  Widget _buildToggleCard(OnboardingState state, AppColorScheme colors, AppLocalizations l10n) {
+  Widget _buildToggleCard(
+      OnboardingState state, AppColorScheme colors, AppLocalizations l10n) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(22),
       child: BackdropFilter(
@@ -451,7 +468,8 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
             children: [
               // Top section - Toggle
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
                 child: Row(
                   children: [
                     Expanded(
@@ -502,9 +520,9 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                     ),
                   ),
                 ),
-
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
                   child: Column(
                     children: [
                       Text(
@@ -518,7 +536,6 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                         ),
                       ),
                       const SizedBox(height: 12),
-
                       ClipRRect(
                         borderRadius: BorderRadius.circular(16),
                         child: BackdropFilter(
@@ -559,20 +576,26 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                               ),
                               decoration: const BoxDecoration(),
                               onTap: () async {
-                                DateTime tempTime = _parseTime(_timeController.text);
+                                DateTime tempTime =
+                                    _parseTime(_timeController.text);
 
                                 await showCupertinoModalPopup(
                                   context: context,
                                   barrierColor: Colors.black.withOpacity(0.5),
-                                  filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                                  filter:
+                                      ImageFilter.blur(sigmaX: 5, sigmaY: 5),
                                   builder: (context) => Container(
                                     margin: EdgeInsets.only(
-                                      bottom: MediaQuery.of(context).viewInsets.bottom,
+                                      bottom: MediaQuery.of(context)
+                                          .viewInsets
+                                          .bottom,
                                     ),
                                     child: ClipRRect(
-                                      borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+                                      borderRadius: const BorderRadius.vertical(
+                                          top: Radius.circular(32)),
                                       child: BackdropFilter(
-                                        filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+                                        filter: ImageFilter.blur(
+                                            sigmaX: 40, sigmaY: 40),
                                         child: Container(
                                           height: 340,
                                           decoration: BoxDecoration(
@@ -580,15 +603,21 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                                               begin: Alignment.topCenter,
                                               end: Alignment.bottomCenter,
                                               colors: [
-                                                colors.modalBg1.withOpacity(0.98),
-                                                colors.modalBg2.withOpacity(0.96),
-                                                colors.modalBg3.withOpacity(0.98),
+                                                colors.modalBg1
+                                                    .withOpacity(0.98),
+                                                colors.modalBg2
+                                                    .withOpacity(0.96),
+                                                colors.modalBg3
+                                                    .withOpacity(0.98),
                                               ],
                                               stops: const [0.0, 0.5, 1.0],
                                             ),
-                                            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+                                            borderRadius:
+                                                const BorderRadius.vertical(
+                                                    top: Radius.circular(32)),
                                             border: Border.all(
-                                              color: Colors.white.withOpacity(0.6),
+                                              color:
+                                                  Colors.white.withOpacity(0.6),
                                               width: 1.5,
                                             ),
                                           ),
@@ -596,64 +625,109 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                                             children: [
                                               // Handle bar
                                               Container(
-                                                margin: const EdgeInsets.only(top: 12),
+                                                margin: const EdgeInsets.only(
+                                                    top: 12),
                                                 width: 36,
                                                 height: 4,
                                                 decoration: BoxDecoration(
-                                                  color: colors.ctaPrimary.withOpacity(0.2),
-                                                  borderRadius: BorderRadius.circular(2),
+                                                  color: colors.ctaPrimary
+                                                      .withOpacity(0.2),
+                                                  borderRadius:
+                                                      BorderRadius.circular(2),
                                                 ),
                                               ),
 
                                               // Header with Done button
                                               Padding(
-                                                padding: const EdgeInsets.fromLTRB(24, 16, 16, 12),
+                                                padding:
+                                                    const EdgeInsets.fromLTRB(
+                                                        24, 16, 16, 12),
                                                 child: Row(
-                                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
                                                   children: [
                                                     Text(
                                                       l10n.reminderTimePicker,
                                                       style: TextStyle(
                                                         fontFamily: 'Sora',
                                                         fontSize: 18,
-                                                        fontWeight: FontWeight.w600,
-                                                        color: colors.textPrimary,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        color:
+                                                            colors.textPrimary,
                                                       ),
                                                     ),
                                                     GestureDetector(
                                                       onTap: () async {
-                                                        HapticFeedback.lightImpact();
+                                                        HapticFeedback
+                                                            .lightImpact();
                                                         setState(() {
                                                           _timeController.text =
                                                               '${tempTime.hour.toString().padLeft(2, '0')}:${tempTime.minute.toString().padLeft(2, '0')}';
-                                                          context.read<OnboardingState>().setReminderTime(_timeController.text);
+                                                          context
+                                                              .read<
+                                                                  OnboardingState>()
+                                                              .setReminderTime(
+                                                                  _timeController
+                                                                      .text);
                                                         });
                                                         Navigator.pop(context);
-                                                        await NotificationPreferencesService.setHour(tempTime.hour);
-                                                        await NotificationPreferencesService.setMinute(tempTime.minute);
-                                                        final enabled = await NotificationPreferencesService.isEnabled();
+                                                        await NotificationPreferencesService
+                                                            .setHour(
+                                                                tempTime.hour);
+                                                        await NotificationPreferencesService
+                                                            .setMinute(tempTime
+                                                                .minute);
+                                                        final enabled =
+                                                            await NotificationPreferencesService
+                                                                .isEnabled();
                                                         if (enabled) {
-                                                          final l10n = AppLocalizations.of(context);
-                                                          await NotificationScheduler.rescheduleAll(l10n);
+                                                          final l10n =
+                                                              AppLocalizations
+                                                                  .of(context);
+                                                          await NotificationScheduler
+                                                              .rescheduleAll(
+                                                                  l10n);
                                                         }
                                                       },
                                                       child: Container(
-                                                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                                                        decoration: BoxDecoration(
-                                                          gradient: LinearGradient(
-                                                            begin: Alignment.topLeft,
-                                                            end: Alignment.bottomRight,
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                                horizontal: 24,
+                                                                vertical: 12),
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          gradient:
+                                                              LinearGradient(
+                                                            begin: Alignment
+                                                                .topLeft,
+                                                            end: Alignment
+                                                                .bottomRight,
                                                             colors: [
-                                                              colors.ctaPrimary.withOpacity(0.92),
-                                                              colors.ctaSecondary.withOpacity(0.88),
+                                                              colors.ctaPrimary
+                                                                  .withOpacity(
+                                                                      0.92),
+                                                              colors
+                                                                  .ctaSecondary
+                                                                  .withOpacity(
+                                                                      0.88),
                                                             ],
                                                           ),
-                                                          borderRadius: BorderRadius.circular(14),
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(14),
                                                           boxShadow: [
                                                             BoxShadow(
-                                                              color: colors.textPrimary.withOpacity(0.2),
+                                                              color: colors
+                                                                  .textPrimary
+                                                                  .withOpacity(
+                                                                      0.2),
                                                               blurRadius: 8,
-                                                              offset: const Offset(0, 3),
+                                                              offset:
+                                                                  const Offset(
+                                                                      0, 3),
                                                             ),
                                                           ],
                                                         ),
@@ -662,7 +736,8 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                                                           style: TextStyle(
                                                             fontFamily: 'Sora',
                                                             fontSize: 15,
-                                                            fontWeight: FontWeight.w600,
+                                                            fontWeight:
+                                                                FontWeight.w600,
                                                             color: Colors.white,
                                                           ),
                                                         ),
@@ -675,13 +750,18 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                                               // Subtle divider
                                               Container(
                                                 height: 1,
-                                                margin: const EdgeInsets.symmetric(horizontal: 24),
+                                                margin:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 24),
                                                 decoration: BoxDecoration(
                                                   gradient: LinearGradient(
                                                     colors: [
-                                                      colors.ctaPrimary.withOpacity(0.0),
-                                                      colors.ctaPrimary.withOpacity(0.15),
-                                                      colors.ctaPrimary.withOpacity(0.0),
+                                                      colors.ctaPrimary
+                                                          .withOpacity(0.0),
+                                                      colors.ctaPrimary
+                                                          .withOpacity(0.15),
+                                                      colors.ctaPrimary
+                                                          .withOpacity(0.0),
                                                     ],
                                                   ),
                                                 ),
@@ -691,21 +771,29 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                                               Expanded(
                                                 child: CupertinoTheme(
                                                   data: CupertinoThemeData(
-                                                    textTheme: CupertinoTextThemeData(
-                                                      dateTimePickerTextStyle: TextStyle(
+                                                    textTheme:
+                                                        CupertinoTextThemeData(
+                                                      dateTimePickerTextStyle:
+                                                          TextStyle(
                                                         fontFamily: 'Sora',
                                                         fontSize: 22,
-                                                        fontWeight: FontWeight.w500,
-                                                        color: colors.textPrimary,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                        color:
+                                                            colors.textPrimary,
                                                       ),
                                                     ),
                                                   ),
                                                   child: CupertinoDatePicker(
-                                                    mode: CupertinoDatePickerMode.time,
+                                                    mode:
+                                                        CupertinoDatePickerMode
+                                                            .time,
                                                     use24hFormat: true,
                                                     initialDateTime: tempTime,
-                                                    backgroundColor: Colors.transparent,
-                                                    onDateTimeChanged: (DateTime newTime) {
+                                                    backgroundColor:
+                                                        Colors.transparent,
+                                                    onDateTimeChanged:
+                                                        (DateTime newTime) {
                                                       tempTime = newTime;
                                                     },
                                                   ),
@@ -713,7 +801,11 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                                               ),
 
                                               // Bottom safe area padding
-                                              SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
+                                              SizedBox(
+                                                  height: MediaQuery.of(context)
+                                                          .padding
+                                                          .bottom +
+                                                      8),
                                             ],
                                           ),
                                         ),
@@ -737,7 +829,8 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
     );
   }
 
-  Widget _buildWeeklySummaryCard(OnboardingState state, AppColorScheme colors, AppLocalizations l10n) {
+  Widget _buildWeeklySummaryCard(
+      OnboardingState state, AppColorScheme colors, AppLocalizations l10n) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(22),
       child: BackdropFilter(
@@ -800,7 +893,8 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                     HapticFeedback.selectionClick();
                     final value = !_weeklyEnabled;
                     setState(() => _weeklyEnabled = value);
-                    await NotificationPreferencesService.setWeeklyEnabled(value);
+                    await NotificationPreferencesService.setWeeklyEnabled(
+                        value);
                     final l10n = AppLocalizations.of(context);
                     if (value) {
                       if (state.dailyReminderEnabled) {
@@ -838,7 +932,8 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: colors.textPrimary.withOpacity(_weeklyEnabled ? 0.2 : 0.08),
+                          color: colors.textPrimary
+                              .withOpacity(_weeklyEnabled ? 0.2 : 0.08),
                           blurRadius: _weeklyEnabled ? 8 : 6,
                           offset: const Offset(0, 2),
                         ),
@@ -940,7 +1035,8 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
           ),
           boxShadow: [
             BoxShadow(
-              color: colors.textPrimary.withOpacity(state.dailyReminderEnabled ? 0.2 : 0.08),
+              color: colors.textPrimary
+                  .withOpacity(state.dailyReminderEnabled ? 0.2 : 0.08),
               blurRadius: state.dailyReminderEnabled ? 8 : 6,
               offset: const Offset(0, 2),
             ),

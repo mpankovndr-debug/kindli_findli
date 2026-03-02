@@ -4,6 +4,7 @@ import '../l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../models/moment.dart';
+import '../services/analytics_service.dart';
 import '../services/moments_service.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme_provider.dart';
@@ -20,12 +21,14 @@ class _MomentsCollectionScreenState extends State<MomentsCollectionScreen> {
   Map<String, List<Moment>> _grouped = {};
   bool _loading = true;
   bool _didLoad = false;
+  final Set<String> _expandedMonths = {};
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_didLoad) {
       _didLoad = true;
+      AnalyticsService.logScreenView('moments_collection');
       _load();
     }
   }
@@ -114,8 +117,45 @@ class _MomentsCollectionScreenState extends State<MomentsCollectionScreen> {
     );
   }
 
+  String _currentMonthKey(AppLocalizations l10n) {
+    final now = DateTime.now();
+    final months = [
+      l10n.monthJanuary, l10n.monthFebruary, l10n.monthMarch,
+      l10n.monthApril, l10n.monthMay, l10n.monthJune,
+      l10n.monthJuly, l10n.monthAugust, l10n.monthSeptember,
+      l10n.monthOctober, l10n.monthNovember, l10n.monthDecember,
+    ];
+    return '${months[now.month - 1]} ${now.year}';
+  }
+
+  void _toggleMonth(String month) {
+    setState(() {
+      if (_expandedMonths.contains(month)) {
+        _expandedMonths.remove(month);
+      } else {
+        _expandedMonths.add(month);
+      }
+    });
+  }
+
+  /// Returns the most frequent habit name. Ties broken by most recent completion.
+  String _mostFrequentIntention(List<Moment> moments) {
+    final counts = <String, int>{};
+    for (final m in moments) {
+      counts[m.habitName] = (counts[m.habitName] ?? 0) + 1;
+    }
+    final maxCount = counts.values.reduce((a, b) => a > b ? a : b);
+    // moments are newest-first, so first match wins the tiebreak
+    for (final m in moments) {
+      if (counts[m.habitName] == maxCount) return m.habitName;
+    }
+    return moments.first.habitName;
+  }
+
   Widget _buildList(AppColorScheme colors) {
+    final l10n = AppLocalizations.of(context);
     final months = _grouped.keys.toList();
+    final currentMonthKey = _currentMonthKey(l10n);
 
     return CustomScrollView(
       slivers: [
@@ -130,9 +170,44 @@ class _MomentsCollectionScreenState extends State<MomentsCollectionScreen> {
 
         // Month sections
         for (final month in months) ...[
+          // Month header — tappable for past months
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 28, 24, 10),
+            child: _buildMonthHeader(month, month == currentMonthKey, colors),
+          ),
+
+          // Current or expanded month → full entry list
+          if (month == currentMonthKey || _expandedMonths.contains(month))
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final moment = _grouped[month]![index];
+                  return _MomentRow(moment: moment);
+                },
+                childCount: _grouped[month]!.length,
+              ),
+            )
+          // Past collapsed month → summary card
+          else
+            SliverToBoxAdapter(
+              child: _buildSummaryCard(month, _grouped[month]!, colors, l10n),
+            ),
+        ],
+
+        const SliverToBoxAdapter(child: SizedBox(height: 140)),
+      ],
+    );
+  }
+
+  Widget _buildMonthHeader(String month, bool isCurrentMonth, AppColorScheme colors) {
+    final isExpanded = _expandedMonths.contains(month);
+
+    return GestureDetector(
+      onTap: isCurrentMonth ? null : () => _toggleMonth(month),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 28, 24, 10),
+        child: Row(
+          children: [
+            Expanded(
               child: Text(
                 month.toUpperCase(),
                 style: TextStyle(
@@ -144,20 +219,86 @@ class _MomentsCollectionScreenState extends State<MomentsCollectionScreen> {
                 ),
               ),
             ),
-          ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final moment = _grouped[month]![index];
-                return _MomentRow(moment: moment);
-              },
-              childCount: _grouped[month]!.length,
+            if (!isCurrentMonth)
+              Icon(
+                isExpanded
+                    ? CupertinoIcons.chevron_up
+                    : CupertinoIcons.chevron_down,
+                size: 14,
+                color: colors.ctaPrimary,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSummaryCard(
+    String month,
+    List<Moment> moments,
+    AppColorScheme colors,
+    AppLocalizations l10n,
+  ) {
+    final momentCount = moments.length;
+    final intentionCount = moments.map((m) => m.habitName).toSet().length;
+    final topIntention = _mostFrequentIntention(moments);
+
+    return GestureDetector(
+      onTap: () => _toggleMonth(month),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFFFFF).withOpacity(0.30),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: const Color(0xFFFFFFFF).withOpacity(0.35),
+                  width: 1,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.monthSummaryMoments(momentCount, month),
+                    style: TextStyle(
+                      fontFamily: 'Sora',
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: colors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    l10n.monthSummaryIntentions(intentionCount),
+                    style: TextStyle(
+                      fontFamily: 'Sora',
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                      color: colors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    l10n.monthSummaryTopIntention(topIntention),
+                    style: TextStyle(
+                      fontFamily: 'Sora',
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                      color: colors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ],
-
-        const SliverToBoxAdapter(child: SizedBox(height: 140)),
-      ],
+        ),
+      ),
     );
   }
 
