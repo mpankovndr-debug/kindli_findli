@@ -608,6 +608,9 @@
   "profileWeeklySummary": "Итоги недели",
   "profileWeeklySubtitle": "Каждое воскресенье вечером",
   "profileNotifDenied": "Ничего страшного — включить уведомления можно в настройках устройства.",
+  "profileNotifDeniedTitle": "Уведомления отключены",
+  "profileNotifDeniedMessage": "Чтобы включить напоминания, разрешите уведомления для Intended в настройках устройства.",
+  "profileNotifOpenSettings": "Открыть настройки",
   "profileAppearance": "Внешний вид",
   "profileSupport": "ПОДДЕРЖКА",
   "profileHelpSupport": "Помощь и поддержка",
@@ -846,7 +849,7 @@
   "boostBenefit2Detail": "вместо 2",
   "boostBenefit3": "3 замены/месяц",
   "boostBenefit3Detail": "вместо 2",
-  "boostBenefit4": "Карточки прогресса для друзей",
+  "boostBenefit4": "Карточка «Я иду своим путём»",
   "boostOfferHabitTitle": "Хочешь ещё одну привычку?",
   "boostOfferHabitDesc": "Ты строишь что-то важное — дай себе место для ещё одной.",
   "boostOfferFocusTitle": "Нужно ещё одно направление?",
@@ -854,5 +857,13 @@
   "boostOfferSwapTitle": "Замены закончились?",
   "boostOfferSwapDesc": "Поиск подходящих привычек — это путь. Получи ещё несколько попыток.",
   "boostOfferShareTitle": "Поделиться прогрессом?",
-  "boostOfferShareDesc": "Твой путь стоит того, чтобы им делиться — покажи его близким."
+  "boostOfferShareDesc": "Твой путь стоит того, чтобы им делиться — покажи его близким.",
+
+  "commonDismiss": "Закрыть",
+  "focusLimitFreeTitle": "Лимит фокус-областей",
+  "focusLimitFreeMessage": "Бесплатный план включает 1 фокус-область. Перейди на платный, чтобы открыть больше.",
+  "focusLimitFreeUpgrade": "Улучшить",
+  "focusNudgeTitle": "Меньше — значит больше",
+  "focusNudgeMessage": "Сосредоточься на одной области для лучших результатов.",
+  "focusNudgeGotIt": "Понятно"
 }

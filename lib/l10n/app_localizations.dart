@@ -152,12 +152,6 @@ abstract class AppLocalizations {
   /// **'Not now'**
   String get commonNotNow;
 
-  /// No description provided for @commonDismiss.
-  ///
-  /// In en, this message translates to:
-  /// **'Dismiss'**
-  String get commonDismiss;
-
   /// No description provided for @commonStart.
   ///
   /// In en, this message translates to:
@@ -349,42 +343,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You can select up to 2 areas. Deselect one to choose another.'**
   String get focusAreasLimitMessage;
-
-  /// No description provided for @focusLimitFreeTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Two is a great start'**
-  String get focusLimitFreeTitle;
-
-  /// No description provided for @focusLimitFreeMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Want to explore more? Upgrade to Intended+ for unlimited focus areas.'**
-  String get focusLimitFreeMessage;
-
-  /// No description provided for @focusLimitFreeUpgrade.
-  ///
-  /// In en, this message translates to:
-  /// **'Upgrade'**
-  String get focusLimitFreeUpgrade;
-
-  /// No description provided for @focusNudgeTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'A gentle thought'**
-  String get focusNudgeTitle;
-
-  /// No description provided for @focusNudgeMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'You can choose as many as you\'d like! Focusing on fewer areas tends to lead to deeper growth. But you know yourself best.'**
-  String get focusNudgeMessage;
-
-  /// No description provided for @focusNudgeGotIt.
-  ///
-  /// In en, this message translates to:
-  /// **'Got it'**
-  String get focusNudgeGotIt;
 
   /// No description provided for @reminderTitle.
   ///
@@ -2786,6 +2744,24 @@ abstract class AppLocalizations {
   /// **'No worries — you can enable notifications in your device Settings.'**
   String get profileNotifDenied;
 
+  /// No description provided for @profileNotifDeniedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications Disabled'**
+  String get profileNotifDeniedTitle;
+
+  /// No description provided for @profileNotifDeniedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'To enable reminders, please turn on notifications for Intended in your device Settings.'**
+  String get profileNotifDeniedMessage;
+
+  /// No description provided for @profileNotifOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings'**
+  String get profileNotifOpenSettings;
+
   /// No description provided for @profileAppearance.
   ///
   /// In en, this message translates to:
@@ -3905,7 +3881,7 @@ abstract class AppLocalizations {
   /// No description provided for @boostBenefit4.
   ///
   /// In en, this message translates to:
-  /// **'Shareable progress cards'**
+  /// **'\'Showing up\' milestone card'**
   String get boostBenefit4;
 
   /// No description provided for @boostOfferHabitTitle.
@@ -3955,6 +3931,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your journey is worth celebrating — share it with people who care.'**
   String get boostOfferShareDesc;
+
+  /// No description provided for @commonDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get commonDismiss;
+
+  /// No description provided for @focusLimitFreeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus area limit reached'**
+  String get focusLimitFreeTitle;
+
+  /// No description provided for @focusLimitFreeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Free plan includes 1 focus area. Upgrade to unlock more.'**
+  String get focusLimitFreeMessage;
+
+  /// No description provided for @focusLimitFreeUpgrade.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade'**
+  String get focusLimitFreeUpgrade;
+
+  /// No description provided for @focusNudgeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Less is more'**
+  String get focusNudgeTitle;
+
+  /// No description provided for @focusNudgeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus on one area at a time for the best results.'**
+  String get focusNudgeMessage;
+
+  /// No description provided for @focusNudgeGotIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get focusNudgeGotIt;
 }
 
 class _AppLocalizationsDelegate

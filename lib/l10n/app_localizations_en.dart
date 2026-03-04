@@ -36,9 +36,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonNotNow => 'Not now';
 
   @override
-  String get commonDismiss => 'Dismiss';
-
-  @override
   String get commonStart => 'Start';
 
   @override
@@ -143,26 +140,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get focusAreasLimitMessage =>
       'You can select up to 2 areas. Deselect one to choose another.';
-
-  @override
-  String get focusLimitFreeTitle => 'Two is a great start';
-
-  @override
-  String get focusLimitFreeMessage =>
-      'Want to explore more? Upgrade to Intended+ for unlimited focus areas.';
-
-  @override
-  String get focusLimitFreeUpgrade => 'Upgrade';
-
-  @override
-  String get focusNudgeTitle => 'A gentle thought';
-
-  @override
-  String get focusNudgeMessage =>
-      "You can choose as many as you'd like! Focusing on fewer areas tends to lead to deeper growth. But you know yourself best.";
-
-  @override
-  String get focusNudgeGotIt => 'Got it';
 
   @override
   String get reminderTitle => 'Reminder';
@@ -1543,6 +1520,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'No worries — you can enable notifications in your device Settings.';
 
   @override
+  String get profileNotifDeniedTitle => 'Notifications Disabled';
+
+  @override
+  String get profileNotifDeniedMessage =>
+      'To enable reminders, please turn on notifications for Intended in your device Settings.';
+
+  @override
+  String get profileNotifOpenSettings => 'Open Settings';
+
+  @override
   String get profileAppearance => 'Appearance';
 
   @override
@@ -2143,7 +2130,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get boostBenefit3Detail => 'up from 2';
 
   @override
-  String get boostBenefit4 => 'Shareable progress cards';
+  String get boostBenefit4 => '\'Showing up\' milestone card';
 
   @override
   String get boostOfferHabitTitle => 'Want one more habit?';
@@ -2172,4 +2159,27 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get boostOfferShareDesc =>
       'Your journey is worth celebrating — share it with people who care.';
+
+  @override
+  String get commonDismiss => 'Dismiss';
+
+  @override
+  String get focusLimitFreeTitle => 'Focus area limit reached';
+
+  @override
+  String get focusLimitFreeMessage =>
+      'Free plan includes 1 focus area. Upgrade to unlock more.';
+
+  @override
+  String get focusLimitFreeUpgrade => 'Upgrade';
+
+  @override
+  String get focusNudgeTitle => 'Less is more';
+
+  @override
+  String get focusNudgeMessage =>
+      'Focus on one area at a time for the best results.';
+
+  @override
+  String get focusNudgeGotIt => 'Got it';
 }

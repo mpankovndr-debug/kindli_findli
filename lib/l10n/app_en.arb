@@ -499,6 +499,9 @@
   "profileWeeklySummary": "Weekly summary",
   "profileWeeklySubtitle": "Every Sunday evening",
   "profileNotifDenied": "No worries — you can enable notifications in your device Settings.",
+  "profileNotifDeniedTitle": "Notifications Disabled",
+  "profileNotifDeniedMessage": "To enable reminders, please turn on notifications for Intended in your device Settings.",
+  "profileNotifOpenSettings": "Open Settings",
   "profileAppearance": "Appearance",
   "profileSupport": "SUPPORT",
   "profileHelpSupport": "Help & Support",
@@ -711,7 +714,7 @@
   "boostBenefit2Detail": "up from 2",
   "boostBenefit3": "3 habit swaps/month",
   "boostBenefit3Detail": "up from 2",
-  "boostBenefit4": "Shareable progress cards",
+  "boostBenefit4": "'Showing up' milestone card",
   "boostOfferHabitTitle": "Want one more habit?",
   "boostOfferHabitDesc": "You're building something meaningful — give yourself room for one more.",
   "boostOfferFocusTitle": "Need another focus area?",
@@ -719,5 +722,13 @@
   "boostOfferSwapTitle": "Out of swaps this month?",
   "boostOfferSwapDesc": "Finding the right habits takes exploring — get a few more tries.",
   "boostOfferShareTitle": "Share your progress?",
-  "boostOfferShareDesc": "Your journey is worth celebrating — share it with people who care."
+  "boostOfferShareDesc": "Your journey is worth celebrating — share it with people who care.",
+
+  "commonDismiss": "Dismiss",
+  "focusLimitFreeTitle": "Focus area limit reached",
+  "focusLimitFreeMessage": "Free plan includes 1 focus area. Upgrade to unlock more.",
+  "focusLimitFreeUpgrade": "Upgrade",
+  "focusNudgeTitle": "Less is more",
+  "focusNudgeMessage": "Focus on one area at a time for the best results.",
+  "focusNudgeGotIt": "Got it"
 }

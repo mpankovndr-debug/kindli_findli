@@ -36,9 +36,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get commonNotNow => 'Не сейчас';
 
   @override
-  String get commonDismiss => 'Закрыть';
-
-  @override
   String get commonStart => 'Начать';
 
   @override
@@ -142,26 +139,6 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get focusAreasLimitMessage =>
       'Можно выбрать до 2 направлений. Убери одно, чтобы выбрать другое.';
-
-  @override
-  String get focusLimitFreeTitle => 'Два — отличное начало';
-
-  @override
-  String get focusLimitFreeMessage =>
-      'Хочешь больше? Перейди на Intended+, чтобы выбирать без ограничений.';
-
-  @override
-  String get focusLimitFreeUpgrade => 'Улучшить';
-
-  @override
-  String get focusNudgeTitle => 'Мягкая мысль';
-
-  @override
-  String get focusNudgeMessage =>
-      'Ты можешь выбрать сколько угодно! Но фокус на меньшем часто ведёт к более глубокому росту. Впрочем, тебе виднее.';
-
-  @override
-  String get focusNudgeGotIt => 'Понятно';
 
   @override
   String get reminderTitle => 'Напоминание';
@@ -1537,6 +1514,16 @@ class AppLocalizationsRu extends AppLocalizations {
       'Ничего страшного — включить уведомления можно в настройках устройства.';
 
   @override
+  String get profileNotifDeniedTitle => 'Уведомления отключены';
+
+  @override
+  String get profileNotifDeniedMessage =>
+      'Чтобы включить напоминания, разрешите уведомления для Intended в настройках устройства.';
+
+  @override
+  String get profileNotifOpenSettings => 'Открыть настройки';
+
+  @override
   String get profileAppearance => 'Внешний вид';
 
   @override
@@ -2138,7 +2125,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get boostBenefit3Detail => 'вместо 2';
 
   @override
-  String get boostBenefit4 => 'Карточки прогресса для друзей';
+  String get boostBenefit4 => 'Карточка «Я иду своим путём»';
 
   @override
   String get boostOfferHabitTitle => 'Хочешь ещё одну привычку?';
@@ -2167,4 +2154,27 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get boostOfferShareDesc =>
       'Твой путь стоит того, чтобы им делиться — покажи его близким.';
+
+  @override
+  String get commonDismiss => 'Закрыть';
+
+  @override
+  String get focusLimitFreeTitle => 'Лимит фокус-областей';
+
+  @override
+  String get focusLimitFreeMessage =>
+      'Бесплатный план включает 1 фокус-область. Перейди на платный, чтобы открыть больше.';
+
+  @override
+  String get focusLimitFreeUpgrade => 'Улучшить';
+
+  @override
+  String get focusNudgeTitle => 'Меньше — значит больше';
+
+  @override
+  String get focusNudgeMessage =>
+      'Сосредоточься на одной области для лучших результатов.';
+
+  @override
+  String get focusNudgeGotIt => 'Понятно';
 }
