@@ -55,7 +55,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _dailyEnabled = false;
   int _notifHour = 9;
   int _notifMinute = 0;
-  bool _weeklyEnabled = true;
+  bool _weeklyEnabled = false;
   bool _notifPermissionDenied = false;
   bool _notifPrefsLoaded = false;
 
@@ -290,8 +290,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       onPressed: () => Navigator.pop(context),
                       child: Text(
                         l10n.commonOk,
-                        style: const TextStyle(
-                          fontFamily: 'Sora',
+                        style: TextStyle(
+                          fontFamily: AppTextStyles.bodyFont(context),
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                           color: Color(0xFFFFFFFF),
@@ -462,8 +462,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   borderRadius: BorderRadius.circular(20),
                                   child: Text(
                                     l10n.profileChangeAreas,
-                                    style: const TextStyle(
-                                      fontFamily: 'Sora',
+                                    style: TextStyle(
+                                      fontFamily: AppTextStyles.bodyFont(context),
                                       fontSize: 17,
                                       fontWeight: FontWeight.w600,
                                       color: Color(0xFFFFFFFF),
@@ -486,7 +486,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             child: Text(
                               l10n.commonCancel,
                               style: TextStyle(
-                                fontFamily: 'Sora',
+                                fontFamily: AppTextStyles.bodyFont(context),
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
                                 color: colors.textTertiary,
@@ -581,7 +581,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Text(
                             l10n.profileChangeSpace,
                             style: TextStyle(
-                              fontFamily: 'Sora',
+                              fontFamily: AppTextStyles.bodyFont(context),
                               fontSize: 17,
                               fontWeight: FontWeight.w600,
                               color: colors.textPrimary,
@@ -821,8 +821,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               },
               child: Text(
                 l10n.commonDelete,
-                style: const TextStyle(
-                  fontFamily: 'Sora',
+                style: TextStyle(
+                  fontFamily: AppTextStyles.bodyFont(context),
                   fontSize: 17,
                   fontWeight: FontWeight.w600,
                   color: Colors.white,
@@ -885,7 +885,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Text(
                             l10n.profileYourName,
                             style: TextStyle(
-                              fontFamily: 'Sora',
+                              fontFamily: AppTextStyles.bodyFont(context),
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
                               color: colors.textSecondary,
@@ -909,7 +909,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       child: Text(
                                         displayName,
                                         style: TextStyle(
-                                          fontFamily: 'Sora',
+                                          fontFamily: AppTextStyles.bodyFont(context),
                                           fontSize: 17,
                                           fontWeight: FontWeight.w500,
                                           color: hasName
@@ -937,13 +937,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               placeholder: l10n.profileEnterName,
                               autofocus: true,
                               style: TextStyle(
-                                fontFamily: 'Sora',
+                                fontFamily: AppTextStyles.bodyFont(context),
                                 fontSize: 17,
                                 fontWeight: FontWeight.w500,
                                 color: colors.textPrimary,
                               ),
                               placeholderStyle: TextStyle(
-                                fontFamily: 'Sora',
+                                fontFamily: AppTextStyles.bodyFont(context),
                                 fontSize: 17,
                                 color: colors.textDisabled,
                               ),
@@ -971,7 +971,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     child: Text(
                                       l10n.commonSave,
                                       style: TextStyle(
-                                        fontFamily: 'Sora',
+                                        fontFamily: AppTextStyles.bodyFont(context),
                                         fontSize: 15,
                                         fontWeight: FontWeight.w600,
                                         color: canSave
@@ -989,7 +989,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   child: Text(
                                     l10n.commonCancel,
                                     style: TextStyle(
-                                      fontFamily: 'Sora',
+                                      fontFamily: AppTextStyles.bodyFont(context),
                                       fontSize: 15,
                                       fontWeight: FontWeight.w500,
                                       color: colors.ctaPrimary,
@@ -1012,7 +1012,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Text(
                             l10n.profilePlan,
                             style: TextStyle(
-                              fontFamily: 'Sora',
+                              fontFamily: AppTextStyles.bodyFont(context),
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
                               color: colors.textSecondary,
@@ -1051,7 +1051,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       child: Text(
                                         l10n.profileManage,
                                         style: TextStyle(
-                                          fontFamily: 'Sora',
+                                          fontFamily: AppTextStyles.bodyFont(context),
                                           fontSize: 14,
                                           fontWeight: FontWeight.w500,
                                           color: colors.ctaPrimary,
@@ -1082,7 +1082,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         child: Text(
                                           l10n.profileUnlockPlus,
                                           style: TextStyle(
-                                            fontFamily: 'Sora',
+                                            fontFamily: AppTextStyles.bodyFont(context),
                                             fontSize: 11,
                                             fontWeight: FontWeight.w600,
                                             color: colors.ctaPrimary,
@@ -1110,7 +1110,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             Text(
                               l10n.profileFocusAreas,
                               style: TextStyle(
-                                fontFamily: 'Sora',
+                                fontFamily: AppTextStyles.bodyFont(context),
                                 fontSize: 13,
                                 fontWeight: FontWeight.w500,
                                 color: colors.textSecondary,
@@ -1126,7 +1126,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         .map((a) => _localizedAreaName(l10n, a))
                                         .join(', '),
                                     style: TextStyle(
-                                      fontFamily: 'Sora',
+                                      fontFamily: AppTextStyles.bodyFont(context),
                                       fontSize: 17,
                                       fontWeight: FontWeight.w500,
                                       color: colors.textPrimary,
@@ -1158,7 +1158,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Text(
                             l10n.profileYourMoments,
                             style: TextStyle(
-                              fontFamily: 'Sora',
+                              fontFamily: AppTextStyles.bodyFont(context),
                               fontSize: 15,
                               fontWeight: FontWeight.w500,
                               color: colors.textSecondary,
@@ -1179,7 +1179,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     child: Text(
                                       label,
                                       style: TextStyle(
-                                        fontFamily: 'Sora',
+                                        fontFamily: AppTextStyles.bodyFont(context),
                                         fontSize: 17,
                                         fontWeight: FontWeight.w500,
                                         color: colors.textPrimary,
@@ -1219,7 +1219,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: Text(
                         l10n.profileSettings,
                         style: TextStyle(
-                          fontFamily: 'Sora',
+                          fontFamily: AppTextStyles.bodyFont(context),
                           fontSize: 11,
                           fontWeight: FontWeight.w500,
                           color: colors.textSecondary,
@@ -1253,8 +1253,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               Expanded(
                                 child: Text(
                                   l10n.profileDailyReminders,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    fontFamily: 'Sora',
+                                    fontFamily: AppTextStyles.bodyFont(context),
                                     fontSize: 16,
                                     fontWeight: FontWeight.w500,
                                     color: colors.textPrimary,
@@ -1266,13 +1268,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 activeTrackColor: colors.ctaPrimary,
                                 thumbColor: const Color(0xFFFFFFFF),
                                 onChanged: (value) async {
+                                  final l10n = AppLocalizations.of(context);
                                   if (value) {
                                     final granted = await NotificationScheduler
                                         .requestPermission();
                                     if (granted) {
                                       await NotificationPreferencesService
                                           .setEnabled(true);
-                                      final l10n = AppLocalizations.of(context);
                                       await NotificationScheduler.scheduleDaily(
                                           l10n);
                                       AnalyticsService.logDailyReminderToggled(true);
@@ -1289,6 +1291,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         setState(() {
                                           _notifPermissionDenied = true;
                                         });
+                                        showCupertinoDialog(
+                                          context: context,
+                                          builder: (ctx) => CupertinoAlertDialog(
+                                            title: Text(l10n.profileNotifDeniedTitle),
+                                            content: Text(l10n.profileNotifDeniedMessage),
+                                            actions: [
+                                              CupertinoDialogAction(
+                                                onPressed: () => Navigator.pop(ctx),
+                                                child: Text(l10n.commonCancel),
+                                              ),
+                                              CupertinoDialogAction(
+                                                isDefaultAction: true,
+                                                onPressed: () {
+                                                  Navigator.pop(ctx);
+                                                  launchUrl(Uri.parse('app-settings:'));
+                                                },
+                                                child: Text(l10n.profileNotifOpenSettings),
+                                              ),
+                                            ],
+                                          ),
+                                        );
                                       }
                                     }
                                   } else {
@@ -1322,7 +1345,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           child: Text(
                                             l10n.profileRemindAt,
                                             style: TextStyle(
-                                              fontFamily: 'Sora',
+                                              fontFamily: AppTextStyles.bodyFont(context),
                                               fontSize: 15,
                                               fontWeight: FontWeight.w400,
                                               color: colors.ctaPrimary,
@@ -1356,7 +1379,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                             l10n.commonDone,
                                                             style: TextStyle(
                                                               fontFamily:
-                                                                  'Sora',
+                                                                  AppTextStyles.bodyFont(context),
                                                               fontSize: 16,
                                                               fontWeight:
                                                                   FontWeight
@@ -1408,7 +1431,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                               CupertinoTextThemeData(
                                                             dateTimePickerTextStyle:
                                                                 TextStyle(
-                                                              fontFamily: 'Sora',
+                                                              fontFamily: AppTextStyles.bodyFont(context),
                                                               fontSize: 22,
                                                               fontWeight:
                                                                   FontWeight.w500,
@@ -1450,7 +1473,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                               _formatTime(
                                                   _notifHour, _notifMinute),
                                               style: TextStyle(
-                                                fontFamily: 'Sora',
+                                                fontFamily: AppTextStyles.bodyFont(context),
                                                 fontSize: 15,
                                                 fontWeight: FontWeight.w500,
                                                 color: colors.textPrimary,
@@ -1498,7 +1521,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     Text(
                                       l10n.profileWeeklySummary,
                                       style: TextStyle(
-                                        fontFamily: 'Sora',
+                                        fontFamily: AppTextStyles.bodyFont(context),
                                         fontSize: 16,
                                         fontWeight: FontWeight.w500,
                                         color: colors.textPrimary,
@@ -1507,8 +1530,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     const SizedBox(height: 2),
                                     Text(
                                       l10n.profileWeeklySubtitle,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
-                                        fontFamily: 'Sora',
+                                        fontFamily: AppTextStyles.bodyFont(context),
                                         fontSize: 13,
                                         fontWeight: FontWeight.w400,
                                         color: colors.textSecondary,
@@ -1522,15 +1547,68 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 activeTrackColor: colors.ctaPrimary,
                                 thumbColor: const Color(0xFFFFFFFF),
                                 onChanged: (value) async {
-                                  await NotificationPreferencesService
-                                      .setWeeklyEnabled(value);
                                   final l10n = AppLocalizations.of(context);
-                                  await NotificationScheduler.rescheduleAll(
-                                      l10n);
-                                  if (mounted) {
-                                    setState(() {
-                                      _weeklyEnabled = value;
-                                    });
+                                  if (value) {
+                                    final granted = await NotificationScheduler
+                                        .requestPermission();
+                                    if (granted) {
+                                      await NotificationPreferencesService
+                                          .setWeeklyEnabled(true);
+                                      await NotificationScheduler
+                                          .rescheduleAll(l10n);
+                                      if (mounted) {
+                                        setState(() {
+                                          _weeklyEnabled = true;
+                                          _notifPermissionDenied = false;
+                                        });
+                                      }
+                                    } else {
+                                      await NotificationPreferencesService
+                                          .setWeeklyEnabled(false);
+                                      if (mounted) {
+                                        setState(() {
+                                          _notifPermissionDenied = true;
+                                        });
+                                        showCupertinoDialog(
+                                          context: context,
+                                          builder: (ctx) =>
+                                              CupertinoAlertDialog(
+                                            title: Text(
+                                                l10n.profileNotifDeniedTitle),
+                                            content: Text(
+                                                l10n.profileNotifDeniedMessage),
+                                            actions: [
+                                              CupertinoDialogAction(
+                                                onPressed: () =>
+                                                    Navigator.pop(ctx),
+                                                child:
+                                                    Text(l10n.commonCancel),
+                                              ),
+                                              CupertinoDialogAction(
+                                                isDefaultAction: true,
+                                                onPressed: () {
+                                                  Navigator.pop(ctx);
+                                                  launchUrl(Uri.parse(
+                                                      'app-settings:'));
+                                                },
+                                                child: Text(l10n
+                                                    .profileNotifOpenSettings),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  } else {
+                                    await NotificationPreferencesService
+                                        .setWeeklyEnabled(false);
+                                    await NotificationScheduler
+                                        .rescheduleAll(l10n);
+                                    if (mounted) {
+                                      setState(() {
+                                        _weeklyEnabled = false;
+                                      });
+                                    }
                                   }
                                 },
                               ),
@@ -1545,7 +1623,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 l10n.profileNotifDenied,
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  fontFamily: 'Sora',
+                                  fontFamily: AppTextStyles.bodyFont(context),
                                   fontSize: 13,
                                   fontWeight: FontWeight.w400,
                                   color: colors.textTertiary,
@@ -1586,7 +1664,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   child: Text(
                                     l10n.profileAppearance,
                                     style: TextStyle(
-                                      fontFamily: 'Sora',
+                                      fontFamily: AppTextStyles.bodyFont(context),
                                       fontSize: 16,
                                       fontWeight: FontWeight.w500,
                                       color: colors.textPrimary,
@@ -1613,7 +1691,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: Text(
                         l10n.profileSupport,
                         style: TextStyle(
-                          fontFamily: 'Sora',
+                          fontFamily: AppTextStyles.bodyFont(context),
                           fontSize: 11,
                           fontWeight: FontWeight.w500,
                           color: colors.textSecondary,
@@ -1722,7 +1800,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: Text(
                         l10n.profileConnectAccount,
                         style: TextStyle(
-                          fontFamily: 'Sora',
+                          fontFamily: AppTextStyles.bodyFont(context),
                           fontSize: 11,
                           fontWeight: FontWeight.w500,
                           color: colors.textSecondary,
@@ -1776,71 +1854,101 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   const SizedBox(width: 14),
                                   // Name, email, provider
                                   Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        if (_currentUser?.displayName !=
-                                                null &&
-                                            _currentUser!
-                                                .displayName!.isNotEmpty)
-                                          Text(
-                                            _currentUser!.displayName!,
-                                            style: TextStyle(
-                                              fontFamily: 'Sora',
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w600,
-                                              color: colors.textPrimary,
-                                            ),
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        if (_currentUser?.email != null)
-                                          Padding(
-                                            padding: EdgeInsets.only(
-                                              top: _currentUser?.displayName !=
-                                                          null &&
-                                                      _currentUser!
-                                                          .displayName!
-                                                          .isNotEmpty
-                                                  ? 2
-                                                  : 0,
-                                            ),
-                                            child: Text(
-                                              _currentUser!.email!,
+                                    child: Builder(builder: (context) {
+                                      final isApple = _currentUser
+                                              ?.providerData
+                                              .any((p) =>
+                                                  p.providerId ==
+                                                  'apple.com') ??
+                                          false;
+                                      final isGoogle = _currentUser
+                                              ?.providerData
+                                              .any((p) =>
+                                                  p.providerId ==
+                                                  'google.com') ??
+                                          false;
+                                      final hasDisplayName = _currentUser
+                                                  ?.displayName !=
+                                              null &&
+                                          _currentUser!
+                                              .displayName!.isNotEmpty;
+                                      final email = _currentUser?.email;
+                                      final isRelayEmail = email != null &&
+                                          email.contains(
+                                              'privaterelay.appleid.com');
+                                      final hasUsableEmail =
+                                          email != null && !isRelayEmail;
+
+                                      final providerLabel = isApple
+                                          ? l10n.profileSignedInApple
+                                          : isGoogle
+                                              ? l10n.profileSignedInGoogle
+                                              : l10n.profileSignedInApple;
+
+                                      return Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          // Primary line: displayName, or email
+                                          // as fallback
+                                          if (hasDisplayName)
+                                            Text(
+                                              _currentUser!.displayName!,
                                               style: TextStyle(
-                                                fontFamily: 'Sora',
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w400,
-                                                color: colors.textSecondary,
+                                                fontFamily: AppTextStyles.bodyFont(context),
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w600,
+                                                color: colors.textPrimary,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                            )
+                                          else if (hasUsableEmail)
+                                            Text(
+                                              email!,
+                                              style: TextStyle(
+                                                fontFamily: AppTextStyles.bodyFont(context),
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w600,
+                                                color: colors.textPrimary,
                                               ),
                                               overflow: TextOverflow.ellipsis,
                                             ),
-                                          ),
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(top: 4),
-                                          child: Text(
-                                            _currentUser!.providerData.any(
-                                                    (p) =>
-                                                        p.providerId ==
-                                                        'apple.com')
-                                                ? l10n.profileSignedInApple
-                                                : _currentUser!.providerData
-                                                        .any((p) =>
-                                                            p.providerId ==
-                                                            'google.com')
-                                                    ? l10n.profileSignedInGoogle
-                                                    : 'Connected',
-                                            style: TextStyle(
-                                              fontFamily: 'Sora',
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w500,
-                                              color: colors.ctaPrimary,
+                                          // Secondary line: email (only when
+                                          // displayName is the primary line)
+                                          if (hasDisplayName && hasUsableEmail)
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  top: 2),
+                                              child: Text(
+                                                email!,
+                                                style: TextStyle(
+                                                  fontFamily: AppTextStyles.bodyFont(context),
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: colors.textSecondary,
+                                                ),
+                                                overflow:
+                                                    TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          // Provider label — never just
+                                          // "Connected"
+                                          Padding(
+                                            padding:
+                                                const EdgeInsets.only(top: 4),
+                                            child: Text(
+                                              providerLabel,
+                                              style: TextStyle(
+                                                fontFamily: AppTextStyles.bodyFont(context),
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w500,
+                                                color: colors.ctaPrimary,
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
+                                        ],
+                                      );
+                                    }),
                                   ),
                                   Icon(
                                     CupertinoIcons.checkmark_shield_fill,
@@ -1874,7 +1982,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             Text(
                                               l10n.profileSignInGoogle,
                                               style: TextStyle(
-                                                fontFamily: 'Sora',
+                                                fontFamily: AppTextStyles.bodyFont(context),
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.w500,
                                                 color: colors.textPrimary,
@@ -1910,7 +2018,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             Text(
                                               l10n.profileSignInApple,
                                               style: TextStyle(
-                                                fontFamily: 'Sora',
+                                                fontFamily: AppTextStyles.bodyFont(context),
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.w500,
                                                 color: colors.textPrimary,
@@ -1968,7 +2076,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   Text(
                                     l10n.profileSignOut,
                                     style: TextStyle(
-                                      fontFamily: 'Sora',
+                                      fontFamily: AppTextStyles.bodyFont(context),
                                       fontSize: 15,
                                       fontWeight: FontWeight.w500,
                                       color: colors.textMutedBrown,
@@ -1988,7 +2096,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           child: Text(
                             l10n.profileDeleteData,
                             style: TextStyle(
-                              fontFamily: 'Sora',
+                              fontFamily: AppTextStyles.bodyFont(context),
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                               color: colors.textSecondary,
@@ -2002,7 +2110,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         Text(
                           l10n.profileVersion,
                           style: TextStyle(
-                            fontFamily: 'Sora',
+                            fontFamily: AppTextStyles.bodyFont(context),
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
                             color: colors.textMutedBrown,
@@ -2085,7 +2193,7 @@ class _ProfileButton extends StatelessWidget {
                   title,
                   textAlign: TextAlign.left,
                   style: TextStyle(
-                    fontFamily: 'Sora',
+                    fontFamily: AppTextStyles.bodyFont(context),
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                     color: colors.textPrimary,
@@ -2097,7 +2205,7 @@ class _ProfileButton extends StatelessWidget {
                     subtitle!,
                     textAlign: TextAlign.left,
                     style: TextStyle(
-                      fontFamily: 'Sora',
+                      fontFamily: AppTextStyles.bodyFont(context),
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
                       color: colors.textSecondary,
@@ -2210,8 +2318,8 @@ class _FocusAreaChangeScreenState extends State<_FocusAreaChangeScreen> {
                   borderRadius: BorderRadius.circular(20),
                   child: Text(
                     l10n.focusLimitFreeUpgrade,
-                    style: const TextStyle(
-                      fontFamily: 'Sora',
+                    style: TextStyle(
+                      fontFamily: AppTextStyles.bodyFont(context),
                       fontSize: 17,
                       fontWeight: FontWeight.w600,
                       color: Color(0xFFFFFFFF),
@@ -2232,7 +2340,7 @@ class _FocusAreaChangeScreenState extends State<_FocusAreaChangeScreen> {
             child: Text(
               l10n.commonDismiss,
               style: TextStyle(
-                fontFamily: 'Sora',
+                fontFamily: AppTextStyles.bodyFont(context),
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
                 color: colors.textTertiary,
@@ -2284,8 +2392,8 @@ class _FocusAreaChangeScreenState extends State<_FocusAreaChangeScreen> {
                   borderRadius: BorderRadius.circular(20),
                   child: Text(
                     l10n.focusNudgeGotIt,
-                    style: const TextStyle(
-                      fontFamily: 'Sora',
+                    style: TextStyle(
+                      fontFamily: AppTextStyles.bodyFont(context),
                       fontSize: 17,
                       fontWeight: FontWeight.w600,
                       color: Color(0xFFFFFFFF),
@@ -2320,46 +2428,44 @@ class _FocusAreaChangeScreenState extends State<_FocusAreaChangeScreen> {
         Positioned(
           top: size.height * 0.1,
           right: size.width * -0.05,
-          child: Container(
-            width: 256,
-            height: 256,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                center: const Alignment(-0.35, -0.35),
-                radius: 0.9,
-                colors: [
-                  colors.surfaceLightest.withOpacity(0.6),
-                  colors.borderMedium.withOpacity(0.2),
-                ],
+          child: ImageFiltered(
+            imageFilter: ImageFilter.blur(sigmaX: 60, sigmaY: 60),
+            child: Container(
+              width: 256,
+              height: 256,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  center: const Alignment(-0.35, -0.35),
+                  radius: 0.9,
+                  colors: [
+                    colors.surfaceLightest.withOpacity(0.6),
+                    colors.borderMedium.withOpacity(0.2),
+                  ],
+                ),
               ),
-            ),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 60, sigmaY: 60),
-              child: Container(color: Colors.transparent),
             ),
           ),
         ),
         Positioned(
           bottom: size.height * 0.2,
           left: size.width * -0.08,
-          child: Container(
-            width: 224,
-            height: 224,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                center: const Alignment(-0.35, -0.35),
-                radius: 0.9,
-                colors: [
-                  colors.onboardingBg1.withOpacity(0.55),
-                  colors.onboardingBg4.withOpacity(0.18),
-                ],
+          child: ImageFiltered(
+            imageFilter: ImageFilter.blur(sigmaX: 55, sigmaY: 55),
+            child: Container(
+              width: 224,
+              height: 224,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  center: const Alignment(-0.35, -0.35),
+                  radius: 0.9,
+                  colors: [
+                    colors.onboardingBg1.withOpacity(0.55),
+                    colors.onboardingBg4.withOpacity(0.18),
+                  ],
+                ),
               ),
-            ),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 55, sigmaY: 55),
-              child: Container(color: Colors.transparent),
             ),
           ),
         ),
@@ -2446,7 +2552,7 @@ class _FocusAreaChangeScreenState extends State<_FocusAreaChangeScreen> {
                           Text(
                             l10n.focusAreasChooseCount(selectedCount, maxAreas),
                             style: TextStyle(
-                              fontFamily: 'Sora',
+                              fontFamily: AppTextStyles.bodyFont(context),
                               fontSize: 15,
                               fontWeight: FontWeight.w500,
                               color: colors.ctaSecondary,
@@ -2523,11 +2629,7 @@ class _FocusAreaChangeScreenState extends State<_FocusAreaChangeScreen> {
                           ),
                         ],
                       ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                          child: Container(
+                      child: Container(
                             width: double.infinity,
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
@@ -2547,8 +2649,8 @@ class _FocusAreaChangeScreenState extends State<_FocusAreaChangeScreen> {
                               borderRadius: BorderRadius.circular(20),
                               child: Text(
                                 l10n.profileSaveChanges,
-                                style: const TextStyle(
-                                  fontFamily: 'Sora',
+                                style: TextStyle(
+                                  fontFamily: AppTextStyles.bodyFont(context),
                                   fontSize: 17,
                                   fontWeight: FontWeight.w600,
                                   color: Color(0xFFFFFFFF),
@@ -2556,8 +2658,6 @@ class _FocusAreaChangeScreenState extends State<_FocusAreaChangeScreen> {
                               ),
                             ),
                           ),
-                        ),
-                      ),
                     ),
                   ),
               ],

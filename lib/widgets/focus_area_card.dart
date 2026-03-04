@@ -1,8 +1,8 @@
-import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 
 import '../theme/theme_provider.dart';
+import '../utils/text_styles.dart';
 
 class FocusAreaCard extends StatefulWidget {
   final String label;
@@ -89,44 +89,40 @@ class _FocusAreaCardState extends State<FocusAreaCard>
         child: Row(
           children: [
             // Icon container
-            ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: widget.selected
-                          ? [
-                              colors.ctaPrimary.withOpacity(0.2),
-                              colors.ctaPrimary.withOpacity(0.1),
-                            ]
-                          : [
-                              colors.borderMedium.withOpacity(0.2),
-                              colors.borderMedium.withOpacity(0.1),
-                            ],
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Icon(
-                    widget.icon,
-                    size: 22,
-                    color:
-                        widget.selected ? colors.ctaPrimary : colors.accentMuted,
-                  ),
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: widget.selected
+                      ? [
+                          colors.ctaPrimary.withOpacity(0.2),
+                          colors.ctaPrimary.withOpacity(0.1),
+                        ]
+                      : [
+                          colors.borderMedium.withOpacity(0.2),
+                          colors.borderMedium.withOpacity(0.1),
+                        ],
                 ),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(
+                widget.icon,
+                size: 22,
+                color:
+                    widget.selected ? colors.ctaPrimary : colors.accentMuted,
               ),
             ),
             const SizedBox(width: 14),
             Expanded(
               child: Text(
                 widget.label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontFamily: 'Sora',
+                  fontFamily: AppTextStyles.bodyFont(context),
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                   color: colors.textPrimary,

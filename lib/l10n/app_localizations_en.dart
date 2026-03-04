@@ -2042,6 +2042,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shareCardDescriptor => 'intention, not perfection';
 
   @override
+  String get shareButton => 'Share';
+
+  @override
   String get sharePickerTitle => 'What would you like to share?';
 
   @override

@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme_provider.dart';
+import '../utils/text_styles.dart';
 
 /// Modal for managing active Intended+ subscription
 /// Shows subscription details and opens App Store for management
@@ -158,7 +159,7 @@ class SubscriptionManagementModal extends StatelessWidget {
                             child: Column(
                               children: [
                                 // Plan row
-                                _buildDetailRow(l10n.subscriptionPlan, plan, colors),
+                                _buildDetailRow(context, l10n.subscriptionPlan, plan, colors),
 
                                 const SizedBox(height: 16),
 
@@ -171,7 +172,7 @@ class SubscriptionManagementModal extends StatelessWidget {
                                 const SizedBox(height: 16),
 
                                 // Price row
-                                _buildDetailRow(l10n.subscriptionPrice, price, colors),
+                                _buildDetailRow(context, l10n.subscriptionPrice, price, colors),
 
                                 const SizedBox(height: 16),
 
@@ -184,7 +185,7 @@ class SubscriptionManagementModal extends StatelessWidget {
                                 const SizedBox(height: 16),
 
                                 // Renewal row
-                                _buildDetailRow(l10n.subscriptionRenews, renewalDate, colors),
+                                _buildDetailRow(context, l10n.subscriptionRenews, renewalDate, colors),
                               ],
                             ),
                           ),
@@ -251,11 +252,11 @@ class SubscriptionManagementModal extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(20),
                                 child: Text(
                                   l10n.subscriptionManage,
-                                  style: const TextStyle(
-                                    fontFamily: 'Sora',
+                                  style: TextStyle(
+                                    fontFamily: AppTextStyles.bodyFont(context),
                                     fontSize: 17,
                                     fontWeight: FontWeight.w600,
-                                    color: Color(0xFFFFFFFF),
+                                    color: const Color(0xFFFFFFFF),
                                   ),
                                 ),
                               ),
@@ -278,7 +279,7 @@ class SubscriptionManagementModal extends StatelessWidget {
                           child: Text(
                             l10n.commonClose,
                             style: TextStyle(
-                              fontFamily: 'Sora',
+                              fontFamily: AppTextStyles.bodyFont(context),
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
                               color: colors.textTertiary,
@@ -297,14 +298,14 @@ class SubscriptionManagementModal extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow(String label, String value, AppColorScheme colors) {
+  Widget _buildDetailRow(BuildContext context, String label, String value, AppColorScheme colors) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           label,
           style: TextStyle(
-            fontFamily: 'Sora',
+            fontFamily: AppTextStyles.bodyFont(context),
             fontSize: 14,
             fontWeight: FontWeight.w500,
             color: colors.ctaPrimary,
@@ -313,7 +314,7 @@ class SubscriptionManagementModal extends StatelessWidget {
         Text(
           value,
           style: TextStyle(
-            fontFamily: 'Sora',
+            fontFamily: AppTextStyles.bodyFont(context),
             fontSize: 16,
             fontWeight: FontWeight.w500,
             color: colors.textPrimary,

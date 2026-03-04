@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../theme/theme_provider.dart';
+import '../utils/text_styles.dart';
 
 class WarmthToast extends StatefulWidget {
   final String message;
@@ -116,7 +117,7 @@ class _WarmthToastState extends State<WarmthToast>
                     widget.message,
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontFamily: 'Sora',
+                      fontFamily: AppTextStyles.bodyFont(context),
                       fontSize: 15,
                       fontWeight: FontWeight.w500,
                       color: colors.toastText,

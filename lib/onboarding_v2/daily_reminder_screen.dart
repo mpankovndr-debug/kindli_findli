@@ -12,6 +12,7 @@ import '../services/notification_scheduler.dart';
 import '../services/notification_preferences_service.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme_provider.dart';
+import '../utils/text_styles.dart';
 
 class DailyReminderScreen extends StatefulWidget {
   const DailyReminderScreen({super.key});
@@ -121,7 +122,7 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                               child: Text(
                                 l10n.reminderTitle,
                                 style: TextStyle(
-                                  fontFamily: 'Sora',
+                                  fontFamily: AppTextStyles.bodyFont(context),
                                   fontSize: 18,
                                   fontWeight: FontWeight.w600,
                                   color: colors.textLabel,
@@ -209,7 +210,7 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                                   Text(
                                     l10n.reminderDescription,
                                     style: TextStyle(
-                                      fontFamily: 'Sora',
+                                      fontFamily: AppTextStyles.bodyFont(context),
                                       fontSize: 15,
                                       fontWeight: FontWeight.w500,
                                       color: colors.ctaSecondary,
@@ -237,7 +238,7 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                                           l10n.reminderSwitchHint,
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
-                                            fontFamily: 'Sora',
+                                            fontFamily: AppTextStyles.bodyFont(context),
                                             fontSize: 14,
                                             fontWeight: FontWeight.w500,
                                             color: colors.textTertiary,
@@ -257,7 +258,7 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                                           l10n.reminderNoWorries,
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
-                                            fontFamily: 'Sora',
+                                            fontFamily: AppTextStyles.bodyFont(context),
                                             fontSize: 14,
                                             fontWeight: FontWeight.w500,
                                             color: colors.textTertiary,
@@ -349,8 +350,8 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                                         hasName
                                             ? l10n.reminderLetsGo(userName)
                                             : l10n.commonStart,
-                                        style: const TextStyle(
-                                          fontFamily: 'Sora',
+                                        style: TextStyle(
+                                          fontFamily: AppTextStyles.bodyFont(context),
                                           fontSize: 17,
                                           fontWeight: FontWeight.w600,
                                           color: Color(0xFFFFFFFF),
@@ -369,7 +370,7 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                               child: Text(
                                 l10n.commonSkip,
                                 style: TextStyle(
-                                  fontFamily: 'Sora',
+                                  fontFamily: AppTextStyles.bodyFont(context),
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
                                   color: colors.textTertiary,
@@ -397,23 +398,22 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
         Positioned(
           top: size.height * 0.05,
           left: size.width * -0.1,
-          child: Container(
-            width: 288,
-            height: 288,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                center: const Alignment(-0.35, -0.35),
-                radius: 0.9,
-                colors: [
-                  colors.surfaceLightest.withOpacity(0.65),
-                  colors.borderMedium.withOpacity(0.22),
-                ],
+          child: ImageFiltered(
+            imageFilter: ImageFilter.blur(sigmaX: 65, sigmaY: 65),
+            child: Container(
+              width: 288,
+              height: 288,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  center: const Alignment(-0.35, -0.35),
+                  radius: 0.9,
+                  colors: [
+                    colors.surfaceLightest.withOpacity(0.65),
+                    colors.borderMedium.withOpacity(0.22),
+                  ],
+                ),
               ),
-            ),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 65, sigmaY: 65),
-              child: Container(color: Colors.transparent),
             ),
           ),
         ),
@@ -422,23 +422,22 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
         Positioned(
           bottom: size.height * 0.15,
           right: size.width * -0.08,
-          child: Container(
-            width: 240,
-            height: 240,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                center: const Alignment(-0.4, -0.4),
-                radius: 0.9,
-                colors: [
-                  colors.onboardingBg1.withOpacity(0.6),
-                  colors.onboardingBg4.withOpacity(0.2),
-                ],
+          child: ImageFiltered(
+            imageFilter: ImageFilter.blur(sigmaX: 58, sigmaY: 58),
+            child: Container(
+              width: 240,
+              height: 240,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  center: const Alignment(-0.4, -0.4),
+                  radius: 0.9,
+                  colors: [
+                    colors.onboardingBg1.withOpacity(0.6),
+                    colors.onboardingBg4.withOpacity(0.2),
+                  ],
+                ),
               ),
-            ),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 58, sigmaY: 58),
-              child: Container(color: Colors.transparent),
             ),
           ),
         ),
@@ -492,7 +491,7 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                           Text(
                             l10n.reminderDailyToggle,
                             style: TextStyle(
-                              fontFamily: 'Sora',
+                              fontFamily: AppTextStyles.bodyFont(context),
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                               color: colors.textPrimary,
@@ -502,7 +501,7 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                           Text(
                             l10n.reminderAroundTime(_timeController.text),
                             style: TextStyle(
-                              fontFamily: 'Sora',
+                              fontFamily: AppTextStyles.bodyFont(context),
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                               color: colors.textLabel,
@@ -541,7 +540,7 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                       Text(
                         l10n.reminderTimeLabel,
                         style: TextStyle(
-                          fontFamily: 'Sora',
+                          fontFamily: AppTextStyles.bodyFont(context),
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: colors.buttonDark,
@@ -580,15 +579,17 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                             ),
                             child: CupertinoTextField(
                               controller: _timeController,
+                              readOnly: true,
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                fontFamily: 'Sora',
+                                fontFamily: AppTextStyles.bodyFont(context),
                                 fontSize: 20,
                                 fontWeight: FontWeight.w500,
                                 color: colors.textPrimary,
                               ),
                               decoration: const BoxDecoration(),
                               onTap: () async {
+                                FocusScope.of(context).unfocus();
                                 DateTime tempTime =
                                     _parseTime(_timeController.text);
 
@@ -660,7 +661,7 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                                                     Text(
                                                       l10n.reminderTimePicker,
                                                       style: TextStyle(
-                                                        fontFamily: 'Sora',
+                                                        fontFamily: AppTextStyles.bodyFont(context),
                                                         fontSize: 18,
                                                         fontWeight:
                                                             FontWeight.w600,
@@ -744,7 +745,7 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                                                         child: Text(
                                                           l10n.commonDone,
                                                           style: TextStyle(
-                                                            fontFamily: 'Sora',
+                                                            fontFamily: AppTextStyles.bodyFont(context),
                                                             fontSize: 15,
                                                             fontWeight:
                                                                 FontWeight.w600,
@@ -785,7 +786,7 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                                                         CupertinoTextThemeData(
                                                       dateTimePickerTextStyle:
                                                           TextStyle(
-                                                        fontFamily: 'Sora',
+                                                        fontFamily: AppTextStyles.bodyFont(context),
                                                         fontSize: 22,
                                                         fontWeight:
                                                             FontWeight.w500,
@@ -878,7 +879,7 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                       Text(
                         l10n.reminderWeeklySummary,
                         style: TextStyle(
-                          fontFamily: 'Sora',
+                          fontFamily: AppTextStyles.bodyFont(context),
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                           color: colors.textPrimary,
@@ -888,7 +889,7 @@ class _DailyReminderScreenState extends State<DailyReminderScreen> {
                       Text(
                         l10n.reminderWeeklySubtitle,
                         style: TextStyle(
-                          fontFamily: 'Sora',
+                          fontFamily: AppTextStyles.bodyFont(context),
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                           color: colors.textLabel,

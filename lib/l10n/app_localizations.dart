@@ -3728,6 +3728,12 @@ abstract class AppLocalizations {
   /// **'intention, not perfection'**
   String get shareCardDescriptor;
 
+  /// No description provided for @shareButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get shareButton;
+
   /// No description provided for @sharePickerTitle.
   ///
   /// In en, this message translates to:

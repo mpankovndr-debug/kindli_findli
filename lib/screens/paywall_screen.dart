@@ -9,6 +9,7 @@ import '../services/analytics_service.dart';
 import '../services/revenue_cat_service.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme_provider.dart';
+import '../utils/text_styles.dart';
 
 class PaywallScreen extends StatefulWidget {
   final String source;
@@ -129,7 +130,7 @@ class _PaywallScreenState extends State<PaywallScreen>
                             Text(
                               l10n.paywallDescription,
                               style: TextStyle(
-                                fontFamily: 'Sora',
+                                fontFamily: AppTextStyles.bodyFont(context),
                                 fontSize: 14,
                                 fontWeight: FontWeight.w400,
                                 color: colors.ctaPrimary.withOpacity(0.9),
@@ -389,7 +390,7 @@ class _PaywallScreenState extends State<PaywallScreen>
                     Text(
                       label,
                       style: TextStyle(
-                        fontFamily: 'Sora',
+                        fontFamily: AppTextStyles.bodyFont(context),
                         fontSize: 15,
                         fontWeight: FontWeight.w500,
                         color: colors.textPrimary,
@@ -413,7 +414,7 @@ class _PaywallScreenState extends State<PaywallScreen>
                         Text(
                           pricePerPeriod,
                           style: TextStyle(
-                            fontFamily: 'Sora',
+                            fontFamily: AppTextStyles.bodyFont(context),
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
                             color: suffixColor,
@@ -531,11 +532,11 @@ class _PaywallScreenState extends State<PaywallScreen>
                     _selectedPlan == 'lifetime'
                         ? l10n.paywallCtaLifetime
                         : l10n.paywallCtaTrial,
-                    style: const TextStyle(
-                      fontFamily: 'Sora',
+                    style: TextStyle(
+                      fontFamily: AppTextStyles.bodyFont(context),
                       fontSize: 17,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFFFFFFFF),
+                      color: const Color(0xFFFFFFFF),
                     ),
                   ),
           ),
@@ -555,7 +556,7 @@ class _PaywallScreenState extends State<PaywallScreen>
     return Text(
       text,
       style: TextStyle(
-        fontFamily: 'Sora',
+        fontFamily: AppTextStyles.bodyFont(context),
         fontSize: 13,
         fontWeight: FontWeight.w400,
         color: colors.textTertiary,
@@ -566,12 +567,12 @@ class _PaywallScreenState extends State<PaywallScreen>
 
   Widget _buildContinueFreeSection(AppColorScheme colors, AppLocalizations l10n) {
     final separatorStyle = TextStyle(
-      fontFamily: 'Sora',
+      fontFamily: AppTextStyles.bodyFont(context),
       fontSize: 12,
       color: colors.textDisabled.withValues(alpha: 0.6),
     );
     final linkStyle = TextStyle(
-      fontFamily: 'Sora',
+      fontFamily: AppTextStyles.bodyFont(context),
       fontSize: 12,
       fontWeight: FontWeight.w400,
       color: colors.textDisabled,
@@ -585,7 +586,7 @@ class _PaywallScreenState extends State<PaywallScreen>
           child: Text(
             l10n.paywallContinueFree,
             style: TextStyle(
-              fontFamily: 'Sora',
+              fontFamily: AppTextStyles.bodyFont(context),
               fontSize: 16,
               fontWeight: FontWeight.w500,
               color: colors.textTertiary,
@@ -676,7 +677,7 @@ class _FeatureItem extends StatelessWidget {
           child: Text(
             text,
             style: TextStyle(
-              fontFamily: 'Sora',
+              fontFamily: AppTextStyles.bodyFont(context),
               fontSize: 14.5,
               fontWeight: FontWeight.w400,
               color: colors.textPrimary,
@@ -726,11 +727,11 @@ class _PricingBadge extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: const TextStyle(
-          fontFamily: 'Sora',
+        style: TextStyle(
+          fontFamily: AppTextStyles.bodyFont(context),
           fontSize: 11,
           fontWeight: FontWeight.w600,
-          color: Color(0xFFFFFFFF),
+          color: const Color(0xFFFFFFFF),
           letterSpacing: 0.3,
         ),
       ),

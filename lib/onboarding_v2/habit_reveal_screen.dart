@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Colors;
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,9 +9,11 @@ import '../l10n/app_localizations.dart';
 import '../main.dart';
 import '../services/analytics_service.dart';
 import '../services/revenue_cat_service.dart';
+import '../utils/habit_l10n.dart';
 import 'onboarding_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme_provider.dart';
+import '../utils/text_styles.dart';
 
 class HabitRevealScreen extends StatefulWidget {
   const HabitRevealScreen({super.key});
@@ -320,7 +321,7 @@ class _HabitRevealScreenState extends State<HabitRevealScreen>
                               l10n.habitRevealDescription,
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                fontFamily: 'Sora',
+                                fontFamily: AppTextStyles.bodyFont(context),
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
                                 color: colors.ctaSecondary,
@@ -389,8 +390,8 @@ class _HabitRevealScreenState extends State<HabitRevealScreen>
                                 borderRadius: BorderRadius.circular(20),
                                 child: Text(
                                   l10n.habitRevealBegin,
-                                  style: const TextStyle(
-                                    fontFamily: 'Sora',
+                                  style: TextStyle(
+                                    fontFamily: AppTextStyles.bodyFont(context),
                                     fontSize: 17,
                                     fontWeight: FontWeight.w600,
                                     color: Color(0xFFFFFFFF),
@@ -420,7 +421,7 @@ class _HabitRevealScreenState extends State<HabitRevealScreen>
         l10n.habitRevealSubtitleDefault,
         textAlign: TextAlign.center,
         style: TextStyle(
-          fontFamily: 'Sora',
+          fontFamily: AppTextStyles.bodyFont(context),
           fontSize: 15,
           fontWeight: FontWeight.w500,
           color: colors.ctaSecondary,
@@ -433,10 +434,10 @@ class _HabitRevealScreenState extends State<HabitRevealScreen>
 
     if (areas.length == 1) {
       return Text(
-        l10n.habitRevealSubtitleOneArea(areas[0]),
+        l10n.habitRevealSubtitleOneArea(localizeCategoryName(areas[0], l10n)),
         textAlign: TextAlign.center,
         style: TextStyle(
-          fontFamily: 'Sora',
+          fontFamily: AppTextStyles.bodyFont(context),
           fontSize: 15,
           fontWeight: FontWeight.w500,
           color: colors.ctaSecondary,
@@ -446,10 +447,10 @@ class _HabitRevealScreenState extends State<HabitRevealScreen>
     }
 
     return Text(
-      l10n.habitRevealSubtitleTwoAreas(areas[0], areas[1]),
+      l10n.habitRevealSubtitleTwoAreas(localizeCategoryName(areas[0], l10n), localizeCategoryName(areas[1], l10n)),
       textAlign: TextAlign.center,
       style: TextStyle(
-        fontFamily: 'Sora',
+        fontFamily: AppTextStyles.bodyFont(context),
         fontSize: 15,
         fontWeight: FontWeight.w500,
         color: colors.ctaSecondary,
@@ -462,6 +463,8 @@ class _HabitRevealScreenState extends State<HabitRevealScreen>
     if (_controllers.isEmpty || index >= _controllers.length) {
       return const SizedBox();
     }
+
+    final l10n = AppLocalizations.of(context);
 
     return FadeTransition(
       opacity: _fadeAnimations[index],
@@ -491,9 +494,9 @@ class _HabitRevealScreenState extends State<HabitRevealScreen>
                   ],
                 ),
                 child: Text(
-                  habit,
+                  localizeHabitName(habit, l10n),
                   style: TextStyle(
-                    fontFamily: 'Sora',
+                    fontFamily: AppTextStyles.bodyFont(context),
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                     color: colors.textPrimary,
@@ -515,23 +518,22 @@ class _HabitRevealScreenState extends State<HabitRevealScreen>
         Positioned(
           top: size.height * 0.1,
           right: size.width * -0.05,
-          child: Container(
-            width: 256,
-            height: 256,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                center: const Alignment(-0.35, -0.35),
-                radius: 0.9,
-                colors: [
-                  colors.surfaceLightest.withOpacity(0.6),
-                  colors.borderMedium.withOpacity(0.2),
-                ],
+          child: ImageFiltered(
+            imageFilter: ImageFilter.blur(sigmaX: 60, sigmaY: 60),
+            child: Container(
+              width: 256,
+              height: 256,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  center: const Alignment(-0.35, -0.35),
+                  radius: 0.9,
+                  colors: [
+                    colors.surfaceLightest.withOpacity(0.6),
+                    colors.borderMedium.withOpacity(0.2),
+                  ],
+                ),
               ),
-            ),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 60, sigmaY: 60),
-              child: Container(color: Colors.transparent),
             ),
           ),
         ),
@@ -540,23 +542,22 @@ class _HabitRevealScreenState extends State<HabitRevealScreen>
         Positioned(
           bottom: size.height * 0.2,
           left: size.width * -0.08,
-          child: Container(
-            width: 224,
-            height: 224,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                center: const Alignment(-0.35, -0.35),
-                radius: 0.9,
-                colors: [
-                  colors.onboardingBg1.withOpacity(0.55),
-                  colors.onboardingBg4.withOpacity(0.18),
-                ],
+          child: ImageFiltered(
+            imageFilter: ImageFilter.blur(sigmaX: 55, sigmaY: 55),
+            child: Container(
+              width: 224,
+              height: 224,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  center: const Alignment(-0.35, -0.35),
+                  radius: 0.9,
+                  colors: [
+                    colors.onboardingBg1.withOpacity(0.55),
+                    colors.onboardingBg4.withOpacity(0.18),
+                  ],
+                ),
               ),
-            ),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 55, sigmaY: 55),
-              child: Container(color: Colors.transparent),
             ),
           ),
         ),

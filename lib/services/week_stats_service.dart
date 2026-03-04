@@ -1,3 +1,5 @@
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../main.dart';
 
 class WeekStats {
@@ -13,9 +15,20 @@ class WeekStats {
 }
 
 class WeekStatsService {
-  /// Calculate stats for the current week (Mon–Sun) given a list of habit titles.
+  /// Calculate stats for the current week (Mon–Sun).
+  ///
+  /// Scans ALL completions recorded during the week, regardless of
+  /// whether the habits are still in the user's active list.
+  /// [habits] is used only to cache display-name mappings.
   static Future<WeekStats> calculate(List<String> habits, DateTime now) async {
     final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+
+    // Cache title mappings for current habits so they survive habit changes.
+    final prefs = await SharedPreferences.getInstance();
+    for (final habit in habits) {
+      final id = HabitTracker.habitId(habit);
+      prefs.setString('habit_title_$id', habit);
+    }
 
     int totalCompletions = 0;
     final Map<String, int> habitCounts = {};
@@ -23,18 +36,17 @@ class WeekStatsService {
 
     for (int i = 0; i < 7; i++) {
       final date = startOfWeek.add(Duration(days: i));
-      bool hadActivityToday = false;
+      final completedIds = await HabitTracker.allCompletedIdsForDate(date);
 
-      for (final habit in habits) {
-        final wasDone = await HabitTracker.wasDone(habit, date);
-        if (wasDone) {
-          totalCompletions++;
-          habitCounts[habit] = (habitCounts[habit] ?? 0) + 1;
-          hadActivityToday = true;
-        }
+      if (completedIds.isNotEmpty) {
+        dailyActivity[i] = true;
       }
 
-      dailyActivity[i] = hadActivityToday;
+      for (final id in completedIds) {
+        totalCompletions++;
+        final title = await HabitTracker.titleForId(id);
+        habitCounts[title] = (habitCounts[title] ?? 0) + 1;
+      }
     }
 
     final sortedHabits = habitCounts.entries.toList()

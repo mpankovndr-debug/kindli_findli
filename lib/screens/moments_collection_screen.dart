@@ -9,6 +9,7 @@ import '../services/analytics_service.dart';
 import '../services/moments_service.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme_provider.dart';
+import '../utils/text_styles.dart';
 
 class MomentsCollectionScreen extends StatefulWidget {
   const MomentsCollectionScreen({super.key});
@@ -212,7 +213,7 @@ class _MomentsCollectionScreenState extends State<MomentsCollectionScreen> {
               child: Text(
                 month.toUpperCase(),
                 style: TextStyle(
-                  fontFamily: 'Sora',
+                  fontFamily: AppTextStyles.bodyFont(context),
                   fontSize: 11,
                   fontWeight: FontWeight.w500,
                   color: colors.ctaPrimary,
@@ -268,7 +269,7 @@ class _MomentsCollectionScreenState extends State<MomentsCollectionScreen> {
                   Text(
                     l10n.monthSummaryMoments(momentCount, month),
                     style: TextStyle(
-                      fontFamily: 'Sora',
+                      fontFamily: AppTextStyles.bodyFont(context),
                       fontSize: 15,
                       fontWeight: FontWeight.w500,
                       color: colors.textPrimary,
@@ -278,7 +279,7 @@ class _MomentsCollectionScreenState extends State<MomentsCollectionScreen> {
                   Text(
                     l10n.monthSummaryIntentions(intentionCount),
                     style: TextStyle(
-                      fontFamily: 'Sora',
+                      fontFamily: AppTextStyles.bodyFont(context),
                       fontSize: 13,
                       fontWeight: FontWeight.w400,
                       color: colors.textSecondary,
@@ -288,7 +289,7 @@ class _MomentsCollectionScreenState extends State<MomentsCollectionScreen> {
                   Text(
                     l10n.monthSummaryTopIntention(localizeHabitName(topIntention, l10n)),
                     style: TextStyle(
-                      fontFamily: 'Sora',
+                      fontFamily: AppTextStyles.bodyFont(context),
                       fontSize: 13,
                       fontWeight: FontWeight.w400,
                       color: colors.textSecondary,
@@ -360,7 +361,7 @@ class _MomentsCollectionScreenState extends State<MomentsCollectionScreen> {
                     l10n.momentsEmptyTitle,
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontFamily: 'Sora',
+                      fontFamily: AppTextStyles.bodyFont(context),
                       fontSize: 17,
                       fontWeight: FontWeight.w500,
                       color: colors.ctaPrimary,
@@ -372,7 +373,7 @@ class _MomentsCollectionScreenState extends State<MomentsCollectionScreen> {
                     l10n.momentsEmptyMessage,
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontFamily: 'Sora',
+                      fontFamily: AppTextStyles.bodyFont(context),
                       fontSize: 14,
                       fontWeight: FontWeight.w400,
                       color: colors.accentMuted,
@@ -471,7 +472,7 @@ class _MomentsHeaderDelegate extends SliverPersistentHeaderDelegate {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontFamily: 'Sora',
+                        fontFamily: AppTextStyles.bodyFont(context),
                         fontSize: 13,
                         fontWeight: FontWeight.w400,
                         color: colors.textSecondary,
@@ -550,7 +551,7 @@ class _MomentRow extends StatelessWidget {
                       Text(
                         localizeHabitName(moment.habitName, l10n),
                         style: TextStyle(
-                          fontFamily: 'Sora',
+                          fontFamily: AppTextStyles.bodyFont(context),
                           fontSize: 15,
                           fontWeight: FontWeight.w500,
                           color: colors.textPrimary,
@@ -560,7 +561,7 @@ class _MomentRow extends StatelessWidget {
                       Text(
                         dateStr,
                         style: TextStyle(
-                          fontFamily: 'Sora',
+                          fontFamily: AppTextStyles.bodyFont(context),
                           fontSize: 12,
                           fontWeight: FontWeight.w400,
                           color: colors.textSecondary,

@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Colors;
 import 'package:provider/provider.dart';
 
 import '../l10n/app_localizations.dart';
@@ -13,6 +12,7 @@ import '../state/user_state.dart';
 import '../services/analytics_service.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme_provider.dart';
+import '../utils/text_styles.dart';
 
 class WelcomeV2Screen extends StatefulWidget {
   const WelcomeV2Screen({super.key});
@@ -163,6 +163,7 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: CupertinoPageScaffold(
+        backgroundColor: colors.onboardingBg3,
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -190,6 +191,29 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
             // Floating glass cards
             _FloatingCards(size: size),
 
+            // Gradient overlay above keyboard
+            if (MediaQuery.of(context).viewInsets.bottom > 0)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+                child: IgnorePointer(
+                  child: Container(
+                    height: 36,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        colors: [
+                          colors.onboardingBg3,
+                          colors.onboardingBg3.withValues(alpha: 0),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
             // Main content
             SafeArea(
               child: Padding(
@@ -198,6 +222,11 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
                   physics: const ClampingScrollPhysics(),
                   keyboardDismissBehavior:
                       ScrollViewKeyboardDismissBehavior.onDrag,
+                  padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewInsets.bottom > 0
+                        ? MediaQuery.of(context).viewInsets.bottom + 20
+                        : 0,
+                  ),
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
                       minHeight: MediaQuery.of(context).size.height -
@@ -296,7 +325,7 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
                               l10n.onboardingTagline,
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                fontFamily: 'Sora',
+                                fontFamily: AppTextStyles.bodyFont(context),
                                 fontSize: 17,
                                 fontWeight: FontWeight.w500,
                                 color: colors.ctaSecondary,
@@ -357,13 +386,13 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
                                                 l10n.onboardingNamePrompt,
                                             textAlign: TextAlign.center,
                                             style: TextStyle(
-                                              fontFamily: 'Sora',
+                                              fontFamily: AppTextStyles.bodyFont(context),
                                               fontSize: 16,
                                               fontWeight: FontWeight.w500,
                                               color: colors.textPrimary,
                                             ),
                                             placeholderStyle: TextStyle(
-                                              fontFamily: 'Sora',
+                                              fontFamily: AppTextStyles.bodyFont(context),
                                               fontSize: 16,
                                               fontWeight: FontWeight.w500,
                                               color: colors.textPrimary
@@ -435,7 +464,7 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
                                               child: Text(
                                                 l10n.commonContinue,
                                                 style: TextStyle(
-                                                  fontFamily: 'Sora',
+                                                  fontFamily: AppTextStyles.bodyFont(context),
                                                   fontSize: 17,
                                                   fontWeight: FontWeight.w600,
                                                   color: Color(0xFFFFFFFF),
@@ -457,7 +486,7 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
                                     child: Text(
                                       l10n.onboardingSkipForNow,
                                       style: TextStyle(
-                                        fontFamily: 'Sora',
+                                        fontFamily: AppTextStyles.bodyFont(context),
                                         fontSize: 15,
                                         fontWeight: FontWeight.w500,
                                         color: colors.textTertiary,
@@ -490,23 +519,22 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
         Positioned(
           top: size.height * -0.1,
           right: size.width * 0.15,
-          child: Container(
-            width: 288,
-            height: 288,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                center: const Alignment(-0.3, -0.3),
-                radius: 0.9,
-                colors: [
-                  colors.surfaceLightest.withOpacity(0.8),
-                  colors.onboardingBg2.withOpacity(0.3),
-                ],
+          child: ImageFiltered(
+            imageFilter: ImageFilter.blur(sigmaX: 60, sigmaY: 60),
+            child: Container(
+              width: 288,
+              height: 288,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  center: const Alignment(-0.3, -0.3),
+                  radius: 0.9,
+                  colors: [
+                    colors.surfaceLightest.withOpacity(0.8),
+                    colors.onboardingBg2.withOpacity(0.3),
+                  ],
+                ),
               ),
-            ),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 60, sigmaY: 60),
-              child: Container(color: Colors.transparent),
             ),
           ),
         ),
@@ -515,23 +543,22 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
         Positioned(
           bottom: size.height * 0.05,
           left: size.width * -0.08,
-          child: Container(
-            width: 256,
-            height: 256,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                center: const Alignment(-0.35, -0.35),
-                radius: 0.9,
-                colors: [
-                  colors.onboardingBg1.withOpacity(0.7),
-                  colors.onboardingBg4.withOpacity(0.25),
-                ],
+          child: ImageFiltered(
+            imageFilter: ImageFilter.blur(sigmaX: 70, sigmaY: 70),
+            child: Container(
+              width: 256,
+              height: 256,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  center: const Alignment(-0.35, -0.35),
+                  radius: 0.9,
+                  colors: [
+                    colors.onboardingBg1.withOpacity(0.7),
+                    colors.onboardingBg4.withOpacity(0.25),
+                  ],
+                ),
               ),
-            ),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 70, sigmaY: 70),
-              child: Container(color: Colors.transparent),
             ),
           ),
         ),
@@ -540,23 +567,22 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
         Positioned(
           top: size.height * 0.5,
           left: size.width * 0.6,
-          child: Container(
-            width: 224,
-            height: 224,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                center: const Alignment(-0.4, -0.4),
-                radius: 0.9,
-                colors: [
-                  colors.surfaceLightest.withOpacity(0.65),
-                  colors.onboardingBg4.withOpacity(0.2),
-                ],
+          child: ImageFiltered(
+            imageFilter: ImageFilter.blur(sigmaX: 55, sigmaY: 55),
+            child: Container(
+              width: 224,
+              height: 224,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  center: const Alignment(-0.4, -0.4),
+                  radius: 0.9,
+                  colors: [
+                    colors.surfaceLightest.withOpacity(0.65),
+                    colors.onboardingBg4.withOpacity(0.2),
+                  ],
+                ),
               ),
-            ),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 55, sigmaY: 55),
-              child: Container(color: Colors.transparent),
             ),
           ),
         ),
@@ -565,23 +591,22 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
         Positioned(
           top: size.height * 0.25,
           left: size.width * 0.1,
-          child: Container(
-            width: 192,
-            height: 192,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                center: const Alignment(-0.35, -0.35),
-                radius: 0.9,
-                colors: [
-                  colors.onboardingBg1.withOpacity(0.6),
-                  colors.onboardingBg4.withOpacity(0.2),
-                ],
+          child: ImageFiltered(
+            imageFilter: ImageFilter.blur(sigmaX: 45, sigmaY: 45),
+            child: Container(
+              width: 192,
+              height: 192,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  center: const Alignment(-0.35, -0.35),
+                  radius: 0.9,
+                  colors: [
+                    colors.onboardingBg1.withOpacity(0.6),
+                    colors.onboardingBg4.withOpacity(0.2),
+                  ],
+                ),
               ),
-            ),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 45, sigmaY: 45),
-              child: Container(color: Colors.transparent),
             ),
           ),
         ),
@@ -702,28 +727,22 @@ class _FloatingCardsState extends State<_FloatingCards>
             ),
             child: Transform.rotate(
               angle: 12 * (3.14159 / 180),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                  child: Container(
-                    width: 128,
-                    height: 128,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          const Color(0xFFFFFFFF).withOpacity(0.25),
-                          const Color(0xFFFFFFFF).withOpacity(0.05),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: const Color(0xFFFFFFFF).withOpacity(0.3),
-                        width: 1,
-                      ),
-                    ),
+              child: Container(
+                width: 128,
+                height: 128,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      const Color(0xFFFFFFFF).withOpacity(0.25),
+                      const Color(0xFFFFFFFF).withOpacity(0.05),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: const Color(0xFFFFFFFF).withOpacity(0.3),
+                    width: 1,
                   ),
                 ),
               ),
@@ -743,28 +762,22 @@ class _FloatingCardsState extends State<_FloatingCards>
             ),
             child: Transform.rotate(
               angle: -6 * (3.14159 / 180),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                  child: Container(
-                    width: 96,
-                    height: 96,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          const Color(0xFFFFFFFF).withOpacity(0.2),
-                          const Color(0xFFFFFFFF).withOpacity(0.04),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: const Color(0xFFFFFFFF).withOpacity(0.25),
-                        width: 1,
-                      ),
-                    ),
+              child: Container(
+                width: 96,
+                height: 96,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      const Color(0xFFFFFFFF).withOpacity(0.2),
+                      const Color(0xFFFFFFFF).withOpacity(0.04),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: const Color(0xFFFFFFFF).withOpacity(0.25),
+                    width: 1,
                   ),
                 ),
               ),
@@ -783,28 +796,22 @@ class _FloatingCardsState extends State<_FloatingCards>
             ),
             child: Transform.rotate(
               angle: -18 * (3.14159 / 180),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                  child: Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          const Color(0xFFFFFFFF).withOpacity(0.2),
-                          const Color(0xFFFFFFFF).withOpacity(0.04),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: const Color(0xFFFFFFFF).withOpacity(0.25),
-                        width: 1,
-                      ),
-                    ),
+              child: Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      const Color(0xFFFFFFFF).withOpacity(0.2),
+                      const Color(0xFFFFFFFF).withOpacity(0.04),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: const Color(0xFFFFFFFF).withOpacity(0.25),
+                    width: 1,
                   ),
                 ),
               ),
@@ -824,28 +831,22 @@ class _FloatingCardsState extends State<_FloatingCards>
             ),
             child: Transform.rotate(
               angle: 22 * (3.14159 / 180),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                  child: Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          const Color(0xFFFFFFFF).withOpacity(0.18),
-                          const Color(0xFFFFFFFF).withOpacity(0.03),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: const Color(0xFFFFFFFF).withOpacity(0.2),
-                        width: 1,
-                      ),
-                    ),
+              child: Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      const Color(0xFFFFFFFF).withOpacity(0.18),
+                      const Color(0xFFFFFFFF).withOpacity(0.03),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: const Color(0xFFFFFFFF).withOpacity(0.2),
+                    width: 1,
                   ),
                 ),
               ),
@@ -865,28 +866,22 @@ class _FloatingCardsState extends State<_FloatingCards>
             ),
             child: Transform.rotate(
               angle: -10 * (3.14159 / 180),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(9),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                  child: Container(
-                    width: 52,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          const Color(0xFFFFFFFF).withOpacity(0.22),
-                          const Color(0xFFFFFFFF).withOpacity(0.04),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(9),
-                      border: Border.all(
-                        color: const Color(0xFFFFFFFF).withOpacity(0.22),
-                        width: 1,
-                      ),
-                    ),
+              child: Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      const Color(0xFFFFFFFF).withOpacity(0.22),
+                      const Color(0xFFFFFFFF).withOpacity(0.04),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(9),
+                  border: Border.all(
+                    color: const Color(0xFFFFFFFF).withOpacity(0.22),
+                    width: 1,
                   ),
                 ),
               ),

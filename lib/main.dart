@@ -10,6 +10,7 @@ import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'firebase_options.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'services/analytics_service.dart';
 
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -152,7 +153,7 @@ void showIntendedDialog({
           onPressed: action.onPressed,
           child: DefaultTextStyle(
             style: TextStyle(
-              fontFamily: 'Sora',
+              fontFamily: AppTextStyles.bodyFont(context),
               fontSize: 15,
               fontWeight: FontWeight.w500,
               color: action.isDefaultAction
@@ -263,11 +264,11 @@ Widget styledPrimaryButton({
           onPressed: onPressed,
           child: Text(
             label,
-            style: const TextStyle(
-              fontFamily: 'Sora',
+            style: TextStyle(
+              fontFamily: AppTextStyles.bodyFont(ctx),
               fontSize: 17,
               fontWeight: FontWeight.w600,
-              color: Color(0xFFFFFFFF),
+              color: const Color(0xFFFFFFFF),
             ),
           ),
         ),
@@ -304,7 +305,7 @@ Widget styledSecondaryButton({
           child: Text(
             label,
             style: TextStyle(
-              fontFamily: 'Sora',
+              fontFamily: AppTextStyles.bodyFont(ctx),
               fontSize: 17,
               fontWeight: FontWeight.w600,
               color: colors.textPrimary,
@@ -395,24 +396,27 @@ const List<Habit> habits = [
 /* -------------------- SERVICES -------------------- */
 
 class HabitTracker {
-  static String _key(String habitTitle, DateTime date) {
-    final d = date.toIso8601String().substring(0, 10); // YYYY-MM-DD
-    // Create a more robust ID from the title
-    final id = habitTitle
+  /// Normalise a habit title into a stable ID for storage keys.
+  static String habitId(String habitTitle) {
+    return habitTitle
         .toLowerCase()
         .trim()
-        .replaceAll(RegExp(r'[^a-z0-9]+'),
-            '_') // Replace non-alphanumeric with underscore
-        .replaceAll(RegExp(r'_+'), '_') // Remove duplicate underscores
-        .replaceAll(
-            RegExp(r'^_|_$'), ''); // Remove leading/trailing underscores
-    return 'habit_done_${id}_$d';
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
+        .replaceAll(RegExp(r'_+'), '_')
+        .replaceAll(RegExp(r'^_|_$'), '');
+  }
+
+  static String _key(String habitTitle, DateTime date) {
+    final d = date.toIso8601String().substring(0, 10);
+    return 'habit_done_${habitId(habitTitle)}_$d';
   }
 
   static Future<void> markDone(String habitTitle) async {
     final prefs = await SharedPreferences.getInstance();
     final key = _key(habitTitle, DateTime.now());
     await prefs.setBool(key, true);
+    // Store original title so weekly summary can display it after habit changes
+    await prefs.setString('habit_title_${habitId(habitTitle)}', habitTitle);
   }
 
   static Future<bool> wasDone(String habitTitle, DateTime date) async {
@@ -420,6 +424,36 @@ class HabitTracker {
     final key = _key(habitTitle, date);
     final result = prefs.getBool(key) ?? false;
     return result;
+  }
+
+  /// Returns all completed habit IDs for a given date by scanning stored keys.
+  static Future<List<String>> allCompletedIdsForDate(DateTime date) async {
+    final prefs = await SharedPreferences.getInstance();
+    final d = date.toIso8601String().substring(0, 10);
+    final suffix = '_$d';
+    const prefix = 'habit_done_';
+    final result = <String>[];
+    for (final key in prefs.getKeys()) {
+      if (key.startsWith(prefix) &&
+          key.endsWith(suffix) &&
+          prefs.getBool(key) == true) {
+        result.add(key.substring(prefix.length, key.length - suffix.length));
+      }
+    }
+    return result;
+  }
+
+  /// Get the display title for a habit ID. Falls back to a readable version
+  /// of the ID if the original title was never cached.
+  static Future<String> titleForId(String id) async {
+    final prefs = await SharedPreferences.getInstance();
+    final stored = prefs.getString('habit_title_$id');
+    if (stored != null) return stored;
+    // Best-effort: capitalise first letter, replace underscores with spaces
+    final readable = id.replaceAll('_', ' ');
+    return readable.isEmpty
+        ? id
+        : '${readable[0].toUpperCase()}${readable.substring(1)}';
   }
 }
 
@@ -446,6 +480,8 @@ void main() {
         // Clear all data on first run
         await prefs.clear();
         await prefs.setBool('first_run', false);
+        // Clear stale Firebase Auth session persisted in iOS Keychain
+        await FirebaseAuth.instance.signOut();
       }
 
       // Load saved name
@@ -904,7 +940,7 @@ class _WelcomeBackOverlayState extends State<WelcomeBackOverlay>
                         _getMessage(),
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontFamily: 'Sora',
+                          fontFamily: AppTextStyles.bodyFont(context),
                           fontSize: 20,
                           fontWeight: FontWeight.w500,
                           color: colors.textPrimary,
@@ -1312,7 +1348,7 @@ class _HabitsScreenState extends State<HabitsScreen>
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
                             color: colors.checkmarkFill,
-                            fontFamily: 'Sora',
+                            fontFamily: AppTextStyles.bodyFont(context),
                           ),
                         ),
                       ],
@@ -1353,7 +1389,7 @@ class _HabitsScreenState extends State<HabitsScreen>
                               fontWeight: FontWeight.w600,
                               color: colors.ctaPrimary,
                               letterSpacing: 1.0,
-                              fontFamily: 'Sora',
+                              fontFamily: AppTextStyles.bodyFont(context),
                             ),
                           ),
                         ),
@@ -1425,7 +1461,7 @@ class _HabitsScreenState extends State<HabitsScreen>
                                 fontWeight: FontWeight.w600,
                                 color: colors.ctaPrimary,
                                 letterSpacing: 1.0,
-                                fontFamily: 'Sora',
+                                fontFamily: AppTextStyles.bodyFont(context),
                               ),
                             ),
                           ),
@@ -1527,7 +1563,7 @@ class _HabitsScreenState extends State<HabitsScreen>
                                                 fontSize: 15,
                                                 fontWeight: FontWeight.w600,
                                                 color: colors.ctaPrimary,
-                                                fontFamily: 'Sora',
+                                                fontFamily: AppTextStyles.bodyFont(context),
                                               ),
                                             ),
                                           ],
@@ -1648,7 +1684,7 @@ class _HabitsScreenState extends State<HabitsScreen>
                                                     fontWeight: FontWeight.w600,
                                                     color: colors.textPrimary
                                                         .withOpacity(0.60),
-                                                    fontFamily: 'Sora',
+                                                    fontFamily: AppTextStyles.bodyFont(context),
                                                   ),
                                                 ),
                                               ],
@@ -1710,7 +1746,7 @@ class _HabitsScreenState extends State<HabitsScreen>
                                               fontSize: 15,
                                               fontWeight: FontWeight.w600,
                                               color: colors.textPrimary,
-                                              fontFamily: 'Sora',
+                                              fontFamily: AppTextStyles.bodyFont(context),
                                             ),
                                           ),
                                           const SizedBox(height: 2),
@@ -1722,7 +1758,7 @@ class _HabitsScreenState extends State<HabitsScreen>
                                               fontSize: 12,
                                               fontWeight: FontWeight.w500,
                                               color: colors.textSecondary,
-                                              fontFamily: 'Sora',
+                                              fontFamily: AppTextStyles.bodyFont(context),
                                             ),
                                           ),
                                         ],
@@ -1785,7 +1821,7 @@ class _HabitsScreenState extends State<HabitsScreen>
                                 l10n.habitsHoldForOptions,
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  fontFamily: 'Sora',
+                                  fontFamily: AppTextStyles.bodyFont(context),
                                   fontSize: 14,
                                   fontWeight: FontWeight.w500,
                                   color: colors.ctaPrimary,
@@ -1944,7 +1980,7 @@ class _CreateCustomHabitScreenState extends State<_CreateCustomHabitScreen> {
                           fontSize: 17,
                           fontWeight: FontWeight.w400,
                           color: colors.buttonDark,
-                          fontFamily: 'Sora',
+                          fontFamily: AppTextStyles.bodyFont(context),
                         ),
                       ),
                     ),
@@ -1955,7 +1991,7 @@ class _CreateCustomHabitScreenState extends State<_CreateCustomHabitScreen> {
                         fontSize: 17,
                         fontWeight: FontWeight.w600,
                         color: colors.textPrimary,
-                        fontFamily: 'Sora',
+                        fontFamily: AppTextStyles.bodyFont(context),
                       ),
                     ),
                     // Spacer to balance the row
@@ -1994,7 +2030,7 @@ class _CreateCustomHabitScreenState extends State<_CreateCustomHabitScreen> {
                           fontSize: 15,
                           fontWeight: FontWeight.w400,
                           color: colors.textSecondary,
-                          fontFamily: 'Sora',
+                          fontFamily: AppTextStyles.bodyFont(context),
                         ),
                       ),
 
@@ -2012,12 +2048,12 @@ class _CreateCustomHabitScreenState extends State<_CreateCustomHabitScreen> {
                         style: TextStyle(
                           fontSize: 17,
                           color: colors.textPrimary,
-                          fontFamily: 'Sora',
+                          fontFamily: AppTextStyles.bodyFont(context),
                         ),
                         placeholderStyle: TextStyle(
                           fontSize: 17,
                           color: colors.textSecondary,
-                          fontFamily: 'Sora',
+                          fontFamily: AppTextStyles.bodyFont(context),
                         ),
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
@@ -2039,7 +2075,7 @@ class _CreateCustomHabitScreenState extends State<_CreateCustomHabitScreen> {
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
                           color: colors.textSecondary,
-                          fontFamily: 'Sora',
+                          fontFamily: AppTextStyles.bodyFont(context),
                         ),
                       ),
 
@@ -2069,7 +2105,7 @@ class _CreateCustomHabitScreenState extends State<_CreateCustomHabitScreen> {
                                   color: _canSave
                                       ? colors.surfaceLightest
                                       : colors.textSecondary,
-                                  fontFamily: 'Sora',
+                                  fontFamily: AppTextStyles.bodyFont(context),
                                 ),
                               ),
                             ),
@@ -2352,7 +2388,7 @@ class _HabitCardState extends State<_HabitCard>
                           child: Text(
                             l10n.commonCancel,
                             style: TextStyle(
-                              fontFamily: 'Sora',
+                              fontFamily: AppTextStyles.bodyFont(context),
                               fontSize: 17,
                               fontWeight: FontWeight.w600,
                               color: colors.textPrimary,
@@ -2402,8 +2438,10 @@ class _HabitCardState extends State<_HabitCard>
               Expanded(
                 child: Text(
                   label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontFamily: 'Sora',
+                    fontFamily: AppTextStyles.bodyFont(context),
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                     color: textColor,
@@ -2612,7 +2650,7 @@ class _HabitCardState extends State<_HabitCard>
                             child: Text(
                               l10n.replacePinConfirm,
                               style: TextStyle(
-                                fontFamily: 'Sora',
+                                fontFamily: AppTextStyles.bodyFont(context),
                                 fontSize: 17,
                                 fontWeight: FontWeight.w600,
                                 color: Colors.white,
@@ -2628,7 +2666,7 @@ class _HabitCardState extends State<_HabitCard>
                           child: Text(
                             l10n.commonCancel,
                             style: TextStyle(
-                              fontFamily: 'Sora',
+                              fontFamily: AppTextStyles.bodyFont(context),
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
                               color: colors.textTertiary,
@@ -2674,7 +2712,7 @@ class _HabitCardState extends State<_HabitCard>
                   return Text(
                     l10n.commonOk,
                     style: TextStyle(
-                      fontFamily: 'Sora',
+                      fontFamily: AppTextStyles.bodyFont(ctx),
                       fontSize: 17,
                       fontWeight: FontWeight.w600,
                       color: clr.ctaPrimary,
@@ -2867,7 +2905,7 @@ class _HabitCardState extends State<_HabitCard>
                                           child: Text(
                                             localizeHabitName(habit, l10n),
                                             style: TextStyle(
-                                              fontFamily: 'Sora',
+                                              fontFamily: AppTextStyles.bodyFont(context),
                                               fontSize: 15,
                                               fontWeight: FontWeight.w500,
                                               color: colors.textPrimary,
@@ -2907,7 +2945,7 @@ class _HabitCardState extends State<_HabitCard>
                             child: Text(
                               l10n.commonCancel,
                               style: TextStyle(
-                                fontFamily: 'Sora',
+                                fontFamily: AppTextStyles.bodyFont(context),
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
                                 color: colors.textTertiary,
@@ -3015,7 +3053,7 @@ class _HabitCardState extends State<_HabitCard>
                               l10n.swapSuccessMessage(newHabit),
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                fontFamily: 'Sora',
+                                fontFamily: AppTextStyles.bodyFont(context),
                                 fontSize: 15,
                                 fontWeight: FontWeight.w500,
                                 color: colors.textSubtitle,
@@ -3053,8 +3091,8 @@ class _HabitCardState extends State<_HabitCard>
                                 onPressed: () => Navigator.pop(context),
                                 child: Text(
                                   l10n.commonGreat,
-                                  style: const TextStyle(
-                                    fontFamily: 'Sora',
+                                  style: TextStyle(
+                                    fontFamily: AppTextStyles.bodyFont(context),
                                     fontSize: 17,
                                     fontWeight: FontWeight.w600,
                                     color: Colors.white,
@@ -3180,7 +3218,7 @@ class _HabitCardState extends State<_HabitCard>
                         l10n.deleteHabitMessage(localizeHabitName(widget.habitTitle, l10n)),
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontFamily: 'Sora',
+                          fontFamily: AppTextStyles.bodyFont(context),
                           fontSize: 15,
                           fontWeight: FontWeight.w500,
                           color: colors.textSubtitle,
@@ -3222,8 +3260,8 @@ class _HabitCardState extends State<_HabitCard>
                           },
                           child: Text(
                             l10n.commonDelete,
-                            style: const TextStyle(
-                              fontFamily: 'Sora',
+                            style: TextStyle(
+                              fontFamily: AppTextStyles.bodyFont(context),
                               fontSize: 17,
                               fontWeight: FontWeight.w600,
                               color: Colors.white,
@@ -3273,7 +3311,7 @@ class _HabitCardState extends State<_HabitCard>
                                   l10n.commonCancel,
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    fontFamily: 'Sora',
+                                    fontFamily: AppTextStyles.bodyFont(context),
                                     fontSize: 17,
                                     fontWeight: FontWeight.w600,
                                     color: colors.textPrimary,
@@ -3456,13 +3494,15 @@ class _HabitCardState extends State<_HabitCard>
                                         : 1.0,
                                     child: Text(
                                       localizeHabitName(widget.habitTitle, l10n),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                         fontSize: _isDoneToday ? 15 : 16,
                                         fontWeight: FontWeight.w500,
                                         color: _isDoneToday
                                             ? colors.textSecondary
                                             : colors.textPrimary,
-                                        fontFamily: 'Sora',
+                                        fontFamily: AppTextStyles.bodyFont(context),
                                         decoration: _isDoneToday
                                             ? TextDecoration.lineThrough
                                             : TextDecoration.none,
@@ -3655,7 +3695,7 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
                   style: TextStyle(
                     fontSize: 16,
                     color: clr.ctaPrimary,
-                    fontFamily: 'Sora',
+                    fontFamily: AppTextStyles.bodyFont(ctx),
                   ),
                 );
               },
@@ -3713,7 +3753,7 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
                       oldHabit,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontFamily: 'Sora',
+                        fontFamily: AppTextStyles.bodyFont(context),
                         fontSize: 17,
                         fontWeight: FontWeight.w600,
                         color: colors.textPrimary,
@@ -3731,7 +3771,7 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
               style: TextStyle(
                 fontSize: 16,
                 color: colors.ctaPrimary,
-                fontFamily: 'Sora',
+                fontFamily: AppTextStyles.bodyFont(context),
               ),
             ),
           ),
@@ -3823,7 +3863,7 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
                             l10n.swapSuccessMessage(newHabit),
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontFamily: 'Sora',
+                              fontFamily: AppTextStyles.bodyFont(context),
                               fontSize: 15,
                               fontWeight: FontWeight.w500,
                               color: colors.textSubtitle,
@@ -3880,11 +3920,11 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
                                     borderRadius: BorderRadius.circular(20),
                                     child: Text(
                                       l10n.commonGreat,
-                                      style: const TextStyle(
-                                        fontFamily: 'Sora',
+                                      style: TextStyle(
+                                        fontFamily: AppTextStyles.bodyFont(context),
                                         fontSize: 17,
                                         fontWeight: FontWeight.w600,
-                                        color: Color(0xFFFFFFFF),
+                                        color: const Color(0xFFFFFFFF),
                                       ),
                                     ),
                                   ),
@@ -4180,7 +4220,7 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
                             fontWeight: FontWeight.w600,
                             color: colors.buttonDark,
                             letterSpacing: 0.5,
-                            fontFamily: 'Sora',
+                            fontFamily: AppTextStyles.bodyFont(context),
                           ),
                         ),
                       ),
@@ -4486,7 +4526,7 @@ class _HabitActionScreenState extends State<HabitActionScreen> {
                         'Not today',
                         style: TextStyle(
                           color: colors.buttonDark,
-                          fontFamily: 'Sora',
+                          fontFamily: AppTextStyles.bodyFont(context),
                         ),
                       ),
                     ),

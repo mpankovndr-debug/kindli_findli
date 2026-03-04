@@ -9,6 +9,7 @@ import '../services/milestone_service.dart';
 import '../services/week_stats_service.dart';
 import '../state/user_state.dart';
 import '../theme/theme_provider.dart';
+import '../utils/text_styles.dart';
 import 'share_card_screen.dart';
 import '../widgets/boost_offer_sheet.dart';
 
@@ -257,7 +258,7 @@ class _ShareCardPickerScreenState extends State<ShareCardPickerScreen> {
                         Text(
                           option.label,
                           style: TextStyle(
-                            fontFamily: 'Sora',
+                            fontFamily: AppTextStyles.bodyFont(context),
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                             color: isLocked

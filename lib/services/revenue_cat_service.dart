@@ -164,14 +164,30 @@ class RevenueCatService extends ChangeNotifier {
     return purchasePackage(package);
   }
 
-  /// Log in to RevenueCat with a user identifier (device ID or Firebase UID)
+  /// Log in to RevenueCat with a user identifier (device ID or Firebase UID).
+  /// Automatically logs out the previous user if switching to a different ID.
   Future<void> logIn(String userId) async {
     if (!_isInitialized) return;
     try {
+      final currentId = await Purchases.appUserID;
+      if (currentId != userId && !currentId.startsWith('\$RCAnonymousID:')) {
+        await Purchases.logOut();
+      }
       final result = await Purchases.logIn(userId);
       _updatePremiumStatus(result.customerInfo);
     } catch (e) {
       debugPrint('RevenueCat: logIn failed: $e');
+    }
+  }
+
+  /// Log out from RevenueCat (revert to anonymous user)
+  Future<void> logOut() async {
+    if (!_isInitialized) return;
+    try {
+      final customerInfo = await Purchases.logOut();
+      _updatePremiumStatus(customerInfo);
+    } catch (e) {
+      debugPrint('RevenueCat: logOut failed: $e');
     }
   }
 

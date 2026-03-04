@@ -9,6 +9,7 @@ import '../services/analytics_service.dart';
 import '../services/revenue_cat_service.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme_provider.dart';
+import '../utils/text_styles.dart';
 
 /// Shows the Boost mini-paywall bottom sheet.
 ///
@@ -325,11 +326,11 @@ class _BoostOfferSheetState extends State<_BoostOfferSheet> {
                     children: [
                       Text(
                         l10n.boostCardTitle,
-                        style: const TextStyle(
-                          fontFamily: 'Sora',
+                        style: TextStyle(
+                          fontFamily: AppTextStyles.bodyFont(context),
                           fontSize: 17,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFFFFFFFF),
+                          color: const Color(0xFFFFFFFF),
                           letterSpacing: -0.2,
                         ),
                       ),
@@ -425,7 +426,7 @@ class _BoostOfferSheetState extends State<_BoostOfferSheet> {
           child: Text(
             l10n.boostGoUnlimited,
             style: TextStyle(
-              fontFamily: 'Sora',
+              fontFamily: AppTextStyles.bodyFont(context),
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: colors.ctaPrimary,

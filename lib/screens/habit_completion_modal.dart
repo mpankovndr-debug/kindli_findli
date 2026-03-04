@@ -11,6 +11,7 @@ import '../main.dart';
 import '../utils/completion_messages.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme_provider.dart';
+import '../utils/text_styles.dart';
 
 /// Modal for completing a habit with smooth animations
 /// Implements the full completion sequence from design specs
@@ -386,11 +387,11 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
                             child: Text(
                               l10n.completionConfirm,
                               textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontFamily: 'Sora',
+                              style: TextStyle(
+                                fontFamily: AppTextStyles.bodyFont(context),
                                 fontSize: 17,
                                 fontWeight: FontWeight.w600,
-                                color: Color(0xFFFFFFFF),
+                                color: const Color(0xFFFFFFFF),
                               ),
                             ),
                           ),
@@ -411,7 +412,7 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
                     child: Text(
                       l10n.completionDecline,
                       style: TextStyle(
-                        fontFamily: 'Sora',
+                        fontFamily: AppTextStyles.bodyFont(context),
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                         color: colors.textTertiary,
@@ -497,7 +498,7 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
                   _celebrationTitle,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontFamily: 'Sora',
+                    fontFamily: AppTextStyles.bodyFont(context),
                     fontSize: 30,
                     fontWeight: FontWeight.w500,
                     color: colors.buttonDark,

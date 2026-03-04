@@ -5,9 +5,9 @@ import '../theme/theme_provider.dart';
 
 /// Intended text styles with locale-aware sizing
 ///
-/// TWO FONTS:
-/// - Sora: Headers, titles, category labels
-/// - DM Sans: Body text, buttons, inputs
+/// TWO FONT ROLES, body font swapped by locale:
+/// - Headers: Sora (always — brand identity)
+/// - Body:    Sora (EN) / Montserrat (RU)
 ///
 /// Russian text is typically 20-30% longer than English.
 /// These styles automatically reduce font sizes slightly for Russian.
@@ -19,11 +19,22 @@ import '../theme/theme_provider.dart';
 class AppTextStyles {
   // Font families
   static const String _headerFont = 'Sora';
-  static const String _bodyFont = 'DMSans'; // Register as 'DMSans' in pubspec.yaml
+  static const String _bodyFontEn = 'Sora';
+  static const String _bodyFontRu = 'Montserrat';
 
   /// Get current locale code from context
   static String _getLocale(BuildContext context) {
     return Localizations.localeOf(context).languageCode;
+  }
+
+  /// Returns the body font for the current locale.
+  /// Public so inline styles outside AppTextStyles can use it.
+  static String bodyFont(BuildContext context) {
+    return _bodyFontForLocale(_getLocale(context));
+  }
+
+  static String _bodyFontForLocale(String locale) {
+    return locale == 'ru' ? _bodyFontRu : _bodyFontEn;
   }
 
   /// Adjust font size for Russian text (8% smaller)
@@ -43,7 +54,7 @@ class AppTextStyles {
   }
 
   // ============================================================
-  // HEADERS (Sora font)
+  // HEADERS (Sora — always)
   // ============================================================
 
   /// Display - Large welcome title
@@ -131,7 +142,7 @@ class AppTextStyles {
   }
 
   // ============================================================
-  // BODY TEXT (DM Sans font)
+  // BODY TEXT (Sora EN / Montserrat RU)
   // ============================================================
 
   /// Body Large - Habit card text, primary content
@@ -142,7 +153,7 @@ class AppTextStyles {
     return TextStyle(
       fontSize: Responsive.sp(_localizedSize(16, locale)),
       fontWeight: FontWeight.w500,
-      fontFamily: _bodyFont,
+      fontFamily: _bodyFontForLocale(locale),
       color: colors.textPrimary, // Dark brown
       height: _localizedHeight(1.5, locale),
     );
@@ -156,7 +167,7 @@ class AppTextStyles {
     return TextStyle(
       fontSize: Responsive.sp(_localizedSize(15, locale)),
       fontWeight: FontWeight.w500,
-      fontFamily: _bodyFont,
+      fontFamily: _bodyFontForLocale(locale),
       color: colors.ctaPrimary,
       height: _localizedHeight(1.5, locale),
     );
@@ -170,7 +181,7 @@ class AppTextStyles {
     return TextStyle(
       fontSize: Responsive.sp(_localizedSize(15, locale)),
       fontWeight: FontWeight.w500,
-      fontFamily: _bodyFont,
+      fontFamily: _bodyFontForLocale(locale),
       color: colors.textSecondary, // Muted brown
     );
   }
@@ -188,7 +199,7 @@ class AppTextStyles {
     return TextStyle(
       fontSize: Responsive.sp(_localizedSize(13, locale)),
       fontWeight: FontWeight.w500,
-      fontFamily: _bodyFont,
+      fontFamily: _bodyFontForLocale(locale),
       color: colors.textDisabled,
     );
   }
@@ -201,13 +212,13 @@ class AppTextStyles {
     return TextStyle(
       fontSize: Responsive.sp(_localizedSize(12, locale)),
       fontWeight: FontWeight.w400,
-      fontFamily: _bodyFont,
+      fontFamily: _bodyFontForLocale(locale),
       color: colors.textDisabled,
     );
   }
 
   // ============================================================
-  // BUTTONS (DM Sans font)
+  // BUTTONS (Sora EN / Montserrat RU)
   // ============================================================
 
   /// Primary button text
@@ -218,7 +229,7 @@ class AppTextStyles {
     return TextStyle(
       fontSize: Responsive.sp(_localizedSize(17, locale)),
       fontWeight: FontWeight.w600,
-      fontFamily: _bodyFont,
+      fontFamily: _bodyFontForLocale(locale),
       color: colors.buttonText,
     );
   }
@@ -231,7 +242,7 @@ class AppTextStyles {
     return TextStyle(
       fontSize: Responsive.sp(_localizedSize(16, locale)),
       fontWeight: FontWeight.w600,
-      fontFamily: _bodyFont,
+      fontFamily: _bodyFontForLocale(locale),
       color: colors.textSecondary, // Muted brown
     );
   }
@@ -244,13 +255,13 @@ class AppTextStyles {
     return TextStyle(
       fontSize: Responsive.sp(_localizedSize(16, locale)),
       fontWeight: FontWeight.w500,
-      fontFamily: _bodyFont,
+      fontFamily: _bodyFontForLocale(locale),
       color: colors.ctaPrimary,
     );
   }
 
   // ============================================================
-  // INPUTS (DM Sans font)
+  // INPUTS (Sora EN / Montserrat RU)
   // ============================================================
 
   /// Input field text
@@ -261,7 +272,7 @@ class AppTextStyles {
     return TextStyle(
       fontSize: Responsive.sp(_localizedSize(15, locale)),
       fontWeight: FontWeight.w500,
-      fontFamily: _bodyFont,
+      fontFamily: _bodyFontForLocale(locale),
       color: colors.textPrimary, // Dark brown
     );
   }
@@ -284,7 +295,7 @@ class AppTextStyles {
     return TextStyle(
       fontSize: Responsive.sp(_localizedSize(20, locale)),
       fontWeight: FontWeight.w500,
-      fontFamily: _bodyFont,
+      fontFamily: _bodyFontForLocale(locale),
       color: colors.ctaPrimary,
       height: _localizedHeight(1.4, locale),
     );
@@ -298,7 +309,7 @@ class AppTextStyles {
     return TextStyle(
       fontSize: Responsive.sp(_localizedSize(15, locale)),
       fontWeight: FontWeight.w400,
-      fontFamily: _bodyFont,
+      fontFamily: _bodyFontForLocale(locale),
       color: colors.textSecondary,
     );
   }
@@ -311,7 +322,7 @@ class AppTextStyles {
     return TextStyle(
       fontSize: Responsive.sp(_localizedSize(24, locale)),
       fontWeight: FontWeight.w600,
-      fontFamily: _headerFont, // Sora for this heading-like text
+      fontFamily: _headerFont,
       color: colors.textPrimary,
       height: _localizedHeight(1.3, locale),
     );

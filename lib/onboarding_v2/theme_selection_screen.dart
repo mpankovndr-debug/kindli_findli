@@ -10,6 +10,7 @@ import '../l10n/app_localizations.dart';
 import '../services/analytics_service.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme_provider.dart';
+import '../utils/text_styles.dart';
 import '../widgets/theme_picker.dart';
 
 class ThemeSelectionScreen extends StatefulWidget {
@@ -111,7 +112,7 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
                       Text(
                         l10n.themeSelectionSubtitle,
                         style: TextStyle(
-                          fontFamily: 'Sora',
+                          fontFamily: AppTextStyles.bodyFont(context),
                           fontSize: 15,
                           fontWeight: FontWeight.w500,
                           color: colors.ctaSecondary,
@@ -140,7 +141,7 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
                               l10n.themeSelectionPremiumHint,
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                fontFamily: 'Sora',
+                                fontFamily: AppTextStyles.bodyFont(context),
                                 fontSize: 13,
                                 color: Colors.black.withValues(alpha: 0.55),
                               ),
@@ -217,7 +218,7 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
                             child: Text(
                               l10n.themeSelectionConfirm,
                               style: TextStyle(
-                                fontFamily: 'Sora',
+                                fontFamily: AppTextStyles.bodyFont(context),
                                 fontSize: 17,
                                 fontWeight: FontWeight.w600,
                                 color: Color(0xFFFFFFFF),
@@ -244,23 +245,22 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
         Positioned(
           top: size.height * 0.1,
           right: size.width * -0.05,
-          child: Container(
-            width: 256,
-            height: 256,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                center: const Alignment(-0.35, -0.35),
-                radius: 0.9,
-                colors: [
-                  colors.surfaceLightest.withOpacity(0.6),
-                  colors.borderMedium.withOpacity(0.2),
-                ],
+          child: ImageFiltered(
+            imageFilter: ImageFilter.blur(sigmaX: 60, sigmaY: 60),
+            child: Container(
+              width: 256,
+              height: 256,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  center: const Alignment(-0.35, -0.35),
+                  radius: 0.9,
+                  colors: [
+                    colors.surfaceLightest.withOpacity(0.6),
+                    colors.borderMedium.withOpacity(0.2),
+                  ],
+                ),
               ),
-            ),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 60, sigmaY: 60),
-              child: Container(color: Colors.transparent),
             ),
           ),
         ),
@@ -269,23 +269,22 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
         Positioned(
           bottom: size.height * 0.2,
           left: size.width * -0.08,
-          child: Container(
-            width: 224,
-            height: 224,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                center: const Alignment(-0.35, -0.35),
-                radius: 0.9,
-                colors: [
-                  colors.onboardingBg1.withOpacity(0.55),
-                  colors.onboardingBg4.withOpacity(0.18),
-                ],
+          child: ImageFiltered(
+            imageFilter: ImageFilter.blur(sigmaX: 55, sigmaY: 55),
+            child: Container(
+              width: 224,
+              height: 224,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  center: const Alignment(-0.35, -0.35),
+                  radius: 0.9,
+                  colors: [
+                    colors.onboardingBg1.withOpacity(0.55),
+                    colors.onboardingBg4.withOpacity(0.18),
+                  ],
+                ),
               ),
-            ),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 55, sigmaY: 55),
-              child: Container(color: Colors.transparent),
             ),
           ),
         ),

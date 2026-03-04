@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 
 import '../theme/theme_provider.dart';
+import '../utils/text_styles.dart';
 
 class IntentionShareCard extends StatelessWidget {
   final int completionCount;
@@ -274,7 +275,7 @@ class IntentionShareCard extends StatelessWidget {
                     Text(
                       'INTENDED',
                       style: TextStyle(
-                        fontFamily: 'Sora',
+                        fontFamily: AppTextStyles.bodyFont(context),
                         fontSize: 40,
                         fontWeight: FontWeight.w500,
                         letterSpacing: 6,

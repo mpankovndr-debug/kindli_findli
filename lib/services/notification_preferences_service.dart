@@ -35,7 +35,7 @@ class NotificationPreferencesService {
 
   static Future<bool> isWeeklyEnabled() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool('weekly_notification_enabled') ?? true;
+    return prefs.getBool('weekly_notification_enabled') ?? false;
   }
 
   static Future<void> setWeeklyEnabled(bool value) async {

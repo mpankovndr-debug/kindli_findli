@@ -134,7 +134,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get focusAreasChangeLater => 'Это всегда можно изменить.';
 
   @override
-  String get focusAreasLimitTitle => 'Лимит достигнут';
+  String get focusAreasLimitTitle => 'Пока хватит';
 
   @override
   String get focusAreasLimitMessage =>
@@ -510,7 +510,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get swapLimitMessage =>
-      'Ты использовал все бесплатные замены в этом месяце.\n\nBoost: 3 замены/мес.\nIntended+: без ограничений';
+      'Все бесплатные замены в этом месяце использованы.\n\nBoost: 3 замены/мес.\nIntended+: без ограничений';
 
   @override
   String get swapNoAltTitle => 'Нет альтернатив';
@@ -528,10 +528,10 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get completionQuestion => 'Ты это сделал сегодня?';
+  String get completionQuestion => 'Тебе это удалось сегодня?';
 
   @override
-  String get completionConfirm => 'Да, сделал';
+  String get completionConfirm => 'Получилось!';
 
   @override
   String get completionDecline => 'Не сегодня';
@@ -1422,13 +1422,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get paywallTerms => 'Условия';
 
   @override
-  String get paywallPrivacy => 'Конфиденциальность';
+  String get paywallPrivacy => 'Приватность';
 
   @override
   String get subscriptionTitle => 'Intended+';
 
   @override
-  String get subscriptionSupporter => 'Ты наш сторонник ♥';
+  String get subscriptionSupporter => 'Спасибо, что ты с нами ♥';
 
   @override
   String get subscriptionPlan => 'Тариф';
@@ -1557,7 +1557,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get profileSignOut => 'Выйти';
 
   @override
-  String get profileDeleteData => 'Удалить данные профиля';
+  String get profileDeleteData => 'Удалить мои данные';
 
   @override
   String get profileVersion => 'Intended v1.0.0';
@@ -1617,7 +1617,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get profileDailyLimitMessage =>
-      'Ты обновил привычки 3 раза сегодня. Попробуй завтра или открой Intended+ для безлимитных обновлений.';
+      'Привычки обновлены 3 раза сегодня. Попробуй завтра или открой Intended+ для безлимитных обновлений.';
 
   @override
   String get profileCannotOpenLink => 'Не удалось открыть ссылку';
@@ -1646,7 +1646,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get profileSaveChanges => 'Сохранить';
 
   @override
-  String get themeWarmClay => 'Обоженная глина';
+  String get themeWarmClay => 'Терракота';
 
   @override
   String get themeIris => 'Ирис';
@@ -1782,7 +1782,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get habitHandOnHeart => 'Положи руку на сердце на мгновение';
 
   @override
-  String get habitGratefulThing => 'Заметь одну вещь, за которую благодарен';
+  String get habitGratefulThing =>
+      'Заметь одну вещь, за которую чувствуешь благодарность';
 
   @override
   String get habitSmileGently => 'Мягко улыбнись себе';
@@ -1893,7 +1894,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get habitReachOut => 'Напиши тому, по кому скучаешь';
 
   @override
-  String get habitTellMeaning => 'Скажи кому-то, как он тебе важен';
+  String get habitTellMeaning => 'Скажи кому-то, как ты ценишь этого человека';
 
   @override
   String get habitOfferHelp => 'Предложи кому-нибудь помощь';
@@ -2011,13 +2012,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get habitDoNothing => 'Ничего не делай 30 секунд';
 
   @override
-  String get shareCardWeeklyCheckin => 'За неделю';
+  String get shareCardWeeklyCheckin => 'Неделя';
 
   @override
   String get shareCardMilestone => 'Достижение';
 
   @override
-  String get shareCardShowedUpPhrase => 'На этой неделе я позаботился о себе';
+  String get shareCardShowedUpPhrase => 'На этой неделе — забота о себе';
 
   @override
   String get shareCardTimes => 'раз';
@@ -2035,11 +2036,14 @@ class AppLocalizationsRu extends AppLocalizations {
   String get shareCardDescriptor => 'намерение, а не совершенство';
 
   @override
-  String get sharePickerTitle => 'Чем бы ты хотел поделиться?';
+  String get shareButton => 'Поделиться';
+
+  @override
+  String get sharePickerTitle => 'Чем хочешь поделиться?';
 
   @override
   String get shareWeeklySubtitle =>
-      'сколько раз ты позаботился о себе на этой неделе';
+      'сколько раз удалось позаботиться о себе на этой неделе';
 
   @override
   String get shareShowingUpSubtitle => 'по-своему, в своём темпе';
@@ -2159,11 +2163,11 @@ class AppLocalizationsRu extends AppLocalizations {
   String get commonDismiss => 'Закрыть';
 
   @override
-  String get focusLimitFreeTitle => 'Лимит фокус-областей';
+  String get focusLimitFreeTitle => 'Лимит направлений достигнут';
 
   @override
   String get focusLimitFreeMessage =>
-      'Бесплатный план включает 1 фокус-область. Перейди на платный, чтобы открыть больше.';
+      'Бесплатный план включает 1 направление. Перейди на платный, чтобы открыть больше.';
 
   @override
   String get focusLimitFreeUpgrade => 'Улучшить';
@@ -2173,7 +2177,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get focusNudgeMessage =>
-      'Сосредоточься на одной области для лучших результатов.';
+      'Меньше направлений — глубже рост. Но тебе виднее.';
 
   @override
   String get focusNudgeGotIt => 'Понятно';

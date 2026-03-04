@@ -12,6 +12,7 @@ import '../services/analytics_service.dart';
 import '../services/week_stats_service.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme_provider.dart';
+import '../utils/text_styles.dart';
 import 'moments_collection_screen.dart';
 import 'share_card_picker_screen.dart';
 
@@ -96,7 +97,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                     child: Text(
                       l10n.progressOnboardingPrompt,
                       style: TextStyle(
-                        fontFamily: 'Sora',
+                        fontFamily: AppTextStyles.bodyFont(context),
                         fontSize: 15,
                         fontWeight: FontWeight.w500,
                         color: colors.textSubtitle,
@@ -247,7 +248,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
               Text(
                 l10n.progressWeeklySummary,
                 style: TextStyle(
-                  fontFamily: 'Sora',
+                  fontFamily: AppTextStyles.bodyFont(context),
                   fontSize: 11,
                   fontWeight: FontWeight.w500,
                   color: colors.ctaPrimary,
@@ -410,7 +411,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
         Text(
           l10n.progressYourMoments,
           style: TextStyle(
-            fontFamily: 'Sora',
+            fontFamily: AppTextStyles.bodyFont(context),
             fontSize: 11,
             fontWeight: FontWeight.w500,
             color: colors.ctaPrimary,

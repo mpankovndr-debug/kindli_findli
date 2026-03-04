@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../models/share_card_type.dart';
 import '../theme/theme_provider.dart';
+import '../utils/text_styles.dart';
 
 class MilestoneShareCard extends StatelessWidget {
   final String heroText;
@@ -242,7 +243,7 @@ class MilestoneShareCard extends StatelessWidget {
                     Text(
                       'INTENDED',
                       style: TextStyle(
-                        fontFamily: 'Sora',
+                        fontFamily: AppTextStyles.bodyFont(context),
                         fontSize: 40,
                         fontWeight: FontWeight.w500,
                         letterSpacing: 6,

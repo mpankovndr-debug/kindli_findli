@@ -12,6 +12,7 @@ import '../services/share_service.dart';
 import '../services/week_stats_service.dart';
 import '../state/user_state.dart';
 import '../theme/theme_provider.dart';
+import '../utils/text_styles.dart';
 import '../widgets/intention_share_card.dart';
 import '../widgets/milestone_share_card.dart';
 
@@ -150,17 +151,17 @@ class _ShareCardScreenState extends State<ShareCardScreen>
                         ? const CupertinoActivityIndicator(color: CupertinoColors.white)
                         : Row(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Icon(
+                            children: [
+                              const Icon(
                                 CupertinoIcons.share,
                                 size: 18,
                                 color: CupertinoColors.white,
                               ),
-                              SizedBox(width: 8),
+                              const SizedBox(width: 8),
                               Text(
-                                'Share',
+                                AppLocalizations.of(context).shareButton,
                                 style: TextStyle(
-                                  fontFamily: 'Sora',
+                                  fontFamily: AppTextStyles.bodyFont(context),
                                   fontSize: 17,
                                   fontWeight: FontWeight.w600,
                                   color: CupertinoColors.white,
