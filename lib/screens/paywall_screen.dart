@@ -257,7 +257,7 @@ class _PaywallScreenState extends State<PaywallScreen>
             child: ColorFiltered(
               colorFilter: ColorFilter.mode(colors.ctaPrimary, BlendMode.srcIn),
               child: Image.asset(
-                'assets/images/kindli_icon_transparent.png',
+                'assets/images/intended_icon_transparent.png',
                 width: 48,
                 height: 48,
               ),

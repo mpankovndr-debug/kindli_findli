@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 // sign_in_with_apple and sign_in_button packages available for auth implementation
 
 import '../main.dart';
@@ -611,11 +612,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  void _showSubscriptionManagement() {
+  Future<void> _showSubscriptionManagement() async {
+    final l10n = AppLocalizations.of(context);
+    String plan = l10n.paywallLifetime;
+    String price = l10n.paywallLifetimePrice;
+    String renewalDate = '—';
+
+    try {
+      final customerInfo = await Purchases.getCustomerInfo();
+      final entitlement = customerInfo.entitlements.all['Intended+'];
+      if (entitlement != null && entitlement.isActive) {
+        final productId = entitlement.productIdentifier;
+        if (productId.contains('monthly')) {
+          plan = l10n.paywallMonthly;
+          price = '${l10n.paywallMonthlyPrice}/${l10n.paywallMonthly.toLowerCase()}';
+        } else if (productId.contains('yearly')) {
+          plan = l10n.paywallYearly;
+          price = '${l10n.paywallYearlyPrice}/${l10n.paywallYearly.toLowerCase()}';
+        }
+        final expDate = entitlement.expirationDate;
+        if (expDate != null) {
+          final dt = DateTime.tryParse(expDate);
+          if (dt != null) {
+            renewalDate = '${dt.day}.${dt.month.toString().padLeft(2, '0')}.${dt.year}';
+          }
+        }
+      }
+    } catch (_) {
+      // Fallback: still show modal with generic info
+    }
+
+    if (!mounted) return;
     showCupertinoDialog(
       context: context,
       barrierDismissible: true,
-      builder: (context) => const SubscriptionManagementModal(),
+      builder: (context) => SubscriptionManagementModal(
+        plan: plan,
+        price: price,
+        renewalDate: renewalDate,
+      ),
     );
   }
 
@@ -804,6 +839,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               onPressed: () async {
                 Navigator.pop(context);
+
+                // Delete server-side data if user is signed in
+                final user = FirebaseAuth.instance.currentUser;
+                if (user != null) {
+                  try {
+                    final revenueCat = context.read<RevenueCatService>();
+                    await revenueCat.logOut();
+                    await user.delete();
+                  } catch (e) {
+                    if (mounted) {
+                      showStyledPopup(
+                        context: context,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              l10n.swapErrorTitle,
+                              style: AppTextStyles.h2(context),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              l10n.profileDeleteErrorMessage,
+                              style: AppTextStyles.body(context),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 24),
+                            styledSecondaryButton(
+                              label: l10n.commonOk,
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                    return;
+                  }
+                }
+
                 final prefs = await SharedPreferences.getInstance();
                 await prefs.clear();
 

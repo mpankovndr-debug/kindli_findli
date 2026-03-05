@@ -2894,12 +2894,6 @@ abstract class AppLocalizations {
   /// **'Payment'**
   String get profilePaymentTitle;
 
-  /// No description provided for @profilePaymentMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'In-app purchase coming soon!'**
-  String get profilePaymentMessage;
-
   /// No description provided for @profileChangeSpace.
   ///
   /// In en, this message translates to:
@@ -2969,8 +2963,14 @@ abstract class AppLocalizations {
   /// No description provided for @profileDeleteAllMessage.
   ///
   /// In en, this message translates to:
-  /// **'This will permanently delete all your habits, progress, and settings. This action cannot be undone.'**
+  /// **'This will permanently delete your account and all data. This cannot be undone.'**
   String get profileDeleteAllMessage;
+
+  /// No description provided for @profileDeleteErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete your account. Please try again.'**
+  String get profileDeleteErrorMessage;
 
   /// No description provided for @profileChangeFocusAreasScreenTitle.
   ///

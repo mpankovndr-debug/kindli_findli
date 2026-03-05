@@ -47,10 +47,12 @@ class MilestoneService {
       for (final m in moments) {
         habitCounts[m.habitName] = (habitCounts[m.habitName] ?? 0) + 1;
       }
-      final topEntry =
-          habitCounts.entries.reduce((a, b) => a.value > b.value ? a : b);
-      topHabitName = topEntry.key;
-      topHabitCount = topEntry.value;
+      if (habitCounts.isNotEmpty) {
+        final topEntry =
+            habitCounts.entries.reduce((a, b) => a.value > b.value ? a : b);
+        topHabitName = topEntry.key;
+        topHabitCount = topEntry.value;
+      }
 
       // Group by area → find most repeated (skip custom habits with null area)
       final Map<String, int> areaCounts = {};

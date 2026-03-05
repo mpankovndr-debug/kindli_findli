@@ -1,4 +1,4 @@
-name: kindli
+name: intended
 description: "Intended - A gentle approach to building better habits."
 publish_to: 'none'
 
@@ -46,7 +46,7 @@ dev_dependencies:
 flutter_launcher_icons:
   android: false
   ios: true
-  image_path: "assets/images/kindli_icon.png"
+  image_path: "assets/images/intended_icon.png"
   remove_alpha_ios: true
 
 flutter:

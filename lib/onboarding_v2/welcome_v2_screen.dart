@@ -288,7 +288,7 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
                                       ),
                                       child: Center(
                                         child: Image.asset(
-                                          'assets/images/kindli_icon_transparent.png',
+                                          'assets/images/intended_icon_transparent.png',
                                           width: 100,
                                           height: 100,
                                         ),

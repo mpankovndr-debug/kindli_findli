@@ -1600,9 +1600,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profilePaymentTitle => 'Payment';
 
   @override
-  String get profilePaymentMessage => 'In-app purchase coming soon!';
-
-  @override
   String get profileChangeSpace => 'Change your space';
 
   @override
@@ -1642,7 +1639,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileDeleteAllMessage =>
-      'This will permanently delete all your habits, progress, and settings. This action cannot be undone.';
+      'This will permanently delete your account and all data. This cannot be undone.';
+
+  @override
+  String get profileDeleteErrorMessage =>
+      'Could not delete your account. Please try again.';
 
   @override
   String get profileChangeFocusAreasScreenTitle => 'Change Focus Areas';

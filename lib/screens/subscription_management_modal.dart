@@ -18,9 +18,9 @@ class SubscriptionManagementModal extends StatelessWidget {
 
   const SubscriptionManagementModal({
     super.key,
-    this.plan = 'Yearly',
-    this.price = '€39.99/year',
-    this.renewalDate = 'March 14, 2027',
+    required this.plan,
+    required this.price,
+    required this.renewalDate,
   });
 
   Future<void> _openAppStoreSubscriptions() async {

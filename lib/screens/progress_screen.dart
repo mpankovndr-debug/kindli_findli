@@ -107,6 +107,19 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 : FutureBuilder<WeekStats>(
                     future: _weekStatsFuture,
                     builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        return Center(
+                          child: Text(
+                            l10n.progressWeekBeginning,
+                            style: TextStyle(
+                              fontFamily: AppTextStyles.bodyFont(context),
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                              color: colors.textSubtitle,
+                            ),
+                          ),
+                        );
+                      }
                       if (!snapshot.hasData) {
                         return const Center(
                           child: CupertinoActivityIndicator(),
@@ -193,7 +206,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                           FutureBuilder<List<Moment>>(
                             future: MomentsService.getAll(),
                             builder: (context, snap) {
-                              if (!snap.hasData || snap.data!.isEmpty) {
+                              if (snap.hasError || !snap.hasData || snap.data!.isEmpty) {
                                 return const SizedBox.shrink();
                               }
                               final moments = snap.data!;

@@ -8,26 +8,30 @@ import 'package:share_plus/share_plus.dart';
 
 class ShareService {
   static Future<void> shareCard(GlobalKey repaintKey, {required Rect sharePositionOrigin}) async {
-    // 1. Capture the RepaintBoundary at 3x pixel ratio for crisp 1080x1920 output
-    final boundary =
-        repaintKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
-    final image = await boundary.toImage(pixelRatio: 3.0);
-    final byteData = await image.toByteData(format: ImageByteFormat.png);
-    final pngBytes = byteData!.buffer.asUint8List();
+    final context = repaintKey.currentContext;
+    if (context == null) throw Exception('Widget not mounted');
 
-    // 2. Save to temporary directory
+    final renderObject = context.findRenderObject();
+    if (renderObject is! RenderRepaintBoundary) {
+      throw Exception('Could not capture image');
+    }
+
+    final image = await renderObject.toImage(pixelRatio: 3.0);
+    final byteData = await image.toByteData(format: ImageByteFormat.png);
+    if (byteData == null) throw Exception('Could not encode image');
+
+    final pngBytes = byteData.buffer.asUint8List();
+
     final tempDir = await getTemporaryDirectory();
     final file = File('${tempDir.path}/intended_share_card.png');
     await file.writeAsBytes(pngBytes);
 
-    // 3. Share via share_plus
     await Share.shareXFiles(
       [XFile(file.path)],
       subject: 'My week on Intended',
       sharePositionOrigin: sharePositionOrigin,
     );
 
-    // 4. Clean up temp file
     if (await file.exists()) {
       await file.delete();
     }

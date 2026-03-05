@@ -395,7 +395,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get dailyMessage19 => 'Начни оттуда, где ты сейчас';
 
   @override
-  String get dailyMessage20 => 'Не нужно быть готовым, чтобы начать';
+  String get dailyMessage20 => 'Готовность не обязательна, чтобы начать';
 
   @override
   String get dailyMessage21 => 'Доверяй своему ритму';
@@ -1422,7 +1422,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get paywallTerms => 'Условия';
 
   @override
-  String get paywallPrivacy => 'Приватность';
+  String get paywallPrivacy => 'Конфиденциальность';
 
   @override
   String get subscriptionTitle => 'Intended+';
@@ -1441,7 +1441,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get subscriptionThankYou =>
-      'Спасибо, что поддерживаешь Intended.\nТвоя подписка помогает нам\nстроить более мягкий путь к росту.';
+      'Спасибо, что поддерживаешь Intended.\nТвоя подписка помогает нам\nсоздавать более мягкий путь к росту.';
 
   @override
   String get subscriptionManage => 'Управление в App Store';
@@ -1593,9 +1593,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get profilePaymentTitle => 'Оплата';
 
   @override
-  String get profilePaymentMessage => 'Встроенные покупки скоро появятся!';
-
-  @override
   String get profileChangeSpace => 'Сменить пространство';
 
   @override
@@ -1634,7 +1631,11 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get profileDeleteAllMessage =>
-      'Все привычки, прогресс и настройки будут удалены безвозвратно.';
+      'Аккаунт и все данные будут удалены безвозвратно.';
+
+  @override
+  String get profileDeleteErrorMessage =>
+      'Не удалось удалить аккаунт. Попробуй ещё раз.';
 
   @override
   String get profileChangeFocusAreasScreenTitle => 'Смена направлений';
@@ -2012,7 +2013,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get habitDoNothing => 'Ничего не делай 30 секунд';
 
   @override
-  String get shareCardWeeklyCheckin => 'Неделя';
+  String get shareCardWeeklyCheckin => 'За неделю';
 
   @override
   String get shareCardMilestone => 'Достижение';

@@ -927,7 +927,7 @@ class _WelcomeBackOverlayState extends State<WelcomeBackOverlay>
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Image.asset(
-                    'assets/images/kindli_icon_transparent.png',
+                    'assets/images/intended_icon_transparent.png',
                     width: 80,
                     height: 80,
                   ),
