@@ -746,5 +746,9 @@
   "shareError": "Could not share. Please try again.",
 
   "restoreSuccess": "Purchases restored!",
-  "restoreNotFound": "No purchases found."
+  "restoreNotFound": "No purchases found.",
+
+  "onboardingAlreadyHaveAccount": "Sign in",
+  "onboardingSignInWithApple": "Sign in with Apple",
+  "onboardingSignInWithGoogle": "Sign in with Google"
 }

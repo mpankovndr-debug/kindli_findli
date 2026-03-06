@@ -3,7 +3,10 @@ import 'dart:ui';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show CircleAvatar, Colors, NetworkImage, ScaffoldMessenger, SnackBar;
+import 'package:flutter/material.dart'
+    show CircleAvatar, Colors, NetworkImage;
+import '../widgets/app_toast.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/services.dart';
 import '../l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
@@ -20,7 +23,6 @@ import '../onboarding_v2/welcome_v2_screen.dart';
 import '../state/user_state.dart';
 import '../utils/profanity_filter.dart';
 import '../utils/text_styles.dart';
-import '../utils/responsive_utils.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme_provider.dart';
 import 'paywall_screen.dart';
@@ -125,11 +127,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showSignInError(BuildContext context, Object error) {
+    debugPrint('Sign in with Apple error: $error');
     showCupertinoDialog(
       context: context,
       builder: (ctx) => CupertinoAlertDialog(
         title: const Text('Sign in failed'),
-        content: const Text('Something went wrong. Please try again.'),
+        content: Text(
+          kDebugMode
+            ? 'Something went wrong. Please try again.\n\nDebug: $error'
+            : 'Something went wrong. Please try again.',
+        ),
         actions: [
           CupertinoDialogAction(
             isDefaultAction: true,
@@ -524,6 +531,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showUpgradeScreen() {
+    if (context.read<RevenueCatService>().isPremium) return;
     showCupertinoModalPopup(
       context: context,
       barrierColor: Colors.black.withOpacity(0.5),
@@ -618,23 +626,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _showSubscriptionManagement() async {
     final l10n = AppLocalizations.of(context);
+    final rc = context.read<RevenueCatService>();
     String plan = l10n.paywallLifetime;
-    String price = l10n.paywallLifetimePrice;
+    String price = rc.lifetimePriceString ?? l10n.paywallLifetimePrice;
     String renewalDate = '—';
 
     try {
       final customerInfo = await Purchases.getCustomerInfo();
-      final entitlement = customerInfo.entitlements.all[RevenueCatService.entitlementPlus];
+      final entitlement =
+          customerInfo.entitlements.all[RevenueCatService.entitlementPlus];
       if (entitlement != null && entitlement.isActive) {
         final productId = entitlement.productIdentifier;
         if (productId.contains('monthly')) {
           plan = l10n.paywallMonthly;
+          final monthlyPrice = rc.monthlyPriceString ?? l10n.paywallMonthlyPrice;
           price =
-              '${l10n.paywallMonthlyPrice}/${l10n.paywallMonthly.toLowerCase()}';
+              '$monthlyPrice/${l10n.paywallMonthly.toLowerCase()}';
         } else if (productId.contains('yearly')) {
           plan = l10n.paywallYearly;
+          final yearlyPrice = rc.yearlyPriceString ?? l10n.paywallYearlyPrice;
           price =
-              '${l10n.paywallYearlyPrice}/${l10n.paywallYearly.toLowerCase()}';
+              '$yearlyPrice/${l10n.paywallYearly.toLowerCase()}';
         }
         final expDate = entitlement.expirationDate;
         if (expDate != null) {
@@ -909,7 +921,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           : await AuthService.reauthenticateWithGoogle();
       if (!success) return false;
       await user.delete();
-      try { FirebaseAnalytics.instance.logEvent(name: 'account_deleted'); } catch (_) {}
+      try {
+        FirebaseAnalytics.instance.logEvent(name: 'account_deleted');
+      } catch (_) {}
       return true;
     } catch (_) {
       if (mounted) _showDeleteError(l10n);
@@ -983,7 +997,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                     await revenueCat.logOut();
                     await user.delete();
-                    try { FirebaseAnalytics.instance.logEvent(name: 'account_deleted'); } catch (_) {}
+                    try {
+                      FirebaseAnalytics.instance
+                          .logEvent(name: 'account_deleted');
+                    } catch (_) {}
                   } on FirebaseAuthException catch (e) {
                     if (e.code == 'requires-recent-login' && mounted) {
                       // Google users: re-auth on demand
@@ -1995,21 +2012,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       .read<RevenueCatService>()
                                       .restorePurchases();
                                   if (mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(result
+                                    AppToast.show(context, result
                                             ? l10n.restoreSuccess
-                                            : l10n.restoreNotFound),
-                                      ),
-                                    );
+                                            : l10n.restoreNotFound);
                                   }
                                 } catch (_) {
                                   if (mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(l10n.restoreNotFound),
-                                      ),
-                                    );
+                                    AppToast.show(context, l10n.restoreNotFound);
                                   }
                                 }
                               },
@@ -2355,10 +2364,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               onPressed: () async {
                                 final revenueCat =
                                     context.read<RevenueCatService>();
-                                final onboarding =
-                                    context.read<OnboardingState>();
-                                final userState =
-                                    context.read<UserState>();
+                                final userState = context.read<UserState>();
                                 final themeProvider =
                                     context.read<ThemeProvider>();
                                 final nav = Navigator.of(context);
@@ -2366,22 +2372,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 await revenueCat.logOut();
                                 await AuthService.signOut();
 
-                                // Clear all local user data after sign-out succeeds
                                 await NotificationScheduler.cancelAll();
+
+                                // Clear only auth-related prefs, preserve habits/theme/onboarding
                                 final prefs =
                                     await SharedPreferences.getInstance();
-                                await prefs.clear();
+                                await prefs.remove('user_name');
 
-                                await onboarding.reset();
                                 userState.reset();
                                 userNameNotifier.value = null;
-                                themeProvider
-                                    .setTheme(AppTheme.warmClay);
+
+                                // Reset to default theme only if current theme requires Intended+
+                                if (themeProvider.isPremiumTheme(themeProvider.theme)) {
+                                  themeProvider.setTheme(AppTheme.warmClay);
+                                }
 
                                 nav.pushAndRemoveUntil(
                                   CupertinoPageRoute(
-                                    builder: (_) =>
-                                        const WelcomeV2Screen(),
+                                    builder: (_) => const MainTabs(),
                                   ),
                                   (route) => false,
                                 );
@@ -2493,6 +2501,7 @@ class _ProfileButton extends StatelessWidget {
   const _ProfileButton({
     required this.iconContainer,
     required this.title,
+    this.subtitle,
     required this.onTap,
   });
 
@@ -2628,6 +2637,7 @@ class _FocusAreaChangeScreenState extends State<_FocusAreaChangeScreen> {
                 child: CupertinoButton(
                   onPressed: () {
                     Navigator.pop(context);
+                    if (context.read<RevenueCatService>().isPremium) return;
                     showCupertinoModalPopup(
                       context: context,
                       barrierColor: Colors.black.withOpacity(0.5),

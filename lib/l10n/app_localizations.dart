@@ -4033,6 +4033,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No purchases found.'**
   String get restoreNotFound;
+
+  /// No description provided for @onboardingAlreadyHaveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get onboardingAlreadyHaveAccount;
+
+  /// No description provided for @onboardingSignInWithApple.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with Apple'**
+  String get onboardingSignInWithApple;
+
+  /// No description provided for @onboardingSignInWithGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with Google'**
+  String get onboardingSignInWithGoogle;
 }
 
 class _AppLocalizationsDelegate

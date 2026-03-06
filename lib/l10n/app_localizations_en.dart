@@ -2219,4 +2219,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get restoreNotFound => 'No purchases found.';
+
+  @override
+  String get onboardingAlreadyHaveAccount => 'Sign in';
+
+  @override
+  String get onboardingSignInWithApple => 'Sign in with Apple';
+
+  @override
+  String get onboardingSignInWithGoogle => 'Sign in with Google';
 }

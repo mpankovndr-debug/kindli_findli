@@ -2217,4 +2217,13 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get restoreNotFound => 'Покупки не найдены.';
+
+  @override
+  String get onboardingAlreadyHaveAccount => 'Войти';
+
+  @override
+  String get onboardingSignInWithApple => 'Войти через Apple';
+
+  @override
+  String get onboardingSignInWithGoogle => 'Войти через Google';
 }

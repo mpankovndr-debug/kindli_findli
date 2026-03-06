@@ -1,10 +1,12 @@
 import 'dart:math';
 import 'dart:ui';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 
 import '../l10n/app_localizations.dart';
 import '../main.dart';
+import '../services/auth_service.dart';
 import '../utils/profanity_filter.dart';
 import 'focus_areas_screen.dart';
 import 'onboarding_state.dart';
@@ -91,6 +93,34 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
     controller.dispose();
     _anim.dispose();
     super.dispose();
+  }
+
+  void _showSignInSheet(BuildContext context, AppColorScheme colors, AppLocalizations l10n) {
+    showCupertinoModalPopup(
+      context: context,
+      barrierColor: const Color(0xFF000000).withValues(alpha: 0.4),
+      filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+      builder: (_) => _SignInSheet(
+        onSignInComplete: (credential) {
+          if (credential == null || !mounted) return;
+          final onboarding = context.read<OnboardingState>();
+          if (onboarding.onboardingComplete) {
+            Navigator.pushReplacement(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (_, __, ___) => const MainTabs(),
+                transitionDuration: const Duration(milliseconds: 400),
+                transitionsBuilder: (_, animation, __, child) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
+              ),
+            );
+          } else {
+            _navigateToFocusAreas();
+          }
+        },
+      ),
+    );
   }
 
   void _navigateToFocusAreas({String? name}) {
@@ -236,7 +266,7 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
                     child: IntrinsicHeight(
                       child: Column(
                         children: [
-                          const SizedBox(height: 200),
+                          const SizedBox(height: 160),
 
                           // Brand group (icon + title)
                           FadeTransition(
@@ -259,15 +289,15 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
                                           end: Alignment.bottomRight,
                                           colors: [
                                             const Color(0xFFFFFFFF)
-                                                .withOpacity(0.2),
+                                                .withOpacity(0.35),
                                             colors.surfaceLight
-                                                .withOpacity(0.12),
+                                                .withOpacity(0.25),
                                           ],
                                         ),
                                         borderRadius: BorderRadius.circular(32),
                                         border: Border.all(
                                           color: const Color(0xFFFFFFFF)
-                                              .withOpacity(0.25),
+                                              .withOpacity(0.4),
                                           width: 1.5,
                                         ),
                                         boxShadow: [
@@ -276,13 +306,6 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
                                                 .withOpacity(0.06),
                                             blurRadius: 32,
                                             offset: const Offset(0, 8),
-                                          ),
-                                          BoxShadow(
-                                            color: const Color(0xFFFFFFFF)
-                                                .withOpacity(0.4),
-                                            blurRadius: 0,
-                                            offset: const Offset(0, 1),
-                                            blurStyle: BlurStyle.inner,
                                           ),
                                         ],
                                       ),
@@ -479,22 +502,56 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
 
                                   const SizedBox(height: 16),
 
-                                  // Skip button
-                                  CupertinoButton(
-                                    padding: const EdgeInsets.all(12),
-                                    onPressed: () => _navigateToFocusAreas(),
-                                    child: Text(
-                                      l10n.onboardingSkipForNow,
-                                      style: TextStyle(
-                                        fontFamily: AppTextStyles.bodyFont(context),
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w500,
-                                        color: colors.textTertiary,
+                                  // Skip & Sign in row
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      CupertinoButton(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 4, vertical: 12),
+                                        minSize: 0,
+                                        onPressed: () => _navigateToFocusAreas(),
+                                        child: Text(
+                                          l10n.onboardingSkipForNow,
+                                          style: TextStyle(
+                                            fontFamily: AppTextStyles.bodyFont(context),
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w500,
+                                            color: colors.textTertiary,
+                                          ),
+                                        ),
                                       ),
-                                    ),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                                        child: Text(
+                                          '\u00B7',
+                                          style: TextStyle(
+                                            fontFamily: AppTextStyles.bodyFont(context),
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w500,
+                                            color: colors.textTertiary.withOpacity(0.5),
+                                          ),
+                                        ),
+                                      ),
+                                      CupertinoButton(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 4, vertical: 12),
+                                        minSize: 0,
+                                        onPressed: () => _showSignInSheet(context, colors, l10n),
+                                        child: Text(
+                                          l10n.onboardingAlreadyHaveAccount,
+                                          style: TextStyle(
+                                            fontFamily: AppTextStyles.bodyFont(context),
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w500,
+                                            color: colors.textTertiary,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
 
-                                  const SizedBox(height: 32),
+                                  const SizedBox(height: 20),
                                 ],
                               ),
                             ),
@@ -611,6 +668,248 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
           ),
         ),
       ],
+    );
+  }
+}
+
+class _SignInSheet extends StatefulWidget {
+  final void Function(UserCredential? credential) onSignInComplete;
+
+  const _SignInSheet({required this.onSignInComplete});
+
+  @override
+  State<_SignInSheet> createState() => _SignInSheetState();
+}
+
+class _SignInSheetState extends State<_SignInSheet> {
+  bool _isSigningIn = false;
+
+  Future<void> _handleAppleSignIn() async {
+    setState(() => _isSigningIn = true);
+    try {
+      final credential = await AuthService.signInWithApple();
+      if (mounted) Navigator.pop(context);
+      widget.onSignInComplete(credential);
+    } catch (e) {
+      debugPrint('Sign in with Apple error: $e');
+    } finally {
+      if (mounted) setState(() => _isSigningIn = false);
+    }
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    setState(() => _isSigningIn = true);
+    try {
+      final credential = await AuthService.signInWithGoogle();
+      if (mounted) Navigator.pop(context);
+      widget.onSignInComplete(credential);
+    } catch (e) {
+      debugPrint('Sign in with Google error: $e');
+    } finally {
+      if (mounted) setState(() => _isSigningIn = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.watch<ThemeProvider>().colors;
+    final l10n = AppLocalizations.of(context);
+
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(28, 14, 28, 0),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: const Alignment(0.0, 2.41),
+              end: const Alignment(0.0, -2.41),
+              colors: [
+                colors.modalBg1.withOpacity(0.96),
+                colors.modalBg2.withOpacity(0.93),
+                colors.modalBg3.withOpacity(0.95),
+              ],
+              stops: const [0.0, 0.5, 1.0],
+            ),
+            borderRadius:
+                const BorderRadius.vertical(top: Radius.circular(32)),
+            border: Border.all(
+              color: const Color(0xFFFFFFFF).withOpacity(0.5),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: colors.modalShadow.withOpacity(0.4),
+                blurRadius: 70,
+                offset: const Offset(0, -25),
+              ),
+              BoxShadow(
+                color: const Color(0xFFFFFFFF).withOpacity(0.6),
+                blurRadius: 0,
+                offset: const Offset(0, 1),
+                spreadRadius: 0,
+                blurStyle: BlurStyle.inner,
+              ),
+            ],
+          ),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Drag handle
+                Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: colors.textDisabled.withOpacity(0.6),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Apple sign-in button
+                _buildSignInButton(
+                  colors: colors,
+                  icon: const Text(
+                    '\uF8FF',
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Color(0xFFFFFFFF),
+                    ),
+                  ),
+                  label: l10n.onboardingSignInWithApple,
+                  onPressed: _isSigningIn ? null : _handleAppleSignIn,
+                  isPrimary: true,
+                ),
+                const SizedBox(height: 12),
+
+                // Google sign-in button
+                _buildSignInButton(
+                  colors: colors,
+                  icon: Text(
+                    'G',
+                    style: TextStyle(
+                      fontFamily: 'Sora',
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: colors.ctaPrimary,
+                    ),
+                  ),
+                  label: l10n.onboardingSignInWithGoogle,
+                  onPressed: _isSigningIn ? null : _handleGoogleSignIn,
+                  isPrimary: false,
+                ),
+                const SizedBox(height: 16),
+
+                // Cancel
+                CupertinoButton(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(
+                    l10n.commonCancel,
+                    style: TextStyle(
+                      fontFamily: AppTextStyles.bodyFont(context),
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: colors.textTertiary,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSignInButton({
+    required AppColorScheme colors,
+    required Widget icon,
+    required String label,
+    required VoidCallback? onPressed,
+    required bool isPrimary,
+  }) {
+    return SizedBox(
+      width: double.infinity,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: isPrimary
+              ? LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    colors.ctaPrimary.withOpacity(0.90),
+                    colors.ctaSecondary.withOpacity(0.84),
+                  ],
+                )
+              : LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    colors.ctaPrimary.withOpacity(0.12),
+                    colors.ctaSecondary.withOpacity(0.08),
+                  ],
+                ),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isPrimary
+                ? colors.ctaPrimary.withOpacity(0.35)
+                : colors.ctaPrimary.withOpacity(0.30),
+            width: isPrimary ? 1 : 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: isPrimary
+                  ? colors.textPrimary.withOpacity(0.2)
+                  : colors.ctaPrimary.withOpacity(0.08),
+              blurRadius: 20,
+              offset: isPrimary ? const Offset(0, 6) : const Offset(0, 4),
+            ),
+            if (isPrimary)
+              BoxShadow(
+                color: const Color(0xFFFFFFFF).withOpacity(0.15),
+                blurRadius: 0,
+                offset: const Offset(0, 1),
+                spreadRadius: 0,
+                blurStyle: BlurStyle.inner,
+              ),
+          ],
+        ),
+        child: CupertinoButton(
+          onPressed: onPressed,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          borderRadius: BorderRadius.circular(20),
+          child: _isSigningIn
+              ? CupertinoActivityIndicator(
+                  color: isPrimary
+                      ? const Color(0xFFFFFFFF)
+                      : colors.ctaPrimary,
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    icon,
+                    const SizedBox(width: 10),
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontFamily: AppTextStyles.bodyFont(context),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: isPrimary
+                            ? const Color(0xFFFFFFFF)
+                            : colors.ctaPrimary,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                  ],
+                ),
+        ),
+      ),
     );
   }
 }

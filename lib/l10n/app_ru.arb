@@ -881,5 +881,9 @@
   "shareError": "Не удалось поделиться. Попробуй ещё раз.",
 
   "restoreSuccess": "Покупки восстановлены!",
-  "restoreNotFound": "Покупки не найдены."
+  "restoreNotFound": "Покупки не найдены.",
+
+  "onboardingAlreadyHaveAccount": "Войти",
+  "onboardingSignInWithApple": "Войти через Apple",
+  "onboardingSignInWithGoogle": "Войти через Google"
 }
