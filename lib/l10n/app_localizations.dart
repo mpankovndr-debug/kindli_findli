@@ -815,50 +815,38 @@ abstract class AppLocalizations {
   /// No description provided for @dailyMessage18.
   ///
   /// In en, this message translates to:
-  /// **'Give yourself permission to rest'**
+  /// **'Start wherever you are'**
   String get dailyMessage18;
 
   /// No description provided for @dailyMessage19.
   ///
   /// In en, this message translates to:
-  /// **'Start wherever you are'**
+  /// **'You don\'t need to be ready'**
   String get dailyMessage19;
 
   /// No description provided for @dailyMessage20.
   ///
   /// In en, this message translates to:
-  /// **'You don\'t need to be ready'**
+  /// **'Trust your own rhythm'**
   String get dailyMessage20;
 
   /// No description provided for @dailyMessage21.
   ///
   /// In en, this message translates to:
-  /// **'Trust your own rhythm'**
+  /// **'It\'s okay to adjust as you go'**
   String get dailyMessage21;
 
   /// No description provided for @dailyMessage22.
   ///
   /// In en, this message translates to:
-  /// **'It\'s okay to adjust as you go'**
+  /// **'Small acts of care matter'**
   String get dailyMessage22;
 
   /// No description provided for @dailyMessage23.
   ///
   /// In en, this message translates to:
-  /// **'Gentle is good enough'**
-  String get dailyMessage23;
-
-  /// No description provided for @dailyMessage24.
-  ///
-  /// In en, this message translates to:
-  /// **'Small acts of care matter'**
-  String get dailyMessage24;
-
-  /// No description provided for @dailyMessage25.
-  ///
-  /// In en, this message translates to:
   /// **'You\'re doing more than you think'**
-  String get dailyMessage25;
+  String get dailyMessage23;
 
   /// No description provided for @customHabitTitle.
   ///
@@ -1061,7 +1049,7 @@ abstract class AppLocalizations {
   /// No description provided for @completionDecline.
   ///
   /// In en, this message translates to:
-  /// **'Not today'**
+  /// **'No, not today'**
   String get completionDecline;
 
   /// No description provided for @celebrationNice.
@@ -2393,7 +2381,7 @@ abstract class AppLocalizations {
   /// No description provided for @momentsSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Every habit you completed, kept forever.'**
+  /// **'Every habit you complete is saved to your collection.'**
   String get momentsSubtitle;
 
   /// No description provided for @momentsEmptyTitle.
@@ -2405,7 +2393,7 @@ abstract class AppLocalizations {
   /// No description provided for @momentsEmptyMessage.
   ///
   /// In en, this message translates to:
-  /// **'Every habit you complete becomes part of your collection — permanently.'**
+  /// **'Every habit you complete becomes part of your collection.'**
   String get momentsEmptyMessage;
 
   /// No description provided for @momentsToday.
@@ -2516,6 +2504,12 @@ abstract class AppLocalizations {
   /// **'Save 40%'**
   String get paywallYearlySave;
 
+  /// No description provided for @paywallSavePercent.
+  ///
+  /// In en, this message translates to:
+  /// **'Save {percent}%'**
+  String paywallSavePercent(int percent);
+
   /// No description provided for @paywallLifetime.
   ///
   /// In en, this message translates to:
@@ -2575,6 +2569,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Restore Purchases'**
   String get paywallRestorePurchases;
+
+  /// No description provided for @restoreError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not restore purchases. Please try again.'**
+  String get restoreError;
+
+  /// No description provided for @ok.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get ok;
 
   /// No description provided for @paywallTerms.
   ///
@@ -2963,7 +2969,7 @@ abstract class AppLocalizations {
   /// No description provided for @profileDeleteAllMessage.
   ///
   /// In en, this message translates to:
-  /// **'This will permanently delete your account and all data. This cannot be undone.'**
+  /// **'This will permanently delete all your habits, progress, and settings. This action cannot be undone.'**
   String get profileDeleteAllMessage;
 
   /// No description provided for @profileDeleteErrorMessage.
@@ -2971,6 +2977,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not delete your account. Please try again.'**
   String get profileDeleteErrorMessage;
+
+  /// No description provided for @profileReauthTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again'**
+  String get profileReauthTitle;
+
+  /// No description provided for @profileReauthMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'For security, please sign in again to confirm account deletion.'**
+  String get profileReauthMessage;
+
+  /// No description provided for @profileReauthButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get profileReauthButton;
 
   /// No description provided for @profileChangeFocusAreasScreenTitle.
   ///
@@ -3107,7 +3131,7 @@ abstract class AppLocalizations {
   /// No description provided for @habitDrinkWater.
   ///
   /// In en, this message translates to:
-  /// **'Drink a glass of water'**
+  /// **'Drink 3 glasses of water'**
   String get habitDrinkWater;
 
   /// No description provided for @habitThreeSlowBreaths.
@@ -3119,7 +3143,7 @@ abstract class AppLocalizations {
   /// No description provided for @habitStretchTenSeconds.
   ///
   /// In en, this message translates to:
-  /// **'Stretch for 10 seconds'**
+  /// **'Stretch for 30 seconds'**
   String get habitStretchTenSeconds;
 
   /// No description provided for @habitRollShoulders.
@@ -3131,13 +3155,13 @@ abstract class AppLocalizations {
   /// No description provided for @habitStepOutside.
   ///
   /// In en, this message translates to:
-  /// **'Step outside for 30 seconds'**
+  /// **'Step outside for 5 minutes'**
   String get habitStepOutside;
 
   /// No description provided for @habitCloseEyes.
   ///
   /// In en, this message translates to:
-  /// **'Close your eyes for 20 seconds'**
+  /// **'Close your eyes for 30 seconds'**
   String get habitCloseEyes;
 
   /// No description provided for @habitNeckRolls.
@@ -3167,7 +3191,7 @@ abstract class AppLocalizations {
   /// No description provided for @habitGentleMovement.
   ///
   /// In en, this message translates to:
-  /// **'10 minutes of gentle movement'**
+  /// **'5 minutes of gentle stretching'**
   String get habitGentleMovement;
 
   /// No description provided for @habitMindfulMeal.
@@ -3179,7 +3203,7 @@ abstract class AppLocalizations {
   /// No description provided for @habitTenSecondPause.
   ///
   /// In en, this message translates to:
-  /// **'Ten-second pause'**
+  /// **'One-minute pause'**
   String get habitTenSecondPause;
 
   /// No description provided for @habitNoticeFeeling.
@@ -3191,13 +3215,13 @@ abstract class AppLocalizations {
   /// No description provided for @habitGroundingBreath.
   ///
   /// In en, this message translates to:
-  /// **'One grounding breath'**
+  /// **'Three grounding breaths'**
   String get habitGroundingBreath;
 
   /// No description provided for @habitLookAway.
   ///
   /// In en, this message translates to:
-  /// **'Look away from your screen for 10 seconds'**
+  /// **'Look away from your screen for 30 seconds'**
   String get habitLookAway;
 
   /// No description provided for @habitNameThreeThings.
@@ -3221,19 +3245,19 @@ abstract class AppLocalizations {
   /// No description provided for @habitHandOnHeart.
   ///
   /// In en, this message translates to:
-  /// **'Place hand on heart for a moment'**
+  /// **'Place hand on heart for 30 seconds'**
   String get habitHandOnHeart;
 
   /// No description provided for @habitGratefulThing.
   ///
   /// In en, this message translates to:
-  /// **'Notice one thing you\'re grateful for'**
+  /// **'Name 3 things you\'re grateful for'**
   String get habitGratefulThing;
 
   /// No description provided for @habitSmileGently.
   ///
   /// In en, this message translates to:
-  /// **'Smile gently at yourself'**
+  /// **'Smile kindly at yourself'**
   String get habitSmileGently;
 
   /// No description provided for @habitAskNeed.
@@ -3251,7 +3275,7 @@ abstract class AppLocalizations {
   /// No description provided for @habitSetPriority.
   ///
   /// In en, this message translates to:
-  /// **'Set one priority'**
+  /// **'Set one priority today'**
   String get habitSetPriority;
 
   /// No description provided for @habitClearSmallThing.
@@ -3269,13 +3293,13 @@ abstract class AppLocalizations {
   /// No description provided for @habitThirtySecondReset.
   ///
   /// In en, this message translates to:
-  /// **'Do a 30-second reset'**
+  /// **'Do a 1-minute reset'**
   String get habitThirtySecondReset;
 
   /// No description provided for @habitWriteIdea.
   ///
   /// In en, this message translates to:
-  /// **'Write down one idea'**
+  /// **'Unsubscribe from an unnecessary email list'**
   String get habitWriteIdea;
 
   /// No description provided for @habitFinishTinyTask.
@@ -3287,7 +3311,7 @@ abstract class AppLocalizations {
   /// No description provided for @habitDeclutterDesk.
   ///
   /// In en, this message translates to:
-  /// **'Declutter your desk for 2 minutes'**
+  /// **'Declutter your desk'**
   String get habitDeclutterDesk;
 
   /// No description provided for @habitReviewCalendar.
@@ -3305,7 +3329,7 @@ abstract class AppLocalizations {
   /// No description provided for @habitCloseTab.
   ///
   /// In en, this message translates to:
-  /// **'Close one browser tab'**
+  /// **'Close unnecessary browser tabs'**
   String get habitCloseTab;
 
   /// No description provided for @habitArchiveEmails.
@@ -3365,7 +3389,7 @@ abstract class AppLocalizations {
   /// No description provided for @habitTakeOutTrash.
   ///
   /// In en, this message translates to:
-  /// **'Take out one small bag of trash'**
+  /// **'Take out one bag of trash'**
   String get habitTakeOutTrash;
 
   /// No description provided for @habitFoldClothing.
@@ -3383,19 +3407,19 @@ abstract class AppLocalizations {
   /// No description provided for @habitWaterPlant.
   ///
   /// In en, this message translates to:
-  /// **'Water one plant'**
+  /// **'Water your plants'**
   String get habitWaterPlant;
 
   /// No description provided for @habitLightCandle.
   ///
   /// In en, this message translates to:
-  /// **'Light a candle'**
+  /// **'Light a scented candle'**
   String get habitLightCandle;
 
   /// No description provided for @habitSendMessage.
   ///
   /// In en, this message translates to:
-  /// **'Send one message to someone'**
+  /// **'Send one message to someone you care about'**
   String get habitSendMessage;
 
   /// No description provided for @habitAppreciatePerson.
@@ -3467,13 +3491,13 @@ abstract class AppLocalizations {
   /// No description provided for @habitWriteSentence.
   ///
   /// In en, this message translates to:
-  /// **'Write one sentence'**
+  /// **'Write a short story'**
   String get habitWriteSentence;
 
   /// No description provided for @habitDoodle.
   ///
   /// In en, this message translates to:
-  /// **'Doodle for 10 seconds'**
+  /// **'Doodle for 5 minutes'**
   String get habitDoodle;
 
   /// No description provided for @habitCaptureIdea.
@@ -3497,7 +3521,7 @@ abstract class AppLocalizations {
   /// No description provided for @habitDrawShape.
   ///
   /// In en, this message translates to:
-  /// **'Draw one simple shape'**
+  /// **'Draw something simple'**
   String get habitDrawShape;
 
   /// No description provided for @habitHumTune.
@@ -3515,13 +3539,13 @@ abstract class AppLocalizations {
   /// No description provided for @habitTryNewWord.
   ///
   /// In en, this message translates to:
-  /// **'Try one new word'**
+  /// **'Learn one new word'**
   String get habitTryNewWord;
 
   /// No description provided for @habitCreateTinyThing.
   ///
   /// In en, this message translates to:
-  /// **'Create one tiny thing'**
+  /// **'Play a short melody'**
   String get habitCreateTinyThing;
 
   /// No description provided for @habitPlayCreative.
@@ -3533,19 +3557,19 @@ abstract class AppLocalizations {
   /// No description provided for @habitImagine.
   ///
   /// In en, this message translates to:
-  /// **'Imagine one possibility'**
+  /// **'Do a vocal warm-up'**
   String get habitImagine;
 
   /// No description provided for @habitCheckBalance.
   ///
   /// In en, this message translates to:
-  /// **'Check your balance'**
+  /// **'Try one financial tip'**
   String get habitCheckBalance;
 
   /// No description provided for @habitMoveToSavings.
   ///
   /// In en, this message translates to:
-  /// **'Move €1 to savings'**
+  /// **'Move €3/\$3 to savings'**
   String get habitMoveToSavings;
 
   /// No description provided for @habitReviewSubscription.
@@ -3557,7 +3581,7 @@ abstract class AppLocalizations {
   /// No description provided for @habitNoteExpense.
   ///
   /// In en, this message translates to:
-  /// **'Note one expense'**
+  /// **'Note 3 expenses'**
   String get habitNoteExpense;
 
   /// No description provided for @habitFinancialTip.
@@ -3575,13 +3599,13 @@ abstract class AppLocalizations {
   /// No description provided for @habitUpdateBudget.
   ///
   /// In en, this message translates to:
-  /// **'Update one budget category'**
+  /// **'Treat yourself'**
   String get habitUpdateBudget;
 
   /// No description provided for @habitReviewBill.
   ///
   /// In en, this message translates to:
-  /// **'Review one bill'**
+  /// **'Review necessity of one subscription'**
   String get habitReviewBill;
 
   /// No description provided for @habitPriceCheck.
@@ -3593,7 +3617,7 @@ abstract class AppLocalizations {
   /// No description provided for @habitWait24Hours.
   ///
   /// In en, this message translates to:
-  /// **'Wait 24 hours before one purchase'**
+  /// **'Wait 24 hours before a big purchase'**
   String get habitWait24Hours;
 
   /// No description provided for @habitCelebrateMoneyWin.
@@ -3605,13 +3629,13 @@ abstract class AppLocalizations {
   /// No description provided for @habitSavingsGoal.
   ///
   /// In en, this message translates to:
-  /// **'Set one small savings goal'**
+  /// **'Set one savings goal'**
   String get habitSavingsGoal;
 
   /// No description provided for @habitSitStill.
   ///
   /// In en, this message translates to:
-  /// **'Sit still for 10 seconds'**
+  /// **'Sit still for 1 minute'**
   String get habitSitStill;
 
   /// No description provided for @habitKindThing.
@@ -3623,7 +3647,7 @@ abstract class AppLocalizations {
   /// No description provided for @habitDrinkSlowly.
   ///
   /// In en, this message translates to:
-  /// **'Drink water slowly'**
+  /// **'Drink a cup of tasty coffee'**
   String get habitDrinkSlowly;
 
   /// No description provided for @habitStretchNeck.
@@ -3659,7 +3683,7 @@ abstract class AppLocalizations {
   /// No description provided for @habitRestTwoMinutes.
   ///
   /// In en, this message translates to:
-  /// **'Rest for 2 minutes'**
+  /// **'Rest for 5 minutes'**
   String get habitRestTwoMinutes;
 
   /// No description provided for @habitPutOnComfortable.
@@ -3677,7 +3701,7 @@ abstract class AppLocalizations {
   /// No description provided for @habitDoNothing.
   ///
   /// In en, this message translates to:
-  /// **'Do absolutely nothing for 30 seconds'**
+  /// **'Do absolutely nothing for 5 minutes'**
   String get habitDoNothing;
 
   /// No description provided for @shareCardWeeklyCheckin.
@@ -3824,6 +3848,12 @@ abstract class AppLocalizations {
   /// **'Intended Boost — €1.99 one-time'**
   String get boostCardTitle;
 
+  /// No description provided for @boostCardTitleDynamic.
+  ///
+  /// In en, this message translates to:
+  /// **'Intended Boost — {price} one-time'**
+  String boostCardTitleDynamic(String price);
+
   /// No description provided for @boostCardSubtitle.
   ///
   /// In en, this message translates to:
@@ -3911,7 +3941,7 @@ abstract class AppLocalizations {
   /// No description provided for @boostOfferFocusDesc.
   ///
   /// In en, this message translates to:
-  /// **'Your growth doesn\'t fit in a box — expand what you focus on.'**
+  /// **'Your growth doesn\'t fit in a box? Expand what you focus on.'**
   String get boostOfferFocusDesc;
 
   /// No description provided for @boostOfferSwapTitle.
@@ -3935,7 +3965,7 @@ abstract class AppLocalizations {
   /// No description provided for @boostOfferShareDesc.
   ///
   /// In en, this message translates to:
-  /// **'Your journey is worth celebrating — share it with people who care.'**
+  /// **'Your journey is worth celebrating — share it with people you care about.'**
   String get boostOfferShareDesc;
 
   /// No description provided for @commonDismiss.
@@ -3979,6 +4009,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Got it'**
   String get focusNudgeGotIt;
+
+  /// No description provided for @profileLocalDataNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data is stored on this device only.'**
+  String get profileLocalDataNote;
+
+  /// No description provided for @shareError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not share. Please try again.'**
+  String get shareError;
+
+  /// No description provided for @restoreSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchases restored!'**
+  String get restoreSuccess;
+
+  /// No description provided for @restoreNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No purchases found.'**
+  String get restoreNotFound;
 }
 
 class _AppLocalizationsDelegate

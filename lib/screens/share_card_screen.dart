@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Colors;
+import 'package:flutter/material.dart' show Colors, ScaffoldMessenger, SnackBar;
 import 'package:provider/provider.dart';
 
 import '../l10n/app_localizations.dart';
@@ -70,6 +70,13 @@ class _ShareCardScreenState extends State<ShareCardScreen>
         _repaintKey,
         sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
       );
+    } catch (e) {
+      if (mounted) {
+        final l10n = AppLocalizations.of(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.shareError)),
+        );
+      }
     } finally {
       if (mounted) {
         setState(() => _isSharing = false);
@@ -204,7 +211,7 @@ class _ShareCardScreenState extends State<ShareCardScreen>
         subtitleText = l10n.milestoneShowingUpSubtitle;
         break;
       case MilestoneVariant.area:
-        heroText = l10n.milestoneAreaHero(data.topArea ?? '');
+        heroText = l10n.milestoneAreaHero(localizeCategoryName(data.topArea ?? '', l10n));
         subtitleText = l10n.milestoneAreaSubtitle;
         break;
       case MilestoneVariant.identity:

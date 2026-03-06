@@ -1,5 +1,7 @@
 import '../l10n/app_localizations.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -14,6 +16,8 @@ class NotificationScheduler {
 
   static Future<void> initialize() async {
     tz.initializeTimeZones();
+    final tzInfo = await FlutterTimezone.getLocalTimezone();
+    tz.setLocalLocation(tz.getLocation(tzInfo.identifier));
 
     const androidSettings =
         AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -31,37 +35,41 @@ class NotificationScheduler {
   }
 
   static Future<bool> requestPermission() async {
-    final ios = _plugin.resolvePlatformSpecificImplementation<
-        IOSFlutterLocalNotificationsPlugin>();
-    if (ios != null) {
-      final granted = await ios.requestPermissions(
-        alert: true,
-        badge: false,
-        sound: true,
-      );
-      return granted ?? false;
+    try {
+      final ios = _plugin.resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin>();
+      if (ios != null) {
+        final granted = await ios.requestPermissions(
+          alert: true,
+          badge: false,
+          sound: true,
+        );
+        return granted ?? false;
+      }
+      return false;
+    } catch (e) {
+      debugPrint('Notification permission request failed: $e');
+      // Continue without notifications — user can enable later from profile
+      return false;
     }
-    return false;
   }
 
   static Future<void> scheduleDaily(AppLocalizations l10n) async {
     final hour = await NotificationPreferencesService.getHour();
     final minute = await NotificationPreferencesService.getMinute();
 
-    // Check how many of IDs 0-6 are still pending
-    final pending = await _plugin.pendingNotificationRequests();
-    final dailyPending =
-        pending.where((n) => n.id >= 0 && n.id <= 6).length;
-
-    if (dailyPending >= 3) return;
-
-    // Cancel existing daily notifications before rescheduling
+    // Always cancel existing daily notifications before rescheduling
     for (int i = 0; i <= 6; i++) {
       await _plugin.cancel(i);
     }
 
     final now = tz.TZDateTime.now(tz.local);
     final messages = NotificationMessages.daily(l10n);
+
+    final subscribed = await NotificationPreferencesService.isSubscribed();
+    final poolSize = subscribed ? 60 : 30;
+    final startIndex =
+        await NotificationPreferencesService.nextMessageIndex(poolSize);
 
     for (int dayOffset = 0; dayOffset < 7; dayOffset++) {
       var scheduled = tz.TZDateTime(
@@ -78,11 +86,8 @@ class NotificationScheduler {
         if (dayOffset == 0) continue;
       }
 
-      final subscribed = await NotificationPreferencesService.isSubscribed();
-      final poolSize = subscribed ? 60 : 30;
-      final messageIndex =
-          await NotificationPreferencesService.nextMessageIndex(poolSize);
-      final body = messages[messageIndex];
+      final msgIndex = (startIndex + dayOffset) % poolSize;
+      final body = messages[msgIndex];
 
       await _plugin.zonedSchedule(
         dayOffset,
@@ -162,6 +167,23 @@ class NotificationScheduler {
           UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
     );
+  }
+
+  static Future<int> pendingDailyCount() async {
+    final pending = await _plugin.pendingNotificationRequests();
+    return pending.where((n) => n.id >= 0 && n.id <= 6).length;
+  }
+
+  static Future<void> refreshTimezone(AppLocalizations l10n) async {
+    final tzInfo = await FlutterTimezone.getLocalTimezone();
+    final newLocation = tz.getLocation(tzInfo.identifier);
+    if (newLocation != tz.local) {
+      tz.setLocalLocation(newLocation);
+      final enabled = await NotificationPreferencesService.isEnabled();
+      if (enabled) {
+        await rescheduleAll(l10n);
+      }
+    }
   }
 
   static Future<void> cancelAll() async {

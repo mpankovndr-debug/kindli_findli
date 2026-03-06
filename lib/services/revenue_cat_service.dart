@@ -7,8 +7,8 @@ import 'analytics_service.dart';
 
 class RevenueCatService extends ChangeNotifier {
   static const _appleApiKey = 'appl_RPNUxXhvXrpnWAiTvMswDDrigtJ';
-  static const _entitlementId = 'Intended+';
-  static const _boostEntitlementId = 'Intended Boost';
+  static const entitlementPlus = 'Intended+';
+  static const entitlementBoost = 'Intended Boost';
   static const _boostProductId = 'com.intendedapp.boost';
 
   final UserState _userState;
@@ -24,6 +24,39 @@ class RevenueCatService extends ChangeNotifier {
   bool get hasBoost => _hasBoost;
   Offerings? get offerings => _offerings;
 
+  // ---------------------------------------------------------------------------
+  // Dynamic price strings (user's local currency from App Store)
+  // ---------------------------------------------------------------------------
+
+  String? get monthlyPriceString =>
+      _findProduct('com.intendedapp.plus.monthly')?.priceString;
+  String? get yearlyPriceString =>
+      _findProduct('com.intendedapp.plus.yearly')?.priceString;
+  String? get lifetimePriceString =>
+      _findProduct('com.intendedapp.plus.lifetime')?.priceString;
+  String? get boostPriceString =>
+      _findProduct(_boostProductId)?.priceString;
+
+  double? get _monthlyPrice =>
+      _findProduct('com.intendedapp.plus.monthly')?.price;
+  double? get _yearlyPrice =>
+      _findProduct('com.intendedapp.plus.yearly')?.price;
+
+  /// Savings percentage for yearly vs 12×monthly (e.g. 40), or null.
+  int? get yearlySavingsPercent {
+    final m = _monthlyPrice;
+    final y = _yearlyPrice;
+    if (m == null || y == null || m <= 0) return null;
+    return ((1.0 - y / (m * 12)) * 100).round();
+  }
+
+  StoreProduct? _findProduct(String id) {
+    for (final p in getPackages()) {
+      if (p.storeProduct.identifier == id) return p.storeProduct;
+    }
+    return null;
+  }
+
   /// Initialize RevenueCat SDK (iOS only for now)
   Future<void> init() async {
     if (_isInitialized) return;
@@ -34,19 +67,26 @@ class RevenueCatService extends ChangeNotifier {
       return;
     }
 
-    final configuration = PurchasesConfiguration(_appleApiKey);
-    await Purchases.configure(configuration);
+    try {
+      final configuration = PurchasesConfiguration(_appleApiKey);
+      await Purchases.configure(configuration);
 
-    // Listen for customer info changes (e.g. subscription renewals, expirations)
-    Purchases.addCustomerInfoUpdateListener(_onCustomerInfoUpdated);
+      // Listen for customer info changes (e.g. subscription renewals, expirations)
+      Purchases.addCustomerInfoUpdateListener(_onCustomerInfoUpdated);
 
-    // Check current entitlement status
-    await refreshPurchaseStatus();
+      // Check current entitlement status
+      await refreshPurchaseStatus();
 
-    // Pre-fetch offerings
-    await loadOfferings();
+      // Pre-fetch offerings
+      await loadOfferings();
 
-    _isInitialized = true;
+      _isInitialized = true;
+    } catch (e) {
+      debugPrint('RevenueCat init failed: $e');
+      _isInitialized = false;
+      // App continues in free mode — purchases will be unavailable
+      // Next app launch will retry
+    }
   }
 
   void _onCustomerInfoUpdated(CustomerInfo customerInfo) {
@@ -54,8 +94,8 @@ class RevenueCatService extends ChangeNotifier {
   }
 
   void _updatePremiumStatus(CustomerInfo customerInfo) {
-    final entitlement = customerInfo.entitlements.all[_entitlementId];
-    final boostEntitlement = customerInfo.entitlements.all[_boostEntitlementId];
+    final entitlement = customerInfo.entitlements.all[entitlementPlus];
+    final boostEntitlement = customerInfo.entitlements.all[entitlementBoost];
     final wasPremium = _isPremium;
     final hadBoost = _hasBoost;
     _isPremium = entitlement?.isActive ?? false;
@@ -192,12 +232,12 @@ class RevenueCatService extends ChangeNotifier {
   }
 
   /// Restore purchases
-  /// Returns true if user has active premium after restore.
+  /// Returns true if user has active premium or boost after restore.
   Future<bool> restorePurchases() async {
     try {
       final customerInfo = await Purchases.restorePurchases();
       _updatePremiumStatus(customerInfo);
-      return _isPremium;
+      return _isPremium || _hasBoost;
     } catch (e) {
       debugPrint('RevenueCat: Restore failed: $e');
       rethrow;

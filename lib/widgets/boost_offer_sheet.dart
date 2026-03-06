@@ -78,6 +78,13 @@ class _BoostOfferSheetState extends State<_BoostOfferSheet> {
     }
   }
 
+  String _boostTitle(AppLocalizations l10n) {
+    final price = context.read<RevenueCatService>().boostPriceString;
+    return price != null
+        ? l10n.boostCardTitleDynamic(price)
+        : l10n.boostCardTitle;
+  }
+
   void _showErrorDialog() {
     final l10n = AppLocalizations.of(context);
     showCupertinoDialog(
@@ -325,7 +332,7 @@ class _BoostOfferSheetState extends State<_BoostOfferSheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        l10n.boostCardTitle,
+                        _boostTitle(l10n),
                         style: TextStyle(
                           fontFamily: AppTextStyles.bodyFont(context),
                           fontSize: 17,

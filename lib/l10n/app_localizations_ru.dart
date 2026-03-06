@@ -71,7 +71,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get welcomeSubtitle => 'Маленькие шаги.\nБез давления.';
 
   @override
-  String get onboardingTagline => 'Намерение, а не перфекционизм.';
+  String get onboardingTagline => 'Намерение важнее совершенства.';
 
   @override
   String get onboardingNamePrompt => 'Как тебя зовут?';
@@ -131,7 +131,7 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get focusAreasChangeLater => 'Это всегда можно изменить.';
+  String get focusAreasChangeLater => 'Это всегда можно изменить позже.';
 
   @override
   String get focusAreasLimitTitle => 'Пока хватит';
@@ -186,17 +186,17 @@ class AppLocalizationsRu extends AppLocalizations {
   String get themeSelectionTitle => 'Выбери своё пространство';
 
   @override
-  String get themeSelectionSubtitle => 'Это всегда можно изменить.';
+  String get themeSelectionSubtitle => 'Это всегда можно изменить позже.';
 
   @override
-  String get themeSelectionConfirm => 'Мне нравится';
+  String get themeSelectionConfirm => 'Мне это подходит';
 
   @override
   String get themeSelectionPremiumHint =>
-      'Clear Sky и Morning Slate доступны с Intended+. Попробуй бесплатно 7 дней после настройки.';
+      '«Ясное небо» и «Утренний сланец» доступны с Intended+. Попробуй бесплатно 7 дней после настройки.';
 
   @override
-  String get habitRevealTitle => 'Вот что мы подобрали для тебя';
+  String get habitRevealTitle => 'Вот, что мы подобрали для тебя';
 
   @override
   String get habitRevealSubtitleDefault => 'На основе твоих предпочтений';
@@ -216,7 +216,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Ты можешь добавлять, убирать или искать другие привычки в любое время. Не нужно делать всё сразу.';
 
   @override
-  String get habitRevealBegin => 'Начнём';
+  String get habitRevealBegin => 'Давай начнём';
 
   @override
   String get habitsHoldForOptions => 'Удерживай привычку для опций';
@@ -338,13 +338,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get monthDecember => 'Декабрь';
 
   @override
-  String get dailyMessage1 => 'Делай то, что чувствуется правильным сегодня';
+  String get dailyMessage1 => 'Делай то, что считаешь верным сегодня';
 
   @override
-  String get dailyMessage2 => 'Сегодня — чистый лист';
+  String get dailyMessage2 => 'Сегодня новый день';
 
   @override
-  String get dailyMessage3 => 'Даже одна мелочь — это уже что-то';
+  String get dailyMessage3 => 'Даже одна мелочь считается';
 
   @override
   String get dailyMessage4 => 'Будь добрее к себе сегодня';
@@ -353,7 +353,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get dailyMessage5 => 'Не спеши. Ты справляешься';
 
   @override
-  String get dailyMessage6 => 'Начни с малого, действуй мягко';
+  String get dailyMessage6 => 'Начни с малого, действуй с заботой о себе';
 
   @override
   String get dailyMessage7 => 'Твой темп — только твой';
@@ -386,31 +386,25 @@ class AppLocalizationsRu extends AppLocalizations {
   String get dailyMessage16 => 'Ты имеешь право не торопиться';
 
   @override
-  String get dailyMessage17 => 'Одно дело за раз — этого достаточно';
+  String get dailyMessage17 => 'Одного дела за раз достаточно';
 
   @override
-  String get dailyMessage18 => 'Разреши себе отдохнуть';
+  String get dailyMessage18 => 'Начни оттуда, где ты сейчас';
 
   @override
-  String get dailyMessage19 => 'Начни оттуда, где ты сейчас';
+  String get dailyMessage19 => 'Не нужно быть готовым, чтобы начать';
 
   @override
-  String get dailyMessage20 => 'Готовность не обязательна, чтобы начать';
+  String get dailyMessage20 => 'Доверяй своему ритму';
 
   @override
-  String get dailyMessage21 => 'Доверяй своему ритму';
+  String get dailyMessage21 => 'Можно адаптироваться на ходу';
 
   @override
-  String get dailyMessage22 => 'Можно подстраиваться на ходу';
+  String get dailyMessage22 => 'Маленькая забота о себе — тоже забота';
 
   @override
-  String get dailyMessage23 => 'Мягко — уже достаточно';
-
-  @override
-  String get dailyMessage24 => 'Маленькая забота о себе — тоже забота';
-
-  @override
-  String get dailyMessage25 => 'Ты делаешь больше, чем тебе кажется';
+  String get dailyMessage23 => 'Ты делаешь больше, чем тебе кажется';
 
   @override
   String get customHabitTitle => 'Создать свою привычку';
@@ -458,7 +452,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get menuSwap => 'Заменить';
 
   @override
-  String get replacePinTitle => 'Заменить закреплённую?';
+  String get replacePinTitle => 'Заменить закрепленную привычку?';
 
   @override
   String replacePinDescription(String current, String newHabit) {
@@ -469,7 +463,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get replacePinConfirm => 'Заменить';
 
   @override
-  String get swapCantTitle => 'Нельзя заменить';
+  String get swapCantTitle => 'Нельзя заменить эту привычку';
 
   @override
   String get swapCantMessage =>
@@ -528,13 +522,13 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get completionQuestion => 'Тебе это удалось сегодня?';
+  String get completionQuestion => 'Ты выполнил это сегодня?';
 
   @override
-  String get completionConfirm => 'Получилось!';
+  String get completionConfirm => 'Да, у меня получилось!';
 
   @override
-  String get completionDecline => 'Не сегодня';
+  String get completionDecline => 'Нет, не сегодня';
 
   @override
   String get celebrationNice => 'Отлично';
@@ -1301,14 +1295,14 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get momentsSubtitle =>
-      'Каждая привычка, которую ты выполнил, сохранена навсегда.';
+      'Каждая выполненная привычка сохраняется в твою коллекцию.';
 
   @override
   String get momentsEmptyTitle => 'Здесь появятся твои моменты.';
 
   @override
   String get momentsEmptyMessage =>
-      'Каждая выполненная привычка становится частью твоей коллекции — навсегда.';
+      'Каждая выполненная привычка становится частью твоей коллекции.';
 
   @override
   String get momentsToday => 'Сегодня';
@@ -1350,7 +1344,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get paywallDescription =>
-      'Intended бесплатен навсегда. Intended+ даёт больше свободы сделать его по-своему.';
+      'Intended бесплатен. Intended+ даёт больше свободы сделать приложение своим.';
 
   @override
   String get paywallFeature1 =>
@@ -1360,7 +1354,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get paywallFeature2 => 'Меняй привычки, когда меняется жизнь';
 
   @override
-  String get paywallFeature3 => 'Карточки достижений для друзей';
+  String get paywallFeature3 => 'Карточки достижений, чтобы делиться успехом';
 
   @override
   String get paywallFeature4 => 'Меняй направления так часто, как нужно';
@@ -1385,6 +1379,11 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get paywallYearlySave => 'Экономия 40%';
+
+  @override
+  String paywallSavePercent(int percent) {
+    return 'Экономия $percent%';
+  }
 
   @override
   String get paywallLifetime => 'Навсегда';
@@ -1419,6 +1418,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get paywallRestorePurchases => 'Восстановить покупки';
 
   @override
+  String get restoreError =>
+      'Не удалось восстановить покупки. Попробуй ещё раз.';
+
+  @override
+  String get ok => 'ОК';
+
+  @override
   String get paywallTerms => 'Условия';
 
   @override
@@ -1441,7 +1447,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get subscriptionThankYou =>
-      'Спасибо, что поддерживаешь Intended.\nТвоя подписка помогает нам\nсоздавать более мягкий путь к росту.';
+      'Спасибо, что поддерживаешь Intended.\nТвоя подписка помогает нам\nстроить более мягкий способ расти.';
 
   @override
   String get subscriptionManage => 'Управление в App Store';
@@ -1569,18 +1575,18 @@ class AppLocalizationsRu extends AppLocalizations {
   String get profileEmailFallback => 'Напиши нам на\nsupport@intendedapp.com';
 
   @override
-  String get profileChangeFocusTitle => 'Сменить направления?';
+  String get profileChangeFocusTitle => 'Изменить направления?';
 
   @override
   String get profileChangeFocusMessage =>
       'Привычки обновятся на основе новых направлений.';
 
   @override
-  String get profileChangeAreas => 'Сменить направления';
+  String get profileChangeAreas => 'Изменить направления';
 
   @override
   String get profileFocusLimitMessage =>
-      'Бесплатная смена в этом месяце уже использована.';
+      'Бесплатная замена в этом месяце уже использована.';
 
   @override
   String get profileFocusLimitOptions =>
@@ -1631,11 +1637,21 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get profileDeleteAllMessage =>
-      'Аккаунт и все данные будут удалены безвозвратно.';
+      'Все привычки, прогресс и настройки будут удалены безвозвратно.';
 
   @override
   String get profileDeleteErrorMessage =>
       'Не удалось удалить аккаунт. Попробуй ещё раз.';
+
+  @override
+  String get profileReauthTitle => 'Войди снова';
+
+  @override
+  String get profileReauthMessage =>
+      'Для безопасности, пожалуйста, войди снова, чтобы подтвердить удаление аккаунта.';
+
+  @override
+  String get profileReauthButton => 'Войти';
 
   @override
   String get profileChangeFocusAreasScreenTitle => 'Смена направлений';
@@ -1723,71 +1739,71 @@ class AppLocalizationsRu extends AppLocalizations {
   String get browseHabitAddedConfirm => 'Отлично!';
 
   @override
-  String get habitDrinkWater => 'Выпей стакан воды';
+  String get habitDrinkWater => 'Выпей 3 стакана воды';
 
   @override
   String get habitThreeSlowBreaths => 'Сделай 3 медленных вдоха';
 
   @override
-  String get habitStretchTenSeconds => 'Потянись 10 секунд';
+  String get habitStretchTenSeconds => 'Потянись 30 секунд';
 
   @override
   String get habitRollShoulders => 'Встань и разомни плечи';
 
   @override
-  String get habitStepOutside => 'Выйди на улицу на 30 секунд';
+  String get habitStepOutside => 'Выйди на улицу на 5 минут';
 
   @override
-  String get habitCloseEyes => 'Закрой глаза на 20 секунд';
+  String get habitCloseEyes => 'Закрой глаза на 30 секунд';
 
   @override
-  String get habitNeckRolls => '5 мягких вращений шеей';
+  String get habitNeckRolls => 'Сделай 5 мягких вращений шеей';
 
   @override
   String get habitWalkToWindow => 'Дойди до окна и обратно';
 
   @override
-  String get habitBellyBreaths => '5 глубоких вдохов животом';
+  String get habitBellyBreaths => 'Сделай 5 глубоких вдохов животом';
 
   @override
-  String get habitBodyScan => 'Сканирование тела — 2 минуты';
+  String get habitBodyScan => 'Последи за телом - 2 минуты';
 
   @override
-  String get habitGentleMovement => '10 минут мягкого движения';
+  String get habitGentleMovement => '5 минут мягкой разминки';
 
   @override
   String get habitMindfulMeal => 'Один осознанный приём пищи';
 
   @override
-  String get habitTenSecondPause => 'Пауза на 10 секунд';
+  String get habitTenSecondPause => 'Пауза на 1 минуту';
 
   @override
-  String get habitNoticeFeeling => 'Заметь одно ощущение';
+  String get habitNoticeFeeling => 'Заметь, что чувствуешь сейчас';
 
   @override
-  String get habitGroundingBreath => 'Один заземляющий вдох';
+  String get habitGroundingBreath => 'Три заземляющих вдоха';
 
   @override
-  String get habitLookAway => 'Отведи взгляд от экрана на 10 секунд';
+  String get habitLookAway => 'Отведи взгляд от экрана на 30 секунд';
 
   @override
   String get habitNameThreeThings => 'Назови три вещи, которые видишь';
 
   @override
-  String get habitNoticeSound => 'Заметь один звук вокруг';
+  String get habitNoticeSound => 'Заметь один звук вокруг тебя';
 
   @override
   String get habitFeelFeet => 'Почувствуй ступни на полу';
 
   @override
-  String get habitHandOnHeart => 'Положи руку на сердце на мгновение';
+  String get habitHandOnHeart => 'Положи руку на сердце на 30 секунд';
 
   @override
   String get habitGratefulThing =>
-      'Заметь одну вещь, за которую чувствуешь благодарность';
+      'Назови 3 вещи, за которые чувствуешь благодарность';
 
   @override
-  String get habitSmileGently => 'Мягко улыбнись себе';
+  String get habitSmileGently => 'Добро улыбнись себе';
 
   @override
   String get habitAskNeed => 'Спроси себя: «Что мне сейчас нужно?»';
@@ -1796,7 +1812,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get habitPermissionToRest => 'Разреши себе отдохнуть';
 
   @override
-  String get habitSetPriority => 'Определи один приоритет';
+  String get habitSetPriority => 'Определи один приоритет на сегодня';
 
   @override
   String get habitClearSmallThing => 'Разберись с одной мелочью';
@@ -1805,16 +1821,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get habitPlanTomorrow => 'Опиши завтрашний день одним предложением';
 
   @override
-  String get habitThirtySecondReset => 'Перезагрузка на 30 секунд';
+  String get habitThirtySecondReset => 'Перезагрузка на 1 минуту';
 
   @override
-  String get habitWriteIdea => 'Запиши одну идею';
+  String get habitWriteIdea => 'Отпишись от ненужной рассылки';
 
   @override
   String get habitFinishTinyTask => 'Заверши одно маленькое дело';
 
   @override
-  String get habitDeclutterDesk => 'Разбери стол за 2 минуты';
+  String get habitDeclutterDesk => 'Убери лишнее со стола';
 
   @override
   String get habitReviewCalendar => 'Загляни в календарь';
@@ -1823,10 +1839,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get habitTurnOffNotification => 'Отключи одно уведомление';
 
   @override
-  String get habitCloseTab => 'Закрой одну вкладку';
+  String get habitCloseTab => 'Закрой ненужные вкладки';
 
   @override
-  String get habitArchiveEmails => 'Архивируй 5 старых писем';
+  String get habitArchiveEmails => 'Архивируй 5 старых имейлов';
 
   @override
   String get habitUpdateTodo => 'Обнови один пункт в списке дел';
@@ -1862,13 +1878,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get habitOrganizeDrawer => 'Разбери один ящик';
 
   @override
-  String get habitWaterPlant => 'Полей одно растение';
+  String get habitWaterPlant => 'Полей свои растения';
 
   @override
-  String get habitLightCandle => 'Зажги свечу';
+  String get habitLightCandle => 'Зажги аромасвечу';
 
   @override
-  String get habitSendMessage => 'Напиши одно сообщение кому-нибудь';
+  String get habitSendMessage => 'Напиши одно сообщение тому, кто тебе дорог';
 
   @override
   String get habitAppreciatePerson => 'Подумай о человеке, которого ценишь';
@@ -1904,10 +1920,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get habitCelebrateOthers => 'Порадуйся за чью-то победу';
 
   @override
-  String get habitWriteSentence => 'Напиши одно предложение';
+  String get habitWriteSentence => 'Напиши короткий рассказ';
 
   @override
-  String get habitDoodle => 'Рисуй каракули 10 секунд';
+  String get habitDoodle => 'Рисуй каракули 5 минут';
 
   @override
   String get habitCaptureIdea => 'Запиши одну идею';
@@ -1919,37 +1935,37 @@ class AppLocalizationsRu extends AppLocalizations {
   String get habitTakePhoto => 'Сфотографируй что-то, что нравится';
 
   @override
-  String get habitDrawShape => 'Нарисуй одну простую фигуру';
+  String get habitDrawShape => 'Нарисуй что-то простое';
 
   @override
   String get habitHumTune => 'Напой мелодию, которая нравится';
 
   @override
-  String get habitRearrange => 'Переставь что-нибудь по мелочи';
+  String get habitRearrange => 'Переставь что-нибудь небольшое';
 
   @override
-  String get habitTryNewWord => 'Попробуй одно новое слово';
+  String get habitTryNewWord => 'Выучи одно новое слово';
 
   @override
-  String get habitCreateTinyThing => 'Создай одну маленькую вещь';
+  String get habitCreateTinyThing => 'Сыграй одну короткую мелодию';
 
   @override
   String get habitPlayCreative => 'Поиграй с одним творческим материалом';
 
   @override
-  String get habitImagine => 'Представь одну возможность';
+  String get habitImagine => 'Сделай одну распевку';
 
   @override
-  String get habitCheckBalance => 'Проверь баланс';
+  String get habitCheckBalance => 'Попробуй один финансовый совет';
 
   @override
-  String get habitMoveToSavings => 'Отложи €1 в копилку';
+  String get habitMoveToSavings => 'Отложи ₽300 в копилку';
 
   @override
   String get habitReviewSubscription => 'Проверь одну подписку';
 
   @override
-  String get habitNoteExpense => 'Запиши одну трату';
+  String get habitNoteExpense => 'Запиши 3 траты';
 
   @override
   String get habitFinancialTip => 'Прочитай один финансовый совет';
@@ -1958,31 +1974,31 @@ class AppLocalizationsRu extends AppLocalizations {
   String get habitDeleteReceipt => 'Удали один старый чек';
 
   @override
-  String get habitUpdateBudget => 'Обнови одну категорию бюджета';
+  String get habitUpdateBudget => 'Побалуй себя';
 
   @override
-  String get habitReviewBill => 'Проверь один счёт';
+  String get habitReviewBill => 'Проверь необходимость одной подписки';
 
   @override
   String get habitPriceCheck => 'Сравни цену перед покупкой';
 
   @override
-  String get habitWait24Hours => 'Подожди 24 часа перед одной покупкой';
+  String get habitWait24Hours => 'Подожди 24 часа перед большой покупкой';
 
   @override
   String get habitCelebrateMoneyWin => 'Порадуйся одной финансовой победе';
 
   @override
-  String get habitSavingsGoal => 'Поставь одну маленькую цель для накоплений';
+  String get habitSavingsGoal => 'Поставь одну цель для накоплений';
 
   @override
-  String get habitSitStill => 'Посиди тихо 10 секунд';
+  String get habitSitStill => 'Посиди тихо 1 минуту';
 
   @override
   String get habitKindThing => 'Сделай одну приятную вещь для себя';
 
   @override
-  String get habitDrinkSlowly => 'Выпей воды не торопясь';
+  String get habitDrinkSlowly => 'Выпей кружку вкусного кофе';
 
   @override
   String get habitStretchNeck => 'Потяни шею';
@@ -2001,7 +2017,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get habitFeelGood => 'Сделай что-то приятное';
 
   @override
-  String get habitRestTwoMinutes => 'Отдохни 2 минуты';
+  String get habitRestTwoMinutes => 'Отдохни 5 минут';
 
   @override
   String get habitPutOnComfortable => 'Надень что-нибудь удобное';
@@ -2010,10 +2026,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get habitListenToSong => 'Послушай одну любимую песню';
 
   @override
-  String get habitDoNothing => 'Ничего не делай 30 секунд';
+  String get habitDoNothing => 'Ничего не делай 5 минут';
 
   @override
-  String get shareCardWeeklyCheckin => 'За неделю';
+  String get shareCardWeeklyCheckin => 'Недельный чек-ин';
 
   @override
   String get shareCardMilestone => 'Достижение';
@@ -2025,7 +2041,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get shareCardTimes => 'раз';
 
   @override
-  String get shareCardTagline => 'намерение, а не совершенство';
+  String get shareCardTagline => 'намерение важнее совершенства';
 
   @override
   String get shareCardWeeks => 'недель';
@@ -2034,7 +2050,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get shareCardMilestoneSubtext => 'бережного отношения к себе';
 
   @override
-  String get shareCardDescriptor => 'намерение, а не совершенство';
+  String get shareCardDescriptor => 'намерение важнее совершенства';
 
   @override
   String get shareButton => 'Поделиться';
@@ -2050,19 +2066,19 @@ class AppLocalizationsRu extends AppLocalizations {
   String get shareShowingUpSubtitle => 'по-своему, в своём темпе';
 
   @override
-  String get shareFocusAreaSubtitle => 'то, к чему ты возвращаешься';
+  String get shareFocusAreaSubtitle => 'то, к чему ты продолжаешь возвращаться';
 
   @override
   String get shareYourThingSubtitle => 'привычка, которая приживается';
 
   @override
-  String get milestoneShowingUpLabel => 'Ты здесь';
+  String get milestoneShowingUpLabel => 'Забота о себе';
 
   @override
-  String get milestoneAreaLabel => 'Фокус';
+  String get milestoneAreaLabel => 'Область фокуса';
 
   @override
-  String get milestoneIdentityLabel => 'Твоё';
+  String get milestoneIdentityLabel => 'Это - твоё!';
 
   @override
   String milestoneShowingUpHero(int count) {
@@ -2077,7 +2093,8 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get milestoneShowingUpSubtitle => 'ты продолжаешь по-своему';
+  String get milestoneShowingUpSubtitle =>
+      'ты продолжаешь заботиться о себе по-своему';
 
   @override
   String milestoneAreaHero(String area) {
@@ -2097,6 +2114,11 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get boostCardTitle => 'Intended Boost — €1,99 разово';
+
+  @override
+  String boostCardTitleDynamic(String price) {
+    return 'Intended Boost — $price разово';
+  }
 
   @override
   String get boostCardSubtitle => 'Немного больше пространства для роста.';
@@ -2144,7 +2166,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get boostOfferFocusDesc =>
-      'Твой рост не помещается в рамки — расширь то, на чём фокусируешься.';
+      'Твой рост не помещается в рамки? Расширь то, на чём фокусируешься.';
 
   @override
   String get boostOfferSwapTitle => 'Замены закончились?';
@@ -2158,7 +2180,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get boostOfferShareDesc =>
-      'Твой путь стоит того, чтобы им делиться — покажи его близким.';
+      'Твой путь стоит того, чтобы им делиться - поделись им с близкими.';
 
   @override
   String get commonDismiss => 'Закрыть';
@@ -2168,7 +2190,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get focusLimitFreeMessage =>
-      'Бесплатный план включает 1 направление. Перейди на платный, чтобы открыть больше.';
+      'Бесплатный план включает одно направление. Перейди на платный, чтобы открыть больше.';
 
   @override
   String get focusLimitFreeUpgrade => 'Улучшить';
@@ -2182,4 +2204,17 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get focusNudgeGotIt => 'Понятно';
+
+  @override
+  String get profileLocalDataNote =>
+      'Данные хранятся только на этом устройстве.';
+
+  @override
+  String get shareError => 'Не удалось поделиться. Попробуй ещё раз.';
+
+  @override
+  String get restoreSuccess => 'Покупки восстановлены!';
+
+  @override
+  String get restoreNotFound => 'Покупки не найдены.';
 }

@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:ui';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show CircleAvatar, Colors, NetworkImage;
+import 'package:flutter/material.dart' show CircleAvatar, Colors, NetworkImage, ScaffoldMessenger, SnackBar;
 import 'package:flutter/services.dart';
 import '../l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
@@ -314,7 +315,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final userState = context.read<UserState>();
 
     // Subscription & boost users bypass the monthly focus area change limit
-    if (!userState.hasSubscription && !userState.hasBoost && !onboardingState.canChangeFocusAreas()) {
+    if (!userState.hasSubscription &&
+        !userState.hasBoost &&
+        !onboardingState.canChangeFocusAreas()) {
       AnalyticsService.logFocusAreaChangeLimitShown();
       _showFocusAreaLimitDialog();
       return;
@@ -464,7 +467,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   child: Text(
                                     l10n.profileChangeAreas,
                                     style: TextStyle(
-                                      fontFamily: AppTextStyles.bodyFont(context),
+                                      fontFamily:
+                                          AppTextStyles.bodyFont(context),
                                       fontSize: 17,
                                       fontWeight: FontWeight.w600,
                                       color: Color(0xFFFFFFFF),
@@ -620,21 +624,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     try {
       final customerInfo = await Purchases.getCustomerInfo();
-      final entitlement = customerInfo.entitlements.all['Intended+'];
+      final entitlement = customerInfo.entitlements.all[RevenueCatService.entitlementPlus];
       if (entitlement != null && entitlement.isActive) {
         final productId = entitlement.productIdentifier;
         if (productId.contains('monthly')) {
           plan = l10n.paywallMonthly;
-          price = '${l10n.paywallMonthlyPrice}/${l10n.paywallMonthly.toLowerCase()}';
+          price =
+              '${l10n.paywallMonthlyPrice}/${l10n.paywallMonthly.toLowerCase()}';
         } else if (productId.contains('yearly')) {
           plan = l10n.paywallYearly;
-          price = '${l10n.paywallYearlyPrice}/${l10n.paywallYearly.toLowerCase()}';
+          price =
+              '${l10n.paywallYearlyPrice}/${l10n.paywallYearly.toLowerCase()}';
         }
         final expDate = entitlement.expirationDate;
         if (expDate != null) {
           final dt = DateTime.tryParse(expDate);
           if (dt != null) {
-            renewalDate = '${dt.day}.${dt.month.toString().padLeft(2, '0')}.${dt.year}';
+            renewalDate =
+                '${dt.day}.${dt.month.toString().padLeft(2, '0')}.${dt.year}';
           }
         }
       }
@@ -793,6 +800,123 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  void _showDeleteError(AppLocalizations l10n) {
+    showStyledPopup(
+      context: context,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            l10n.swapErrorTitle,
+            style: AppTextStyles.h2(context),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            l10n.profileDeleteErrorMessage,
+            style: AppTextStyles.body(context),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          styledSecondaryButton(
+            label: l10n.commonOk,
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<bool> _reauthenticateAndDelete(
+    User user,
+    AppLocalizations l10n,
+    AppColorScheme colors,
+  ) async {
+    final isApple = AuthService.isAppleUser;
+    final isGoogle = AuthService.isGoogleUser;
+
+    if (!isApple && !isGoogle) {
+      _showDeleteError(l10n);
+      return false;
+    }
+
+    // Show re-auth explanation dialog and wait for user action
+    final shouldReauth = await showStyledPopup<bool>(
+      context: context,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            l10n.profileReauthTitle,
+            style: AppTextStyles.h2(context),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            l10n.profileReauthMessage,
+            style: AppTextStyles.body(context),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 32),
+          Container(
+            width: double.infinity,
+            margin: const EdgeInsets.only(bottom: 14),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  colors.ctaPrimary.withOpacity(0.92),
+                  colors.ctaPrimary.withOpacity(0.88),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: colors.ctaPrimary.withOpacity(0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: CupertinoButton(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(
+                l10n.profileReauthButton,
+                style: TextStyle(
+                  fontFamily: AppTextStyles.bodyFont(context),
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+          styledSecondaryButton(
+            label: l10n.commonCancel,
+            onPressed: () => Navigator.pop(context, false),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldReauth != true || !mounted) return false;
+
+    try {
+      final success = isApple
+          ? await AuthService.reauthenticateWithApple()
+          : await AuthService.reauthenticateWithGoogle();
+      if (!success) return false;
+      await user.delete();
+      try { FirebaseAnalytics.instance.logEvent(name: 'account_deleted'); } catch (_) {}
+      return true;
+    } catch (_) {
+      if (mounted) _showDeleteError(l10n);
+      return false;
+    }
+  }
+
   void _deleteProfileData() {
     final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
     final l10n = AppLocalizations.of(context);
@@ -838,60 +962,59 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: CupertinoButton(
               padding: const EdgeInsets.symmetric(vertical: 16),
               onPressed: () async {
+                final onboarding = context.read<OnboardingState>();
+                final userState = context.read<UserState>();
+                final themeProvider = context.read<ThemeProvider>();
+                final nav = Navigator.of(context);
                 Navigator.pop(context);
 
                 // Delete server-side data if user is signed in
                 final user = FirebaseAuth.instance.currentUser;
                 if (user != null) {
+                  final revenueCat = context.read<RevenueCatService>();
                   try {
-                    final revenueCat = context.read<RevenueCatService>();
+                    // Apple users: always re-auth first to revoke token
+                    // (App Store requirement + solves requires-recent-login)
+                    if (AuthService.isAppleUser) {
+                      final success =
+                          await AuthService.reauthenticateWithApple();
+                      if (!success) return; // User cancelled
+                    }
+
                     await revenueCat.logOut();
                     await user.delete();
-                  } catch (e) {
-                    if (mounted) {
-                      showStyledPopup(
-                        context: context,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              l10n.swapErrorTitle,
-                              style: AppTextStyles.h2(context),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              l10n.profileDeleteErrorMessage,
-                              style: AppTextStyles.body(context),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 24),
-                            styledSecondaryButton(
-                              label: l10n.commonOk,
-                              onPressed: () => Navigator.pop(context),
-                            ),
-                          ],
-                        ),
-                      );
+                    try { FirebaseAnalytics.instance.logEvent(name: 'account_deleted'); } catch (_) {}
+                  } on FirebaseAuthException catch (e) {
+                    if (e.code == 'requires-recent-login' && mounted) {
+                      // Google users: re-auth on demand
+                      final deleted =
+                          await _reauthenticateAndDelete(user, l10n, colors);
+                      if (!deleted) return;
+                    } else {
+                      if (mounted) _showDeleteError(l10n);
+                      return;
                     }
+                  } catch (_) {
+                    if (mounted) _showDeleteError(l10n);
                     return;
                   }
                 }
 
+                await NotificationScheduler.cancelAll();
                 final prefs = await SharedPreferences.getInstance();
                 await prefs.clear();
 
-                if (mounted) {
-                  await context.read<OnboardingState>().reset();
-                  userNameNotifier.value = null;
+                await onboarding.reset();
+                userState.reset();
+                userNameNotifier.value = null;
+                themeProvider.setTheme(AppTheme.warmClay);
 
-                  Navigator.pushReplacement(
-                    context,
-                    CupertinoPageRoute(
-                      builder: (_) => const WelcomeV2Screen(),
-                    ),
-                  );
-                }
+                nav.pushAndRemoveUntil(
+                  CupertinoPageRoute(
+                    builder: (_) => const WelcomeV2Screen(),
+                  ),
+                  (route) => false,
+                );
               },
               child: Text(
                 l10n.commonDelete,
@@ -983,7 +1106,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       child: Text(
                                         displayName,
                                         style: TextStyle(
-                                          fontFamily: AppTextStyles.bodyFont(context),
+                                          fontFamily:
+                                              AppTextStyles.bodyFont(context),
                                           fontSize: 17,
                                           fontWeight: FontWeight.w500,
                                           color: hasName
@@ -1045,7 +1169,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     child: Text(
                                       l10n.commonSave,
                                       style: TextStyle(
-                                        fontFamily: AppTextStyles.bodyFont(context),
+                                        fontFamily:
+                                            AppTextStyles.bodyFont(context),
                                         fontSize: 15,
                                         fontWeight: FontWeight.w600,
                                         color: canSave
@@ -1063,7 +1188,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   child: Text(
                                     l10n.commonCancel,
                                     style: TextStyle(
-                                      fontFamily: AppTextStyles.bodyFont(context),
+                                      fontFamily:
+                                          AppTextStyles.bodyFont(context),
                                       fontSize: 15,
                                       fontWeight: FontWeight.w500,
                                       color: colors.ctaPrimary,
@@ -1125,7 +1251,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       child: Text(
                                         l10n.profileManage,
                                         style: TextStyle(
-                                          fontFamily: AppTextStyles.bodyFont(context),
+                                          fontFamily:
+                                              AppTextStyles.bodyFont(context),
                                           fontSize: 14,
                                           fontWeight: FontWeight.w500,
                                           color: colors.ctaPrimary,
@@ -1156,7 +1283,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         child: Text(
                                           l10n.profileUnlockPlus,
                                           style: TextStyle(
-                                            fontFamily: AppTextStyles.bodyFont(context),
+                                            fontFamily:
+                                                AppTextStyles.bodyFont(context),
                                             fontSize: 11,
                                             fontWeight: FontWeight.w600,
                                             color: colors.ctaPrimary,
@@ -1200,7 +1328,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         .map((a) => _localizedAreaName(l10n, a))
                                         .join(', '),
                                     style: TextStyle(
-                                      fontFamily: AppTextStyles.bodyFont(context),
+                                      fontFamily:
+                                          AppTextStyles.bodyFont(context),
                                       fontSize: 17,
                                       fontWeight: FontWeight.w500,
                                       color: colors.textPrimary,
@@ -1253,7 +1382,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     child: Text(
                                       label,
                                       style: TextStyle(
-                                        fontFamily: AppTextStyles.bodyFont(context),
+                                        fontFamily:
+                                            AppTextStyles.bodyFont(context),
                                         fontSize: 17,
                                         fontWeight: FontWeight.w500,
                                         color: colors.textPrimary,
@@ -1304,7 +1434,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                     // Notifications Card
                     _GlassCard(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 16),
                       child: Column(
                         children: [
                           // Row 1: Daily reminders toggle
@@ -1351,7 +1482,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           .setEnabled(true);
                                       await NotificationScheduler.scheduleDaily(
                                           l10n);
-                                      AnalyticsService.logDailyReminderToggled(true);
+                                      AnalyticsService.logDailyReminderToggled(
+                                          true);
                                       if (mounted) {
                                         setState(() {
                                           _dailyEnabled = true;
@@ -1367,21 +1499,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         });
                                         showCupertinoDialog(
                                           context: context,
-                                          builder: (ctx) => CupertinoAlertDialog(
-                                            title: Text(l10n.profileNotifDeniedTitle),
-                                            content: Text(l10n.profileNotifDeniedMessage),
+                                          builder: (ctx) =>
+                                              CupertinoAlertDialog(
+                                            title: Text(
+                                                l10n.profileNotifDeniedTitle),
+                                            content: Text(
+                                                l10n.profileNotifDeniedMessage),
                                             actions: [
                                               CupertinoDialogAction(
-                                                onPressed: () => Navigator.pop(ctx),
+                                                onPressed: () =>
+                                                    Navigator.pop(ctx),
                                                 child: Text(l10n.commonCancel),
                                               ),
                                               CupertinoDialogAction(
                                                 isDefaultAction: true,
                                                 onPressed: () {
                                                   Navigator.pop(ctx);
-                                                  launchUrl(Uri.parse('app-settings:'));
+                                                  launchUrl(Uri.parse(
+                                                      'app-settings:'));
                                                 },
-                                                child: Text(l10n.profileNotifOpenSettings),
+                                                child: Text(l10n
+                                                    .profileNotifOpenSettings),
                                               ),
                                             ],
                                           ),
@@ -1392,7 +1530,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     await NotificationPreferencesService
                                         .setEnabled(false);
                                     await NotificationScheduler.cancelAll();
-                                    AnalyticsService.logDailyReminderToggled(false);
+                                    AnalyticsService.logDailyReminderToggled(
+                                        false);
                                     if (mounted) {
                                       setState(() {
                                         _dailyEnabled = false;
@@ -1419,7 +1558,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           child: Text(
                                             l10n.profileRemindAt,
                                             style: TextStyle(
-                                              fontFamily: AppTextStyles.bodyFont(context),
+                                              fontFamily:
+                                                  AppTextStyles.bodyFont(
+                                                      context),
                                               fontSize: 15,
                                               fontWeight: FontWeight.w400,
                                               color: colors.ctaPrimary,
@@ -1453,7 +1594,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                             l10n.commonDone,
                                                             style: TextStyle(
                                                               fontFamily:
-                                                                  AppTextStyles.bodyFont(context),
+                                                                  AppTextStyles
+                                                                      .bodyFont(
+                                                                          context),
                                                               fontSize: 16,
                                                               fontWeight:
                                                                   FontWeight
@@ -1483,7 +1626,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                                   .rescheduleAll(
                                                                       l10n);
                                                             }
-                                                            AnalyticsService.logReminderTimeChanged();
+                                                            AnalyticsService
+                                                                .logReminderTimeChanged();
                                                             if (mounted) {
                                                               setState(() {
                                                                 _notifHour =
@@ -1500,17 +1644,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                     ),
                                                     Expanded(
                                                       child: CupertinoTheme(
-                                                        data: CupertinoThemeData(
+                                                        data:
+                                                            CupertinoThemeData(
                                                           textTheme:
                                                               CupertinoTextThemeData(
                                                             dateTimePickerTextStyle:
                                                                 TextStyle(
-                                                              fontFamily: AppTextStyles.bodyFont(context),
+                                                              fontFamily:
+                                                                  AppTextStyles
+                                                                      .bodyFont(
+                                                                          context),
                                                               fontSize: 22,
                                                               fontWeight:
-                                                                  FontWeight.w500,
-                                                              color:
-                                                                  colors.textPrimary,
+                                                                  FontWeight
+                                                                      .w500,
+                                                              color: colors
+                                                                  .textPrimary,
                                                             ),
                                                           ),
                                                         ),
@@ -1522,7 +1671,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                           initialDateTime:
                                                               tempTime,
                                                           backgroundColor:
-                                                              Colors.transparent,
+                                                              Colors
+                                                                  .transparent,
                                                           onDateTimeChanged:
                                                               (dt) {
                                                             tempTime = dt;
@@ -1535,6 +1685,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                               ),
                                             );
                                           },
+                                          minimumSize: Size(0, 0),
                                           child: Container(
                                             padding: const EdgeInsets.symmetric(
                                                 horizontal: 12, vertical: 6),
@@ -1547,14 +1698,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                               _formatTime(
                                                   _notifHour, _notifMinute),
                                               style: TextStyle(
-                                                fontFamily: AppTextStyles.bodyFont(context),
+                                                fontFamily:
+                                                    AppTextStyles.bodyFont(
+                                                        context),
                                                 fontSize: 15,
                                                 fontWeight: FontWeight.w500,
                                                 color: colors.textPrimary,
                                               ),
                                             ),
                                           ),
-                                          minimumSize: Size(0, 0),
                                         ),
                                       ],
                                     ),
@@ -1595,7 +1747,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     Text(
                                       l10n.profileWeeklySummary,
                                       style: TextStyle(
-                                        fontFamily: AppTextStyles.bodyFont(context),
+                                        fontFamily:
+                                            AppTextStyles.bodyFont(context),
                                         fontSize: 16,
                                         fontWeight: FontWeight.w500,
                                         color: colors.textPrimary,
@@ -1607,7 +1760,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
-                                        fontFamily: AppTextStyles.bodyFont(context),
+                                        fontFamily:
+                                            AppTextStyles.bodyFont(context),
                                         fontSize: 13,
                                         fontWeight: FontWeight.w400,
                                         color: colors.textSecondary,
@@ -1628,8 +1782,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     if (granted) {
                                       await NotificationPreferencesService
                                           .setWeeklyEnabled(true);
-                                      await NotificationScheduler
-                                          .rescheduleAll(l10n);
+                                      await NotificationScheduler.rescheduleAll(
+                                          l10n);
                                       if (mounted) {
                                         setState(() {
                                           _weeklyEnabled = true;
@@ -1655,8 +1809,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                               CupertinoDialogAction(
                                                 onPressed: () =>
                                                     Navigator.pop(ctx),
-                                                child:
-                                                    Text(l10n.commonCancel),
+                                                child: Text(l10n.commonCancel),
                                               ),
                                               CupertinoDialogAction(
                                                 isDefaultAction: true,
@@ -1676,8 +1829,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   } else {
                                     await NotificationPreferencesService
                                         .setWeeklyEnabled(false);
-                                    await NotificationScheduler
-                                        .rescheduleAll(l10n);
+                                    await NotificationScheduler.rescheduleAll(
+                                        l10n);
                                     if (mounted) {
                                       setState(() {
                                         _weeklyEnabled = false;
@@ -1738,7 +1891,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   child: Text(
                                     l10n.profileAppearance,
                                     style: TextStyle(
-                                      fontFamily: AppTextStyles.bodyFont(context),
+                                      fontFamily:
+                                          AppTextStyles.bodyFont(context),
                                       fontSize: 16,
                                       fontWeight: FontWeight.w500,
                                       color: colors.textPrimary,
@@ -1825,6 +1979,53 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 width: 48,
                                 height: 48,
                                 decoration: BoxDecoration(
+                                  color: colors.accentRegular.withOpacity(0.12),
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Icon(
+                                  CupertinoIcons.arrow_2_circlepath,
+                                  size: 20,
+                                  color: colors.textMutedBrown,
+                                ),
+                              ),
+                              title: l10n.paywallRestorePurchases,
+                              onTap: () async {
+                                try {
+                                  final result = await context
+                                      .read<RevenueCatService>()
+                                      .restorePurchases();
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(result
+                                            ? l10n.restoreSuccess
+                                            : l10n.restoreNotFound),
+                                      ),
+                                    );
+                                  }
+                                } catch (_) {
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(l10n.restoreNotFound),
+                                      ),
+                                    );
+                                  }
+                                }
+                              },
+                            ),
+                          ),
+                          Container(
+                            height: 1,
+                            color: colors.ctaPrimary.withOpacity(0.1),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(20),
+                            child: _ProfileButton(
+                              iconContainer: Container(
+                                width: 48,
+                                height: 48,
+                                decoration: BoxDecoration(
                                   color: colors.ctaPrimary.withOpacity(0.12),
                                   borderRadius: BorderRadius.circular(16),
                                 ),
@@ -1863,6 +2064,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                           ),
                         ],
+                      ),
+                    ),
+
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12, left: 4),
+                      child: Text(
+                        l10n.profileLocalDataNote,
+                        style: TextStyle(
+                          fontFamily: AppTextStyles.bodyFont(context),
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
                       ),
                     ),
 
@@ -1912,11 +2125,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     radius: 22,
                                     backgroundColor:
                                         colors.ctaPrimary.withOpacity(0.15),
-                                    backgroundImage:
-                                        _currentUser?.photoURL != null
-                                            ? NetworkImage(
-                                                _currentUser!.photoURL!)
-                                            : null,
+                                    backgroundImage: _currentUser?.photoURL !=
+                                            null
+                                        ? NetworkImage(_currentUser!.photoURL!)
+                                        : null,
                                     child: _currentUser?.photoURL == null
                                         ? Icon(
                                             CupertinoIcons.person_fill,
@@ -1929,23 +2141,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   // Name, email, provider
                                   Expanded(
                                     child: Builder(builder: (context) {
-                                      final isApple = _currentUser
-                                              ?.providerData
+                                      final isApple = _currentUser?.providerData
                                               .any((p) =>
                                                   p.providerId ==
                                                   'apple.com') ??
                                           false;
-                                      final isGoogle = _currentUser
-                                              ?.providerData
-                                              .any((p) =>
+                                      final isGoogle =
+                                          _currentUser?.providerData.any((p) =>
                                                   p.providerId ==
                                                   'google.com') ??
-                                          false;
-                                      final hasDisplayName = _currentUser
-                                                  ?.displayName !=
-                                              null &&
-                                          _currentUser!
-                                              .displayName!.isNotEmpty;
+                                              false;
+                                      final hasDisplayName =
+                                          _currentUser?.displayName != null &&
+                                              _currentUser!
+                                                  .displayName!.isNotEmpty;
                                       final email = _currentUser?.email;
                                       final isRelayEmail = email != null &&
                                           email.contains(
@@ -1969,7 +2178,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             Text(
                                               _currentUser!.displayName!,
                                               style: TextStyle(
-                                                fontFamily: AppTextStyles.bodyFont(context),
+                                                fontFamily:
+                                                    AppTextStyles.bodyFont(
+                                                        context),
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.w600,
                                                 color: colors.textPrimary,
@@ -1978,9 +2189,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             )
                                           else if (hasUsableEmail)
                                             Text(
-                                              email!,
+                                              email,
                                               style: TextStyle(
-                                                fontFamily: AppTextStyles.bodyFont(context),
+                                                fontFamily:
+                                                    AppTextStyles.bodyFont(
+                                                        context),
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.w600,
                                                 color: colors.textPrimary,
@@ -1991,18 +2204,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           // displayName is the primary line)
                                           if (hasDisplayName && hasUsableEmail)
                                             Padding(
-                                              padding: const EdgeInsets.only(
-                                                  top: 2),
+                                              padding:
+                                                  const EdgeInsets.only(top: 2),
                                               child: Text(
-                                                email!,
+                                                email,
                                                 style: TextStyle(
-                                                  fontFamily: AppTextStyles.bodyFont(context),
+                                                  fontFamily:
+                                                      AppTextStyles.bodyFont(
+                                                          context),
                                                   fontSize: 14,
                                                   fontWeight: FontWeight.w400,
                                                   color: colors.textSecondary,
                                                 ),
-                                                overflow:
-                                                    TextOverflow.ellipsis,
+                                                overflow: TextOverflow.ellipsis,
                                               ),
                                             ),
                                           // Provider label — never just
@@ -2013,7 +2227,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             child: Text(
                                               providerLabel,
                                               style: TextStyle(
-                                                fontFamily: AppTextStyles.bodyFont(context),
+                                                fontFamily:
+                                                    AppTextStyles.bodyFont(
+                                                        context),
                                                 fontSize: 12,
                                                 fontWeight: FontWeight.w500,
                                                 color: colors.ctaPrimary,
@@ -2056,7 +2272,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             Text(
                                               l10n.profileSignInGoogle,
                                               style: TextStyle(
-                                                fontFamily: AppTextStyles.bodyFont(context),
+                                                fontFamily:
+                                                    AppTextStyles.bodyFont(
+                                                        context),
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.w500,
                                                 color: colors.textPrimary,
@@ -2092,7 +2310,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             Text(
                                               l10n.profileSignInApple,
                                               style: TextStyle(
-                                                fontFamily: AppTextStyles.bodyFont(context),
+                                                fontFamily:
+                                                    AppTextStyles.bodyFont(
+                                                        context),
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.w500,
                                                 color: colors.textPrimary,
@@ -2133,10 +2353,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 20, vertical: 10),
                               onPressed: () async {
-                                await context
-                                    .read<RevenueCatService>()
-                                    .logOut();
+                                final revenueCat =
+                                    context.read<RevenueCatService>();
+                                final onboarding =
+                                    context.read<OnboardingState>();
+                                final userState =
+                                    context.read<UserState>();
+                                final themeProvider =
+                                    context.read<ThemeProvider>();
+                                final nav = Navigator.of(context);
+
+                                await revenueCat.logOut();
                                 await AuthService.signOut();
+
+                                // Clear all local user data after sign-out succeeds
+                                await NotificationScheduler.cancelAll();
+                                final prefs =
+                                    await SharedPreferences.getInstance();
+                                await prefs.clear();
+
+                                await onboarding.reset();
+                                userState.reset();
+                                userNameNotifier.value = null;
+                                themeProvider
+                                    .setTheme(AppTheme.warmClay);
+
+                                nav.pushAndRemoveUntil(
+                                  CupertinoPageRoute(
+                                    builder: (_) =>
+                                        const WelcomeV2Screen(),
+                                  ),
+                                  (route) => false,
+                                );
                               },
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -2150,7 +2398,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   Text(
                                     l10n.profileSignOut,
                                     style: TextStyle(
-                                      fontFamily: AppTextStyles.bodyFont(context),
+                                      fontFamily:
+                                          AppTextStyles.bodyFont(context),
                                       fontSize: 15,
                                       fontWeight: FontWeight.w500,
                                       color: colors.textMutedBrown,
@@ -2245,7 +2494,6 @@ class _ProfileButton extends StatelessWidget {
     required this.iconContainer,
     required this.title,
     required this.onTap,
-    this.subtitle,
   });
 
   @override
@@ -2704,34 +2952,33 @@ class _FocusAreaChangeScreenState extends State<_FocusAreaChangeScreen> {
                         ],
                       ),
                       child: Container(
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  colors.ctaPrimary.withOpacity(0.92),
-                                  colors.ctaSecondary.withOpacity(0.88),
-                                ],
-                              ),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: CupertinoButton(
-                              onPressed: _saveAreas,
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 16),
-                              borderRadius: BorderRadius.circular(20),
-                              child: Text(
-                                l10n.profileSaveChanges,
-                                style: TextStyle(
-                                  fontFamily: AppTextStyles.bodyFont(context),
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFFFFFFFF),
-                                ),
-                              ),
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              colors.ctaPrimary.withOpacity(0.92),
+                              colors.ctaSecondary.withOpacity(0.88),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: CupertinoButton(
+                          onPressed: _saveAreas,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          borderRadius: BorderRadius.circular(20),
+                          child: Text(
+                            l10n.profileSaveChanges,
+                            style: TextStyle(
+                              fontFamily: AppTextStyles.bodyFont(context),
+                              fontSize: 17,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFFFFFFFF),
                             ),
                           ),
+                        ),
+                      ),
                     ),
                   ),
               ],

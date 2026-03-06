@@ -13,6 +13,7 @@ import '../services/week_stats_service.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme_provider.dart';
 import '../utils/text_styles.dart';
+import '../utils/habit_l10n.dart';
 import 'moments_collection_screen.dart';
 import 'share_card_picker_screen.dart';
 
@@ -310,7 +311,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              habit,
+                              localizeHabitName(habit, l10n),
                               style: TextStyle(
                                 fontFamily: 'DMSans',
                                 fontSize: 15,
@@ -402,16 +403,13 @@ class _ProgressScreenState extends State<ProgressScreen> {
   Widget _buildRecentMoment(int count, Moment recent, AppColorScheme colors, AppLocalizations l10n) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final momentDay = DateTime(
-      recent.completedAt.year,
-      recent.completedAt.month,
-      recent.completedAt.day,
-    );
+    final local = recent.completedAt.toLocal();
+    final momentDay = DateTime(local.year, local.month, local.day);
 
     final String timeLabel;
     if (momentDay == today) {
       timeLabel = l10n.progressEarlierToday;
-    } else if (momentDay == today.subtract(const Duration(days: 1))) {
+    } else if (momentDay == DateTime(today.year, today.month, today.day - 1)) {
       timeLabel = l10n.progressYesterday;
     } else {
       final diff = today.difference(momentDay).inDays;

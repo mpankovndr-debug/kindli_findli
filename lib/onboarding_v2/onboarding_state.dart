@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -209,13 +210,12 @@ class OnboardingState extends ChangeNotifier {
       selectedHabits.addAll([
         'Drink a glass of water',
         'Take 3 slow breaths',
-        'Tidy one small thing',
       ]);
     } else {
       for (final area in _focusAreas) {
         final categoryHabits = habitsByCategory[area] ?? [];
         final shuffled = List<String>.from(categoryHabits)..shuffle(random);
-        selectedHabits.addAll(shuffled.take(3));
+        selectedHabits.addAll(shuffled.take(2));
       }
     }
 
@@ -311,16 +311,20 @@ class OnboardingState extends ChangeNotifier {
     }
 
     // Load swap tracking
-    final swapsJson = prefs.getString('swaps_used');
-    if (swapsJson != null) {
-      // Parse JSON map
-      final decoded = Map<String, dynamic>.from(
-        Map.castFrom(Uri.splitQueryString(swapsJson))
-      );
+    final swapsRaw = prefs.getString('swaps_used');
+    if (swapsRaw != null) {
       _swapsUsed.clear();
-      decoded.forEach((key, value) {
-        _swapsUsed[key] = int.tryParse(value.toString()) ?? 0;
-      });
+      try {
+        final map = Map<String, String>.from(jsonDecode(swapsRaw) as Map);
+        map.forEach((k, v) {
+          _swapsUsed[k] = int.tryParse(v) ?? 0;
+        });
+      } catch (_) {
+        // Fallback: old query string format for existing users
+        Uri.splitQueryString(swapsRaw).forEach((k, v) {
+          _swapsUsed[k] = int.tryParse(v) ?? 0;
+        });
+      }
     }
     
     final lastSwapStr = prefs.getString('last_swap_reset');
@@ -376,11 +380,9 @@ class OnboardingState extends ChangeNotifier {
   Future<void> _saveSwapData() async {
     final prefs = await SharedPreferences.getInstance();
     
-    // Save swaps as query string
-    final swapsQuery = _swapsUsed.entries
-        .map((e) => '${e.key}=${e.value}')
-        .join('&');
-    await prefs.setString('swaps_used', swapsQuery);
+    // Save swaps as JSON
+    final jsonStr = jsonEncode(_swapsUsed.map((k, v) => MapEntry(k, v.toString())));
+    await prefs.setString('swaps_used', jsonStr);
     
     if (_lastSwapReset != null) {
       await prefs.setString('last_swap_reset', _lastSwapReset!.toIso8601String());
@@ -587,8 +589,8 @@ class OnboardingState extends ChangeNotifier {
     return _customHabits.length < maxCustomHabits(hasBoost: hasBoost);
   }
 
-  Future<void> addCustomHabit(String habitTitle) async {
-    if (!canAddCustomHabit()) return;
+  Future<void> addCustomHabit(String habitTitle, {bool hasBoost = false}) async {
+    if (!canAddCustomHabit(hasBoost: hasBoost)) return;
     if (userHabits.any((h) => h.toLowerCase() == habitTitle.toLowerCase())) return;
 
     _customHabits.add(habitTitle);
@@ -649,5 +651,9 @@ class OnboardingState extends ChangeNotifier {
     await prefs.remove('last_swap_reset');
     await prefs.remove('habit_refresh_count');
     await prefs.remove('last_habit_refresh');
+    await prefs.remove('focus_areas');
+    await prefs.remove('onboarding_complete');
+    await prefs.remove('last_focus_change');
+    await prefs.remove('just_completed_onboarding');
   }
 }

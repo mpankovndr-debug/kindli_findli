@@ -1,10 +1,10 @@
-import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import '../l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import '../models/moment.dart';
 import '../services/moments_service.dart';
+import '../services/milestone_service.dart';
 import '../services/analytics_service.dart';
 import '../widgets/warmth_toast_overlay.dart';
 import '../main.dart';
@@ -42,8 +42,6 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
   late AnimationController _modalEntranceController;
   late Animation<double> _modalEntranceScaleAnimation;
   late Animation<double> _modalEntranceFadeAnimation;
-  late Animation<double> _blurAnimation;
-
   // Content stagger animations
   late AnimationController _contentStaggerController;
   late Animation<double> _titleFadeAnimation;
@@ -103,11 +101,6 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
       CurvedAnimation(parent: _modalEntranceController, curve: Curves.easeOutCubic),
     );
     _modalEntranceFadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _modalEntranceController, curve: Curves.easeOut),
-    );
-
-    // Background blur animation (0 → 5)
-    _blurAnimation = Tween<double>(begin: 0.0, end: 5.0).animate(
       CurvedAnimation(parent: _modalEntranceController, curve: Curves.easeOut),
     );
 
@@ -187,12 +180,13 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
     // Record the moment
     await MomentsService.record(
       Moment(
-        id: DateTime.now().toIso8601String(),
+        id: DateTime.now().toUtc().toIso8601String(),
         habitName: widget.habitTitle,
         habitEmoji: '✦',
-        completedAt: DateTime.now(),
+        completedAt: DateTime.now().toUtc(),
       ),
     );
+    MilestoneService.invalidate();
 
     // Wait for color transition to complete
     await Future.delayed(const Duration(milliseconds: 300));
@@ -234,28 +228,24 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
     final colors = context.watch<ThemeProvider>().colors;
 
     return AnimatedBuilder(
-      animation: _blurAnimation,
+      animation: _modalEntranceController,
       builder: (context, child) {
         return FadeTransition(
           opacity: _modalFadeAnimation,
           child: ScaleTransition(
             scale: _modalScaleAnimation,
             child: Container(
-              color: colors.textPrimary.withOpacity(0.40),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(
-                  sigmaX: _showCelebration ? 5 : _blurAnimation.value,
-                  sigmaY: _showCelebration ? 5 : _blurAnimation.value,
-                ),
-                child: FadeTransition(
-                  opacity: _modalEntranceFadeAnimation,
-                  child: ScaleTransition(
-                    scale: _modalEntranceScaleAnimation,
-                    child: Center(
-                      child: _showCelebration
-                          ? _buildCelebrationView(colors)
-                          : _buildQuestionView(colors),
-                    ),
+              color: colors.textPrimary.withOpacity(
+                0.50 * _modalEntranceFadeAnimation.value,
+              ),
+              child: FadeTransition(
+                opacity: _modalEntranceFadeAnimation,
+                child: ScaleTransition(
+                  scale: _modalEntranceScaleAnimation,
+                  child: Center(
+                    child: _showCelebration
+                        ? _buildCelebrationView(colors)
+                        : _buildQuestionView(colors),
                   ),
                 ),
               ),
@@ -271,43 +261,39 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24),
       constraints: const BoxConstraints(maxWidth: 384),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(32),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(28, 32, 28, 36),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: const Alignment(0.0, 1.0), // bottom
-                end: const Alignment(0.0, -1.0), // top
-                colors: [
-                  colors.modalBg1.withOpacity(0.96),
-                  colors.modalBg2.withOpacity(0.96),
-                  colors.modalBg3.withOpacity(0.96),
-                ],
-                stops: const [0.0, 0.5, 1.0],
-              ),
-              borderRadius: BorderRadius.circular(32),
-              border: Border.all(
-                color: const Color(0xFFFFFFFF).withOpacity(0.5),
-                width: 1.5,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: colors.modalShadow.withOpacity(0.35),
-                  blurRadius: 70,
-                  offset: const Offset(0, 25),
-                ),
-                BoxShadow(
-                  color: const Color(0xFFFFFFFF).withOpacity(0.6),
-                  blurRadius: 0,
-                  offset: const Offset(0, 1),
-                  spreadRadius: 0,
-                  blurStyle: BlurStyle.inner,
-                ),
-              ],
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(28, 32, 28, 36),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: const Alignment(0.0, 1.0), // bottom
+            end: const Alignment(0.0, -1.0), // top
+            colors: [
+              colors.modalBg1,
+              colors.modalBg2,
+              colors.modalBg3,
+            ],
+            stops: const [0.0, 0.5, 1.0],
+          ),
+          borderRadius: BorderRadius.circular(32),
+          border: Border.all(
+            color: const Color(0xFFFFFFFF).withOpacity(0.5),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: colors.modalShadow.withOpacity(0.35),
+              blurRadius: 70,
+              offset: const Offset(0, 25),
             ),
+            BoxShadow(
+              color: const Color(0xFFFFFFFF).withOpacity(0.6),
+              blurRadius: 0,
+              offset: const Offset(0, 1),
+              spreadRadius: 0,
+              blurStyle: BlurStyle.inner,
+            ),
+          ],
+        ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -423,8 +409,6 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
               ],
             ),
           ),
-        ),
-      ),
     );
   }
 
@@ -432,99 +416,93 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24),
       constraints: const BoxConstraints(maxWidth: 384),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 48),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: const Alignment(0.0, 1.0), // bottom
-                end: const Alignment(0.0, -1.0), // top
-                colors: [
-                  colors.modalBg1.withOpacity(0.96),
-                  colors.modalBg2.withOpacity(0.94),
-                  colors.modalBg3.withOpacity(0.95),
-                ],
-                stops: const [0.0, 0.5, 1.0],
-              ),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: const Color(0xFFFFFFFF).withOpacity(0.5),
-                width: 1.5,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: colors.modalShadow.withOpacity(0.35),
-                  blurRadius: 70,
-                  offset: const Offset(0, 25),
-                ),
-                BoxShadow(
-                  color: const Color(0xFFFFFFFF).withOpacity(0.6),
-                  blurRadius: 0,
-                  offset: const Offset(0, 1),
-                  spreadRadius: 0,
-                  blurStyle: BlurStyle.inner,
-                ),
-                BoxShadow(
-                  color: colors.modalInnerShadow.withOpacity(0.15),
-                  blurRadius: 0,
-                  offset: const Offset(0, -1),
-                  spreadRadius: 0,
-                  blurStyle: BlurStyle.inner,
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Heart icon with scale animation
-                ScaleTransition(
-                  scale: _heartScaleAnimation,
-                  child: SizedBox(
-                    width: 72,
-                    height: 72,
-                    child: CustomPaint(
-                      painter: _HeartPainter(colors: colors),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 28),
-
-                // Celebration title
-                Text(
-                  _celebrationTitle,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: AppTextStyles.bodyFont(context),
-                    fontSize: 30,
-                    fontWeight: FontWeight.w500,
-                    color: colors.buttonDark,
-                    letterSpacing: -0.3,
-                    height: 1.2,
-                  ),
-                ),
-
-                const SizedBox(height: 12),
-
-                // Celebration message
-                Text(
-                  _celebrationMessage,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: 'DM Sans',
-                    fontSize: 17,
-                    fontWeight: FontWeight.w400,
-                    color: colors.textTertiary,
-                    letterSpacing: -0.1,
-                    height: 1.5,
-                  ),
-                ),
-              ],
-            ),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 48),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: const Alignment(0.0, 1.0), // bottom
+            end: const Alignment(0.0, -1.0), // top
+            colors: [
+              colors.modalBg1,
+              colors.modalBg2,
+              colors.modalBg3,
+            ],
+            stops: const [0.0, 0.5, 1.0],
           ),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: const Color(0xFFFFFFFF).withOpacity(0.5),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: colors.modalShadow.withOpacity(0.35),
+              blurRadius: 70,
+              offset: const Offset(0, 25),
+            ),
+            BoxShadow(
+              color: const Color(0xFFFFFFFF).withOpacity(0.6),
+              blurRadius: 0,
+              offset: const Offset(0, 1),
+              spreadRadius: 0,
+              blurStyle: BlurStyle.inner,
+            ),
+            BoxShadow(
+              color: colors.modalInnerShadow.withOpacity(0.15),
+              blurRadius: 0,
+              offset: const Offset(0, -1),
+              spreadRadius: 0,
+              blurStyle: BlurStyle.inner,
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Heart icon with scale animation
+            ScaleTransition(
+              scale: _heartScaleAnimation,
+              child: SizedBox(
+                width: 72,
+                height: 72,
+                child: CustomPaint(
+                  painter: _HeartPainter(colors: colors),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 28),
+
+            // Celebration title
+            Text(
+              _celebrationTitle,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: AppTextStyles.bodyFont(context),
+                fontSize: 30,
+                fontWeight: FontWeight.w500,
+                color: colors.buttonDark,
+                letterSpacing: -0.3,
+                height: 1.2,
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            // Celebration message
+            Text(
+              _celebrationMessage,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'DM Sans',
+                fontSize: 17,
+                fontWeight: FontWeight.w400,
+                color: colors.textTertiary,
+                letterSpacing: -0.1,
+                height: 1.5,
+              ),
+            ),
+          ],
         ),
       ),
     );

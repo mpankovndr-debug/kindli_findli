@@ -501,19 +501,16 @@ class _MomentRow extends StatelessWidget {
 
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final momentDay = DateTime(
-      moment.completedAt.year,
-      moment.completedAt.month,
-      moment.completedAt.day,
-    );
+    final local = moment.completedAt.toLocal();
+    final momentDay = DateTime(local.year, local.month, local.day);
 
     final String dateStr;
     if (momentDay == today) {
-      dateStr = '${l10n.momentsToday} · ${DateFormat('h:mm a').format(moment.completedAt)}';
-    } else if (momentDay == today.subtract(const Duration(days: 1))) {
-      dateStr = '${l10n.momentsYesterday} · ${DateFormat('h:mm a').format(moment.completedAt)}';
+      dateStr = '${l10n.momentsToday} · ${DateFormat('h:mm a').format(local)}';
+    } else if (momentDay == DateTime(today.year, today.month, today.day - 1)) {
+      dateStr = '${l10n.momentsYesterday} · ${DateFormat('h:mm a').format(local)}';
     } else {
-      dateStr = DateFormat('MMM d · h:mm a').format(moment.completedAt);
+      dateStr = DateFormat('MMM d · h:mm a').format(local);
     }
 
     return Padding(

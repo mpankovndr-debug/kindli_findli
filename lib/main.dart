@@ -26,11 +26,15 @@ import 'screens/paywall_screen.dart';
 import 'screens/progress_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/habit_completion_modal.dart';
+import 'models/moment.dart';
+import 'services/moments_service.dart';
+import 'services/milestone_service.dart';
 import 'utils/profanity_filter.dart'; // Add this
 import 'utils/responsive_utils.dart';
 import 'utils/text_styles.dart';
 import 'utils/ios_version.dart';
 import 'services/notification_scheduler.dart';
+import 'services/notification_preferences_service.dart';
 import 'services/revenue_cat_service.dart';
 import 'widgets/boost_offer_sheet.dart';
 
@@ -470,7 +474,8 @@ void main() {
         // Already initialized (e.g. hot restart)
       }
 
-      FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+      FlutterError.onError =
+          FirebaseCrashlytics.instance.recordFlutterFatalError;
 
       final prefs = await SharedPreferences.getInstance();
 
@@ -525,8 +530,26 @@ void main() {
       // so the UI appears instantly instead of waiting for network calls.
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         await NotificationScheduler.initialize();
+
+        // Re-schedule daily notifications if enabled and running low
+        final dailyEnabled =
+            await NotificationPreferencesService.isEnabled();
+        if (dailyEnabled) {
+          final pending = await NotificationScheduler.pendingDailyCount();
+          if (pending < 3) {
+            final locale =
+                WidgetsBinding.instance.platformDispatcher.locale;
+            final l10n = lookupAppLocalizations(
+              locale.languageCode == 'ru'
+                  ? const Locale('ru')
+                  : const Locale('en'),
+            );
+            await NotificationScheduler.scheduleDaily(l10n);
+          }
+        }
+
         IOSVersion.init();
-        revenueCatService.init();
+        await revenueCatService.init();
       });
     },
     (error, stack) {
@@ -742,8 +765,28 @@ class MainTabs extends StatefulWidget {
   State<MainTabs> createState() => _MainTabsState();
 }
 
-class _MainTabsState extends State<MainTabs> {
+class _MainTabsState extends State<MainTabs> with WidgetsBindingObserver {
   int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      NotificationScheduler.refreshTimezone(AppLocalizations.of(context));
+      context.read<RevenueCatService>().refreshPurchaseStatus();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1109,8 +1152,6 @@ class _HabitsScreenState extends State<HabitsScreen>
         l10n.dailyMessage21,
         l10n.dailyMessage22,
         l10n.dailyMessage23,
-        l10n.dailyMessage24,
-        l10n.dailyMessage25,
       ];
 
   String _getTodaysMessage(AppLocalizations l10n) {
@@ -1232,8 +1273,9 @@ class _HabitsScreenState extends State<HabitsScreen>
 
   Future<void> _dismissHoldTip() async {
     if (_tooltipController == null ||
-        !_tooltipController!.isAnimating && _tooltipController!.value == 0)
+        !_tooltipController!.isAnimating && _tooltipController!.value == 0) {
       return;
+    }
 
     await _tooltipController!.reverse();
     if (!mounted) return;
@@ -1247,7 +1289,8 @@ class _HabitsScreenState extends State<HabitsScreen>
     final onboardingState = context.read<OnboardingState>();
     final userState = context.read<UserState>();
 
-    if (!userState.hasSubscription && !onboardingState.canAddCustomHabit(hasBoost: userState.hasBoost)) {
+    if (!userState.hasSubscription &&
+        !onboardingState.canAddCustomHabit(hasBoost: userState.hasBoost)) {
       final l10n = AppLocalizations.of(context);
       showBoostOfferSheet(
         context: context,
@@ -1327,518 +1370,570 @@ class _HabitsScreenState extends State<HabitsScreen>
                   FadeTransition(
                     opacity: _fadeHeader,
                     child: Padding(
-                    padding: EdgeInsets.fromLTRB(
-                        24, MediaQuery.of(context).padding.top + 24, 24, 32),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _getTodaysMessage(l10n),
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w600,
-                            color: colors.textPrimary,
-                            fontFamily: 'Sora',
+                      padding: EdgeInsets.fromLTRB(
+                          24, MediaQuery.of(context).padding.top + 24, 24, 32),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _getTodaysMessage(l10n),
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w600,
+                              color: colors.textPrimary,
+                              fontFamily: 'Sora',
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          dateStr,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: colors.checkmarkFill,
-                            fontFamily: AppTextStyles.bodyFont(context),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  ),
-
-                  // Habits content
-              if (allHabits.isEmpty)
-                Expanded(
-                  child: FadeTransition(
-                    opacity: _fadeContent,
-                    child: Center(
-                      child: Text(
-                        l10n.habitsCompleteOnboarding,
-                        style: AppTextStyles.buttonSecondary(context),
-                      ),
-                    ),
-                  ),
-                )
-              else ...[
-
-                // Pinned section (stagger 2: fades in second)
-                if (pinned.isNotEmpty)
-                  FadeTransition(
-                    opacity: _fadeMiddle,
-                    child: Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(left: 16),
-                          child: Text(
-                            l10n.habitsPinned,
+                          const SizedBox(height: 8),
+                          Text(
+                            dateStr,
                             style: TextStyle(
                               fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: colors.ctaPrimary,
-                              letterSpacing: 1.0,
+                              fontWeight: FontWeight.w500,
+                              color: colors.checkmarkFill,
                               fontFamily: AppTextStyles.bodyFont(context),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 12),
-                        ...pinned.asMap().entries.map((entry) {
-                          final habit = entry.value;
-                          final habitCard = _HabitCard(
-                            key: ValueKey(habit),
-                            habitTitle: habit,
-                            isPinned: true,
-                            accentColor: colors.accentPinned,
-                          );
-                          if (!isNewPin) return habitCard;
-                          // Arrival animation: slide up + scale + fade in
-                          return TweenAnimationBuilder<double>(
-                            key: ValueKey('pin_arrive_$habit'),
-                            tween: Tween(begin: 0.0, end: 1.0),
-                            duration: const Duration(milliseconds: 550),
-                            curve: Curves.easeOutBack,
-                            builder: (context, progress, child) {
-                              return Transform.translate(
-                                offset: Offset(0, 60 * (1 - progress)),
-                                child: Opacity(
-                                  opacity: progress.clamp(0.0, 1.0),
-                                  child: Transform.scale(
-                                    scale: 0.88 + 0.12 * progress,
-                                    child: child,
-                                  ),
-                                ),
-                              );
-                            },
-                            child: habitCard,
-                          );
-                        }),
-                        const SizedBox(height: 24),
-                        Container(
-                          height: 1,
-                          color: colors.borderWarm,
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                  ),
 
-                // Scrollable section (stagger 3: fades + slides in last)
-                Expanded(
-                  child: FadeTransition(
-                    opacity: _fadeContent,
-                    child: SlideTransition(
-                      position: _slideContent,
-                      child: Listener(
-                        onPointerDown: (_) => _dismissHoldTip(),
-                        child: ListView(
-                      padding: EdgeInsets.fromLTRB(
-                        24,
-                        pinned.isNotEmpty ? 24 : 16,
-                        24,
-                        140,
-                      ),
-                      children: [
-                        // Today's Suggestions section
-                        if (unpinned.isNotEmpty) ...[
-                          Padding(
-                            padding: const EdgeInsets.only(left: 16),
-                            child: Text(
-                              l10n.habitsSuggestions,
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: colors.ctaPrimary,
-                                letterSpacing: 1.0,
-                                fontFamily: AppTextStyles.bodyFont(context),
-                              ),
-                            ),
+                  // Habits content
+                  if (allHabits.isEmpty)
+                    Expanded(
+                      child: FadeTransition(
+                        opacity: _fadeContent,
+                        child: Center(
+                          child: Text(
+                            l10n.habitsCompleteOnboarding,
+                            style: AppTextStyles.buttonSecondary(context),
                           ),
-                          const SizedBox(height: 12),
-                          ...unpinned.asMap().entries.map((entry) {
-                            final habit = entry.value;
-                            final habitCard = _HabitCard(
-                              key: ValueKey(habit),
-                              habitTitle: habit,
-                              accentColor: colors.accentRegular, // Warm taupe
-                            );
-                            if (habit != unpinnedHabit) return habitCard;
-                            // Arrival animation for card returning from pinned section
-                            return TweenAnimationBuilder<double>(
-                              key: ValueKey('unpin_arrive_$habit'),
-                              tween: Tween(begin: 0.0, end: 1.0),
-                              duration: const Duration(milliseconds: 500),
-                              curve: Curves.easeOutBack,
-                              builder: (context, progress, child) {
-                                return Transform.translate(
-                                  offset: Offset(0, -60 * (1 - progress)),
-                                  child: Opacity(
-                                    opacity: progress.clamp(0.0, 1.0),
-                                    child: Transform.scale(
-                                      scale: 0.88 + 0.12 * progress,
-                                      child: child,
+                        ),
+                      ),
+                    )
+                  else ...[
+                    // Pinned section (stagger 2: fades in second)
+                    if (pinned.isNotEmpty)
+                      FadeTransition(
+                        opacity: _fadeMiddle,
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(left: 16),
+                                child: Text(
+                                  l10n.habitsPinned,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: colors.ctaPrimary,
+                                    letterSpacing: 1.0,
+                                    fontFamily: AppTextStyles.bodyFont(context),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              ...pinned.asMap().entries.map((entry) {
+                                final habit = entry.value;
+                                final habitCard = _HabitCard(
+                                  key: ValueKey(habit),
+                                  habitTitle: habit,
+                                  isPinned: true,
+                                  accentColor: colors.accentPinned,
+                                );
+                                if (!isNewPin) return habitCard;
+                                // Arrival animation: slide up + scale + fade in
+                                return TweenAnimationBuilder<double>(
+                                  key: ValueKey('pin_arrive_$habit'),
+                                  tween: Tween(begin: 0.0, end: 1.0),
+                                  duration: const Duration(milliseconds: 550),
+                                  curve: Curves.easeOutBack,
+                                  builder: (context, progress, child) {
+                                    return Transform.translate(
+                                      offset: Offset(0, 60 * (1 - progress)),
+                                      child: Opacity(
+                                        opacity: progress.clamp(0.0, 1.0),
+                                        child: Transform.scale(
+                                          scale: 0.88 + 0.12 * progress,
+                                          child: child,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: habitCard,
+                                );
+                              }),
+                              const SizedBox(height: 24),
+                              Container(
+                                height: 1,
+                                color: colors.borderWarm,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                    // Scrollable section (stagger 3: fades + slides in last)
+                    Expanded(
+                      child: FadeTransition(
+                        opacity: _fadeContent,
+                        child: SlideTransition(
+                          position: _slideContent,
+                          child: Listener(
+                            onPointerDown: (_) => _dismissHoldTip(),
+                            child: ListView(
+                              padding: EdgeInsets.fromLTRB(
+                                24,
+                                pinned.isNotEmpty ? 24 : 16,
+                                24,
+                                140,
+                              ),
+                              children: [
+                                // Today's Suggestions section
+                                if (unpinned.isNotEmpty) ...[
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 16),
+                                    child: Text(
+                                      l10n.habitsSuggestions,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: colors.ctaPrimary,
+                                        letterSpacing: 1.0,
+                                        fontFamily:
+                                            AppTextStyles.bodyFont(context),
+                                      ),
                                     ),
                                   ),
-                                );
-                              },
-                              child: habitCard,
-                            );
-                          }),
-                        ],
-
-                        // CREATE CUSTOM HABIT BUTTON / LOCKED SLOT
-                        const SizedBox(height: 16),
-
-                        Builder(builder: (context) {
-                          final customCount =
-                              onboardingState.customHabits.length;
-                          final userSt = context.read<UserState>();
-                          final maxCustom = onboardingState.maxCustomHabits(hasBoost: userSt.hasBoost);
-
-                          if (customCount < maxCustom || userSt.hasSubscription) {
-                            return Padding(
-                              padding: const EdgeInsets.only(left: 16),
-                              child: GestureDetector(
-                                onTap: () => _createCustomHabit(context),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(24),
-                                  child: BackdropFilter(
-                                    filter: ImageFilter.blur(
-                                        sigmaX: 12, sigmaY: 12),
-                                    child: DottedBorder(
-                                      borderType: BorderType.RRect,
-                                      radius: const Radius.circular(24),
-                                      dashPattern: const [8, 4],
-                                      color:
-                                          colors.ctaPrimary.withOpacity(0.20),
-                                      strokeWidth: 2,
-                                      child: Container(
-                                        width: double.infinity,
-                                        height: 96,
-                                        decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                            colors: [
-                                              colors.modalBg1.withOpacity(0.40),
-                                              colors.modalBg1.withOpacity(0.20),
-                                            ],
+                                  const SizedBox(height: 12),
+                                  ...unpinned.asMap().entries.map((entry) {
+                                    final habit = entry.value;
+                                    final habitCard = _HabitCard(
+                                      key: ValueKey(habit),
+                                      habitTitle: habit,
+                                      accentColor:
+                                          colors.accentRegular, // Warm taupe
+                                    );
+                                    if (habit != unpinnedHabit)
+                                      return habitCard;
+                                    // Arrival animation for card returning from pinned section
+                                    return TweenAnimationBuilder<double>(
+                                      key: ValueKey('unpin_arrive_$habit'),
+                                      tween: Tween(begin: 0.0, end: 1.0),
+                                      duration:
+                                          const Duration(milliseconds: 500),
+                                      curve: Curves.easeOutBack,
+                                      builder: (context, progress, child) {
+                                        return Transform.translate(
+                                          offset:
+                                              Offset(0, -60 * (1 - progress)),
+                                          child: Opacity(
+                                            opacity: progress.clamp(0.0, 1.0),
+                                            child: Transform.scale(
+                                              scale: 0.88 + 0.12 * progress,
+                                              child: child,
+                                            ),
                                           ),
+                                        );
+                                      },
+                                      child: habitCard,
+                                    );
+                                  }),
+                                ],
+
+                                // CREATE CUSTOM HABIT BUTTON / LOCKED SLOT
+                                const SizedBox(height: 16),
+
+                                Builder(builder: (context) {
+                                  final customCount =
+                                      onboardingState.customHabits.length;
+                                  final userSt = context.read<UserState>();
+                                  final maxCustom =
+                                      onboardingState.maxCustomHabits(
+                                          hasBoost: userSt.hasBoost);
+
+                                  if (customCount < maxCustom ||
+                                      userSt.hasSubscription) {
+                                    return Padding(
+                                      padding: const EdgeInsets.only(left: 16),
+                                      child: GestureDetector(
+                                        onTap: () =>
+                                            _createCustomHabit(context),
+                                        child: ClipRRect(
                                           borderRadius:
                                               BorderRadius.circular(24),
-                                        ),
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Container(
-                                              width: 36,
-                                              height: 36,
-                                              decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                color: const Color(0xFFFFFFFF)
-                                                    .withOpacity(0.50),
-                                              ),
-                                              child: Icon(
-                                                CupertinoIcons.add,
-                                                size: 18,
-                                                color: colors.ctaPrimary,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 8),
-                                            Text(
-                                              l10n.habitsCreateCustom,
-                                              style: TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.w600,
-                                                color: colors.ctaPrimary,
-                                                fontFamily: AppTextStyles.bodyFont(context),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          }
-
-                          // Limit reached & not subscribed: show locked slot
-                          return Padding(
-                            padding: const EdgeInsets.only(left: 16),
-                            child: GestureDetector(
-                              onTap: () {
-                                showCupertinoModalPopup(
-                                  context: context,
-                                  barrierColor: Colors.black.withOpacity(0.5),
-                                  filter:
-                                      ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                                  builder: (context) => const PaywallScreen(source: 'browse_habits'),
-                                );
-                              },
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(24),
-                                  border: Border.all(
-                                    color: colors.ctaPrimary.withOpacity(0.10),
-                                    width: 1,
-                                  ),
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(24),
-                                  child: BackdropFilter(
-                                    filter: ImageFilter.blur(
-                                        sigmaX: 12, sigmaY: 12),
-                                    child: Container(
-                                      width: double.infinity,
-                                      height: 96,
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                          colors: [
-                                            colors.modalBg1.withOpacity(0.9),
-                                            colors.modalBg1.withOpacity(0.7),
-                                          ],
-                                        ),
-                                        borderRadius: BorderRadius.circular(24),
-                                        border: Border.all(
-                                          color: const Color(0xFFFFFFFF)
-                                              .withOpacity(0.6),
-                                          width: 1.5,
-                                        ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: colors.ctaPrimary
-                                                .withOpacity(0.10),
-                                            blurRadius: 32,
-                                          ),
-                                          BoxShadow(
-                                            color: colors.ctaPrimary
-                                                .withOpacity(0.10),
-                                            blurRadius: 0,
-                                            spreadRadius: 1,
-                                          ),
-                                        ],
-                                      ),
-                                      child: Stack(
-                                        clipBehavior: Clip.hardEdge,
-                                        children: [
-                                          Positioned(
-                                            bottom: -20,
-                                            right: -20,
-                                            child: Container(
-                                              width: 128,
-                                              height: 128,
-                                              decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                gradient: RadialGradient(
-                                                  colors: [
-                                                    colors.ctaPrimary
-                                                        .withOpacity(0.10),
-                                                    colors.ctaPrimary
-                                                        .withOpacity(0.0),
+                                          child: BackdropFilter(
+                                            filter: ImageFilter.blur(
+                                                sigmaX: 12, sigmaY: 12),
+                                            child: DottedBorder(
+                                              borderType: BorderType.RRect,
+                                              radius: const Radius.circular(24),
+                                              dashPattern: const [8, 4],
+                                              color: colors.ctaPrimary
+                                                  .withOpacity(0.20),
+                                              strokeWidth: 2,
+                                              child: Container(
+                                                width: double.infinity,
+                                                height: 96,
+                                                decoration: BoxDecoration(
+                                                  gradient: LinearGradient(
+                                                    begin: Alignment.topLeft,
+                                                    end: Alignment.bottomRight,
+                                                    colors: [
+                                                      colors.modalBg1
+                                                          .withOpacity(0.40),
+                                                      colors.modalBg1
+                                                          .withOpacity(0.20),
+                                                    ],
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.circular(24),
+                                                ),
+                                                child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    Container(
+                                                      width: 36,
+                                                      height: 36,
+                                                      decoration: BoxDecoration(
+                                                        shape: BoxShape.circle,
+                                                        color: const Color(
+                                                                0xFFFFFFFF)
+                                                            .withOpacity(0.50),
+                                                      ),
+                                                      child: Icon(
+                                                        CupertinoIcons.add,
+                                                        size: 18,
+                                                        color:
+                                                            colors.ctaPrimary,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(height: 8),
+                                                    Text(
+                                                      l10n.habitsCreateCustom,
+                                                      style: TextStyle(
+                                                        fontSize: 15,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        color:
+                                                            colors.ctaPrimary,
+                                                        fontFamily:
+                                                            AppTextStyles
+                                                                .bodyFont(
+                                                                    context),
+                                                      ),
+                                                    ),
                                                   ],
                                                 ),
                                               ),
                                             ),
                                           ),
-                                          Center(
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Container(
-                                                  width: 36,
-                                                  height: 36,
-                                                  decoration: BoxDecoration(
-                                                    shape: BoxShape.circle,
-                                                    color:
-                                                        const Color(0xFFFFFFFF)
-                                                            .withOpacity(0.5),
-                                                  ),
-                                                  child: Icon(
-                                                    CupertinoIcons.lock,
-                                                    size: 16,
-                                                    color: colors.ctaPrimary,
-                                                  ),
+                                        ),
+                                      ),
+                                    );
+                                  }
+
+                                  // Limit reached & not subscribed: show locked slot
+                                  return Padding(
+                                    padding: const EdgeInsets.only(left: 16),
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        showCupertinoModalPopup(
+                                          context: context,
+                                          barrierColor:
+                                              Colors.black.withOpacity(0.5),
+                                          filter: ImageFilter.blur(
+                                              sigmaX: 5, sigmaY: 5),
+                                          builder: (context) =>
+                                              const PaywallScreen(
+                                                  source: 'browse_habits'),
+                                        );
+                                      },
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(24),
+                                          border: Border.all(
+                                            color: colors.ctaPrimary
+                                                .withOpacity(0.10),
+                                            width: 1,
+                                          ),
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(24),
+                                          child: BackdropFilter(
+                                            filter: ImageFilter.blur(
+                                                sigmaX: 12, sigmaY: 12),
+                                            child: Container(
+                                              width: double.infinity,
+                                              height: 96,
+                                              decoration: BoxDecoration(
+                                                gradient: LinearGradient(
+                                                  begin: Alignment.topLeft,
+                                                  end: Alignment.bottomRight,
+                                                  colors: [
+                                                    colors.modalBg1
+                                                        .withOpacity(0.9),
+                                                    colors.modalBg1
+                                                        .withOpacity(0.7),
+                                                  ],
                                                 ),
-                                                const SizedBox(height: 6),
-                                                Text(
-                                                  l10n.habitsCreateCustom,
-                                                  style: TextStyle(
-                                                    fontSize: 15,
-                                                    fontWeight: FontWeight.w600,
-                                                    color: colors.textPrimary
-                                                        .withOpacity(0.60),
-                                                    fontFamily: AppTextStyles.bodyFont(context),
-                                                  ),
+                                                borderRadius:
+                                                    BorderRadius.circular(24),
+                                                border: Border.all(
+                                                  color: const Color(0xFFFFFFFF)
+                                                      .withOpacity(0.6),
+                                                  width: 1.5,
                                                 ),
-                                              ],
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: colors.ctaPrimary
+                                                        .withOpacity(0.10),
+                                                    blurRadius: 32,
+                                                  ),
+                                                  BoxShadow(
+                                                    color: colors.ctaPrimary
+                                                        .withOpacity(0.10),
+                                                    blurRadius: 0,
+                                                    spreadRadius: 1,
+                                                  ),
+                                                ],
+                                              ),
+                                              child: Stack(
+                                                clipBehavior: Clip.hardEdge,
+                                                children: [
+                                                  Positioned(
+                                                    bottom: -20,
+                                                    right: -20,
+                                                    child: Container(
+                                                      width: 128,
+                                                      height: 128,
+                                                      decoration: BoxDecoration(
+                                                        shape: BoxShape.circle,
+                                                        gradient:
+                                                            RadialGradient(
+                                                          colors: [
+                                                            colors.ctaPrimary
+                                                                .withOpacity(
+                                                                    0.10),
+                                                            colors.ctaPrimary
+                                                                .withOpacity(
+                                                                    0.0),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  Center(
+                                                    child: Column(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        Container(
+                                                          width: 36,
+                                                          height: 36,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            shape:
+                                                                BoxShape.circle,
+                                                            color: const Color(
+                                                                    0xFFFFFFFF)
+                                                                .withOpacity(
+                                                                    0.5),
+                                                          ),
+                                                          child: Icon(
+                                                            CupertinoIcons.lock,
+                                                            size: 16,
+                                                            color: colors
+                                                                .ctaPrimary,
+                                                          ),
+                                                        ),
+                                                        const SizedBox(
+                                                            height: 6),
+                                                        Text(
+                                                          l10n.habitsCreateCustom,
+                                                          style: TextStyle(
+                                                            fontSize: 15,
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            color: colors
+                                                                .textPrimary
+                                                                .withOpacity(
+                                                                    0.60),
+                                                            fontFamily:
+                                                                AppTextStyles
+                                                                    .bodyFont(
+                                                                        context),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
                                             ),
                                           ),
-                                        ],
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }),
+
+                                // BROWSE ALL HABITS CARD
+                                const SizedBox(height: 16),
+
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 16),
+                                  child: GestureDetector(
+                                    onTap: () => _showBrowseHabits(context),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(16),
+                                      child: BackdropFilter(
+                                        filter: ImageFilter.blur(
+                                            sigmaX: 22, sigmaY: 22),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(20),
+                                          decoration: BoxDecoration(
+                                            color: colors.cardBrowse
+                                                .withOpacity(
+                                                    colors.cardBrowseOpacity),
+                                            borderRadius:
+                                                BorderRadius.circular(16),
+                                            border: Border.all(
+                                              color: const Color(0xFFFFFFFF)
+                                                  .withOpacity(0.20),
+                                              width: 1,
+                                            ),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: colors.textPrimary
+                                                    .withOpacity(0.04),
+                                                blurRadius: 16,
+                                                offset: const Offset(0, 2),
+                                              ),
+                                            ],
+                                          ),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    l10n.habitsBrowseAll,
+                                                    style: TextStyle(
+                                                      fontSize: 15,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      color: colors.textPrimary,
+                                                      fontFamily: AppTextStyles
+                                                          .bodyFont(context),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 2),
+                                                  Text(
+                                                    l10n.habitsMoreAvailable(
+                                                        _getAvailableHabitsCount(
+                                                            context)),
+                                                    style: TextStyle(
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      color:
+                                                          colors.textSecondary,
+                                                      fontFamily: AppTextStyles
+                                                          .bodyFont(context),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              Icon(
+                                                CupertinoIcons.chevron_right,
+                                                size: 18,
+                                                color: colors.textSecondary,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ),
-                          );
-                        }),
-
-                        // BROWSE ALL HABITS CARD
-                        const SizedBox(height: 16),
-
-                        Padding(
-                          padding: const EdgeInsets.only(left: 16),
-                          child: GestureDetector(
-                            onTap: () => _showBrowseHabits(context),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(16),
-                              child: BackdropFilter(
-                                filter:
-                                    ImageFilter.blur(sigmaX: 22, sigmaY: 22),
-                                child: Container(
-                                  padding: const EdgeInsets.all(20),
-                                  decoration: BoxDecoration(
-                                    color: colors.cardBrowse
-                                        .withOpacity(colors.cardBrowseOpacity),
-                                    borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(
-                                      color: const Color(0xFFFFFFFF)
-                                          .withOpacity(0.20),
-                                      width: 1,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: colors.textPrimary
-                                            .withOpacity(0.04),
-                                        blurRadius: 16,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            l10n.habitsBrowseAll,
-                                            style: TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.w600,
-                                              color: colors.textPrimary,
-                                              fontFamily: AppTextStyles.bodyFont(context),
-                                            ),
-                                          ),
-                                          const SizedBox(height: 2),
-                                          Text(
-                                            l10n.habitsMoreAvailable(
-                                                _getAvailableHabitsCount(
-                                                    context)),
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w500,
-                                              color: colors.textSecondary,
-                                              fontFamily: AppTextStyles.bodyFont(context),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      Icon(
-                                        CupertinoIcons.chevron_right,
-                                        size: 18,
-                                        color: colors.textSecondary,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-
-          // "Hold for options" floating tooltip (overlays content, doesn't push layout)
-          if (_tooltipController != null && _tooltipOpacity != null)
-            Positioned(
-              top: MediaQuery.of(context).padding.top + 100,
-              left: 32,
-              right: 32,
-              child: AnimatedBuilder(
-                animation: _tooltipOpacity!,
-                builder: (context, child) {
-                  if (_tooltipOpacity!.value == 0)
-                    return const SizedBox.shrink();
-                  return IgnorePointer(
-                    ignoring: false,
-                    child: GestureDetector(
-                      onTap: _dismissHoldTip,
-                      child: Opacity(
-                        opacity: _tooltipOpacity!.value,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(14),
-                          child: BackdropFilter(
-                            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 18, vertical: 12),
-                              decoration: BoxDecoration(
-                                color: colors.modalBg1.withOpacity(0.75),
-                                borderRadius: BorderRadius.circular(14),
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.35),
-                                  width: 0.8,
-                                ),
-                              ),
-                              child: Text(
-                                l10n.habitsHoldForOptions,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontFamily: AppTextStyles.bodyFont(context),
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: colors.ctaPrimary,
-                                  letterSpacing: -0.1,
-                                ),
-                              ),
+                              ],
                             ),
                           ),
                         ),
                       ),
                     ),
-                  );
-                },
+                  ],
+                ],
               ),
-            ),
-          ],
-        ),
+
+              // "Hold for options" floating tooltip (overlays content, doesn't push layout)
+              if (_tooltipController != null && _tooltipOpacity != null)
+                Positioned(
+                  top: MediaQuery.of(context).padding.top + 100,
+                  left: 32,
+                  right: 32,
+                  child: AnimatedBuilder(
+                    animation: _tooltipOpacity!,
+                    builder: (context, child) {
+                      if (_tooltipOpacity!.value == 0) {
+                        return const SizedBox.shrink();
+                      }
+                      return IgnorePointer(
+                        ignoring: false,
+                        child: GestureDetector(
+                          onTap: _dismissHoldTip,
+                          child: Opacity(
+                            opacity: _tooltipOpacity!.value,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(14),
+                              child: BackdropFilter(
+                                filter:
+                                    ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 18, vertical: 12),
+                                  decoration: BoxDecoration(
+                                    color: colors.modalBg1.withOpacity(0.75),
+                                    borderRadius: BorderRadius.circular(14),
+                                    border: Border.all(
+                                      color: Colors.white.withOpacity(0.35),
+                                      width: 0.8,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    l10n.habitsHoldForOptions,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontFamily:
+                                          AppTextStyles.bodyFont(context),
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                      color: colors.ctaPrimary,
+                                      letterSpacing: -0.1,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -1910,10 +2005,11 @@ class _CreateCustomHabitScreenState extends State<_CreateCustomHabitScreen> {
     if (!_canSave) return;
 
     final onboardingState = context.read<OnboardingState>();
+    final userState = context.read<UserState>();
     final navigator = Navigator.of(context);
     final navContext = navigator.context;
 
-    await onboardingState.addCustomHabit(habitTitle);
+    await onboardingState.addCustomHabit(habitTitle, hasBoost: userState.hasBoost);
     AnalyticsService.logCustomHabitCreated(habitTitle);
 
     if (!mounted) return;
@@ -2595,84 +2691,85 @@ class _HabitCardState extends State<_HabitCard>
                           // Title
                           Text(
                             l10n.replacePinTitle,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: 'Sora',
-                            fontSize: 27,
-                            fontWeight: FontWeight.w600,
-                            color: colors.textPrimary,
-                            letterSpacing: -0.4,
-                            height: 1.25,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: 'Sora',
+                              fontSize: 27,
+                              fontWeight: FontWeight.w600,
+                              color: colors.textPrimary,
+                              letterSpacing: -0.4,
+                              height: 1.25,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 12),
+                          const SizedBox(height: 12),
 
-                        Text(
-                          l10n.replacePinDescription(
-                              localizeHabitName(currentPinned!, l10n), localizeHabitName(widget.habitTitle, l10n)),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: 'DM Sans',
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                            color: colors.ctaPrimary,
-                            height: 1.5,
+                          Text(
+                            l10n.replacePinDescription(
+                                localizeHabitName(currentPinned!, l10n),
+                                localizeHabitName(widget.habitTitle, l10n)),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: 'DM Sans',
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                              color: colors.ctaPrimary,
+                              height: 1.5,
+                            ),
                           ),
-                        ),
 
-                        const SizedBox(height: 36),
+                          const SizedBox(height: 36),
 
-                        // Replace pin button
-                        Container(
-                          width: double.infinity,
-                          margin: const EdgeInsets.only(bottom: 14),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                colors.ctaPrimary.withOpacity(0.92),
-                                colors.ctaSecondary.withOpacity(0.88),
+                          // Replace pin button
+                          Container(
+                            width: double.infinity,
+                            margin: const EdgeInsets.only(bottom: 14),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  colors.ctaPrimary.withOpacity(0.92),
+                                  colors.ctaSecondary.withOpacity(0.88),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: colors.textPrimary.withOpacity(0.25),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                ),
                               ],
                             ),
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: colors.textPrimary.withOpacity(0.25),
-                                blurRadius: 12,
-                                offset: const Offset(0, 4),
+                            child: CupertinoButton(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              onPressed: () => Navigator.pop(context, true),
+                              child: Text(
+                                l10n.replacePinConfirm,
+                                style: TextStyle(
+                                  fontFamily: AppTextStyles.bodyFont(context),
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
                               ),
-                            ],
+                            ),
                           ),
-                          child: CupertinoButton(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            onPressed: () => Navigator.pop(context, true),
+
+                          // Cancel
+                          CupertinoButton(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            onPressed: () => Navigator.pop(context, false),
                             child: Text(
-                              l10n.replacePinConfirm,
+                              l10n.commonCancel,
                               style: TextStyle(
                                 fontFamily: AppTextStyles.bodyFont(context),
-                                fontSize: 17,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: colors.textTertiary,
                               ),
                             ),
                           ),
-                        ),
-
-                        // Cancel
-                        CupertinoButton(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          onPressed: () => Navigator.pop(context, false),
-                          child: Text(
-                            l10n.commonCancel,
-                            style: TextStyle(
-                              fontFamily: AppTextStyles.bodyFont(context),
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: colors.textTertiary,
-                            ),
-                          ),
-                        ),
                         ],
                       ),
                     ),
@@ -2729,7 +2826,8 @@ class _HabitCardState extends State<_HabitCard>
 
     final isPremium = context.read<UserState>().hasSubscription;
     final hasBoost = context.read<UserState>().hasBoost;
-    if (!isPremium && !onboardingState.canSwapInCategory(category, hasBoost: hasBoost)) {
+    if (!isPremium &&
+        !onboardingState.canSwapInCategory(category, hasBoost: hasBoost)) {
       _showSwapLimitDialog(category);
       return;
     }
@@ -2749,7 +2847,8 @@ class _HabitCardState extends State<_HabitCard>
     final onboardingState = context.read<OnboardingState>();
     final isPremium = context.read<UserState>().hasSubscription;
     final hasBoost = context.read<UserState>().hasBoost;
-    final remaining = onboardingState.getRemainingSwaps(category, hasBoost: hasBoost);
+    final remaining =
+        onboardingState.getRemainingSwaps(category, hasBoost: hasBoost);
     final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
     final l10n = AppLocalizations.of(context);
 
@@ -2809,150 +2908,153 @@ class _HabitCardState extends State<_HabitCard>
                         children: [
                           // Title
                           Text(
-                            l10n.swapTitle(localizeHabitName(widget.habitTitle, l10n)),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: 'Sora',
-                            fontSize: 25,
-                            fontWeight: FontWeight.w600,
-                            color: colors.textPrimary,
-                            letterSpacing: -0.3,
-                            height: 1.3,
+                            l10n.swapTitle(
+                                localizeHabitName(widget.habitTitle, l10n)),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: 'Sora',
+                              fontSize: 25,
+                              fontWeight: FontWeight.w600,
+                              color: colors.textPrimary,
+                              letterSpacing: -0.3,
+                              height: 1.3,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 16),
+                          const SizedBox(height: 16),
 
-                        // Description (REVERTED to DM Sans)
-                        Text(
-                          l10n.swapCategoryHabits(category),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: 'DM Sans',
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                            color: colors.ctaPrimary,
-                            height: 1.5,
+                          // Description (REVERTED to DM Sans)
+                          Text(
+                            l10n.swapCategoryHabits(localizeCategoryName(category, l10n)),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: 'DM Sans',
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                              color: colors.ctaPrimary,
+                              height: 1.5,
+                            ),
                           ),
-                        ),
 
-                        const SizedBox(height: 26),
+                          const SizedBox(height: 26),
 
-                        // Habit alternatives buttons
-                        ...alternatives.map((habit) => Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: SizedBox(
-                                width: double.infinity,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(18),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color:
-                                            colors.buttonDark.withOpacity(0.1),
-                                        blurRadius: 12,
-                                        offset: const Offset(0, 3),
-                                      ),
-                                    ],
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(18),
-                                    child: BackdropFilter(
-                                      filter: ImageFilter.blur(
-                                          sigmaX: 20, sigmaY: 20),
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                            colors: [
-                                              Colors.white.withOpacity(0.65),
-                                              colors.surfaceLight
-                                                  .withOpacity(0.50),
-                                            ],
-                                          ),
-                                          border: Border(
-                                            top: BorderSide(
-                                              color:
-                                                  Colors.white.withOpacity(0.5),
-                                              width: 1.5,
-                                            ),
-                                            left: BorderSide(
-                                              color:
-                                                  Colors.white.withOpacity(0.4),
-                                              width: 1.5,
-                                            ),
-                                            right: BorderSide(
-                                              color:
-                                                  Colors.white.withOpacity(0.4),
-                                              width: 1.5,
-                                            ),
-                                            bottom: BorderSide(
-                                              color:
-                                                  Colors.white.withOpacity(0.4),
-                                              width: 1.5,
-                                            ),
-                                          ),
+                          // Habit alternatives buttons
+                          ...alternatives.map((habit) => Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: SizedBox(
+                                  width: double.infinity,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(18),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: colors.buttonDark
+                                              .withOpacity(0.1),
+                                          blurRadius: 12,
+                                          offset: const Offset(0, 3),
                                         ),
-                                        child: CupertinoButton(
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                            _performSwap(habit);
-                                          },
-                                          padding: const EdgeInsets.symmetric(
-                                              vertical: 16, horizontal: 20),
-                                          borderRadius:
-                                              BorderRadius.circular(18),
-                                          child: Text(
-                                            localizeHabitName(habit, l10n),
-                                            style: TextStyle(
-                                              fontFamily: AppTextStyles.bodyFont(context),
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.w500,
-                                              color: colors.textPrimary,
+                                      ],
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(18),
+                                      child: BackdropFilter(
+                                        filter: ImageFilter.blur(
+                                            sigmaX: 20, sigmaY: 20),
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(
+                                              begin: Alignment.topLeft,
+                                              end: Alignment.bottomRight,
+                                              colors: [
+                                                Colors.white.withOpacity(0.65),
+                                                colors.surfaceLight
+                                                    .withOpacity(0.50),
+                                              ],
                                             ),
-                                            textAlign: TextAlign.center,
+                                            border: Border(
+                                              top: BorderSide(
+                                                color: Colors.white
+                                                    .withOpacity(0.5),
+                                                width: 1.5,
+                                              ),
+                                              left: BorderSide(
+                                                color: Colors.white
+                                                    .withOpacity(0.4),
+                                                width: 1.5,
+                                              ),
+                                              right: BorderSide(
+                                                color: Colors.white
+                                                    .withOpacity(0.4),
+                                                width: 1.5,
+                                              ),
+                                              bottom: BorderSide(
+                                                color: Colors.white
+                                                    .withOpacity(0.4),
+                                                width: 1.5,
+                                              ),
+                                            ),
+                                          ),
+                                          child: CupertinoButton(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                              _performSwap(habit);
+                                            },
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 16, horizontal: 20),
+                                            borderRadius:
+                                                BorderRadius.circular(18),
+                                            child: Text(
+                                              localizeHabitName(habit, l10n),
+                                              style: TextStyle(
+                                                fontFamily:
+                                                    AppTextStyles.bodyFont(
+                                                        context),
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w500,
+                                                color: colors.textPrimary,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
                                           ),
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            )),
+                              )),
 
-                        const SizedBox(height: 28),
+                          const SizedBox(height: 28),
 
-                        // Free swaps remaining (hide for premium)
-                        if (!isPremium)
-                          Text(
-                            l10n.swapFreeRemaining(remaining),
-                            style: TextStyle(
-                              fontFamily: 'DM Sans',
-                              fontSize: 13,
-                              fontWeight: FontWeight.w400,
-                              color: colors.textSecondary,
-                            ),
-                          ),
-
-                        const SizedBox(height: 26),
-
-                        // Cancel button (ghost)
-                        SizedBox(
-                          width: double.infinity,
-                          child: CupertinoButton(
-                            onPressed: () => Navigator.pop(context),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            child: Text(
-                              l10n.commonCancel,
+                          // Free swaps remaining (hide for premium)
+                          if (!isPremium)
+                            Text(
+                              l10n.swapFreeRemaining(remaining),
                               style: TextStyle(
-                                fontFamily: AppTextStyles.bodyFont(context),
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                color: colors.textTertiary,
+                                fontFamily: 'DM Sans',
+                                fontSize: 13,
+                                fontWeight: FontWeight.w400,
+                                color: colors.textSecondary,
+                              ),
+                            ),
+
+                          const SizedBox(height: 26),
+
+                          // Cancel button (ghost)
+                          SizedBox(
+                            width: double.infinity,
+                            child: CupertinoButton(
+                              onPressed: () => Navigator.pop(context),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              child: Text(
+                                l10n.commonCancel,
+                                style: TextStyle(
+                                  fontFamily: AppTextStyles.bodyFont(context),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: colors.textTertiary,
+                                ),
                               ),
                             ),
                           ),
-                        ),
                         ],
                       ),
                     ),
@@ -3050,7 +3152,7 @@ class _HabitCardState extends State<_HabitCard>
 
                             // Description
                             Text(
-                              l10n.swapSuccessMessage(newHabit),
+                              l10n.swapSuccessMessage(localizeHabitName(newHabit, l10n)),
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontFamily: AppTextStyles.bodyFont(context),
@@ -3171,158 +3273,164 @@ class _HabitCardState extends State<_HabitCard>
                 ],
               ),
               child: ClipRRect(
-            borderRadius: BorderRadius.circular(32),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: const Alignment(-0.3, -0.5),
-                    end: const Alignment(0.3, 0.5),
-                    colors: [
-                      colors.modalBg1.withOpacity(0.96),
-                      colors.modalBg2.withOpacity(0.93),
-                      colors.modalBg3.withOpacity(0.95),
-                    ],
-                    stops: const [0.0, 0.5, 1.0],
-                  ),
-                  borderRadius: BorderRadius.circular(32),
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.5),
-                    width: 1.5,
-                  ),
-                ),
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Title
-                      Text(
-                        l10n.deleteHabitTitle,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: 'Sora',
-                          fontSize: 27,
-                          fontWeight: FontWeight.w600,
-                          color: colors.textPrimary,
-                          letterSpacing: -0.4,
-                          height: 1.25,
-                        ),
+                borderRadius: BorderRadius.circular(32),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: const Alignment(-0.3, -0.5),
+                        end: const Alignment(0.3, 0.5),
+                        colors: [
+                          colors.modalBg1.withOpacity(0.96),
+                          colors.modalBg2.withOpacity(0.93),
+                          colors.modalBg3.withOpacity(0.95),
+                        ],
+                        stops: const [0.0, 0.5, 1.0],
                       ),
-                      const SizedBox(height: 12),
-
-                      // Description
-                      Text(
-                        l10n.deleteHabitMessage(localizeHabitName(widget.habitTitle, l10n)),
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: AppTextStyles.bodyFont(context),
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
-                          color: colors.textSubtitle,
-                          height: 1.45,
-                        ),
+                      borderRadius: BorderRadius.circular(32),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.5),
+                        width: 1.5,
                       ),
-
-                      const SizedBox(height: 36),
-
-                      // Delete button (muted red)
-                      Container(
-                        width: double.infinity,
-                        margin: const EdgeInsets.only(bottom: 14),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              colors.destructive.withOpacity(0.92),
-                              colors.destructiveDark.withOpacity(0.88),
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: colors.destructiveDark.withOpacity(0.3),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 28, vertical: 32),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Title
+                          Text(
+                            l10n.deleteHabitTitle,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: 'Sora',
+                              fontSize: 27,
+                              fontWeight: FontWeight.w600,
+                              color: colors.textPrimary,
+                              letterSpacing: -0.4,
+                              height: 1.25,
                             ),
-                          ],
-                        ),
-                        child: CupertinoButton(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          onPressed: () async {
-                            Navigator.pop(context);
-                            await onboardingState
-                                .removeCustomHabit(widget.habitTitle);
-                            AnalyticsService.logCustomHabitRemoved();
-                          },
-                          child: Text(
-                            l10n.commonDelete,
+                          ),
+                          const SizedBox(height: 12),
+
+                          // Description
+                          Text(
+                            l10n.deleteHabitMessage(
+                                localizeHabitName(widget.habitTitle, l10n)),
+                            textAlign: TextAlign.center,
                             style: TextStyle(
                               fontFamily: AppTextStyles.bodyFont(context),
-                              fontSize: 17,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                              color: colors.textSubtitle,
+                              height: 1.45,
                             ),
                           ),
-                        ),
-                      ),
 
-                      // Cancel button (secondary glassmorphism)
-                      GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: Container(
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: colors.buttonDark.withOpacity(0.12),
-                                blurRadius: 16,
-                                offset: const Offset(0, 4),
+                          const SizedBox(height: 36),
+
+                          // Delete button (muted red)
+                          Container(
+                            width: double.infinity,
+                            margin: const EdgeInsets.only(bottom: 14),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  colors.destructive.withOpacity(0.92),
+                                  colors.destructiveDark.withOpacity(0.88),
+                                ],
                               ),
-                            ],
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(20),
-                            child: BackdropFilter(
-                              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                              child: Container(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 16),
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: [
-                                      Colors.white.withOpacity(0.5),
-                                      colors.surfaceLight.withOpacity(0.35),
-                                    ],
-                                  ),
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(
-                                    color: Colors.white.withOpacity(0.4),
-                                    width: 1.5,
-                                  ),
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color:
+                                      colors.destructiveDark.withOpacity(0.3),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
                                 ),
-                                child: Text(
-                                  l10n.commonCancel,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontFamily: AppTextStyles.bodyFont(context),
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.w600,
-                                    color: colors.textPrimary,
+                              ],
+                            ),
+                            child: CupertinoButton(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              onPressed: () async {
+                                Navigator.pop(context);
+                                await onboardingState
+                                    .removeCustomHabit(widget.habitTitle);
+                                AnalyticsService.logCustomHabitRemoved();
+                              },
+                              child: Text(
+                                l10n.commonDelete,
+                                style: TextStyle(
+                                  fontFamily: AppTextStyles.bodyFont(context),
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          // Cancel button (secondary glassmorphism)
+                          GestureDetector(
+                            onTap: () => Navigator.pop(context),
+                            child: Container(
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: colors.buttonDark.withOpacity(0.12),
+                                    blurRadius: 16,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(20),
+                                child: BackdropFilter(
+                                  filter:
+                                      ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 16),
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                        colors: [
+                                          Colors.white.withOpacity(0.5),
+                                          colors.surfaceLight.withOpacity(0.35),
+                                        ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: Border.all(
+                                        color: Colors.white.withOpacity(0.4),
+                                        width: 1.5,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      l10n.commonCancel,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontFamily:
+                                            AppTextStyles.bodyFont(context),
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w600,
+                                        color: colors.textPrimary,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -3330,8 +3438,6 @@ class _HabitCardState extends State<_HabitCard>
           ),
         ),
       ),
-    ),
-  ),
     );
   }
 
@@ -3358,173 +3464,175 @@ class _HabitCardState extends State<_HabitCard>
       opacity: _departureFade,
       child: ScaleTransition(
         scale: _departureScale,
-      child: GestureDetector(
-        onTap: _handleTap,
-        onLongPress: _handleLongPress,
-        child: ScaleTransition(
-          scale: _scaleAnimation,
-          child: SizedBox(
-            height: _isDoneToday ? 64 : 72,
-            child: Row(
-              children: [
-                // LEFT ACCENT BAR (only show if not completed)
-                if (!_isDoneToday)
-                  Container(
-                    width: 4,
-                    decoration: BoxDecoration(
-                      color: effectiveAccentColor,
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(16),
-                        bottomLeft: Radius.circular(16),
+        child: GestureDetector(
+          onTap: _handleTap,
+          onLongPress: _handleLongPress,
+          child: ScaleTransition(
+            scale: _scaleAnimation,
+            child: SizedBox(
+              height: _isDoneToday ? 64 : 72,
+              child: Row(
+                children: [
+                  // LEFT ACCENT BAR (only show if not completed)
+                  if (!_isDoneToday)
+                    Container(
+                      width: 4,
+                      decoration: BoxDecoration(
+                        color: effectiveAccentColor,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(16),
+                          bottomLeft: Radius.circular(16),
+                        ),
                       ),
                     ),
-                  ),
 
-                // Spacing between accent bar and card
-                SizedBox(width: _isDoneToday ? 20 : 16),
+                  // Spacing between accent bar and card
+                  SizedBox(width: _isDoneToday ? 20 : 16),
 
-                // CARD
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(
-                        sigmaX: _isDoneToday ? 20 : 25,
-                        sigmaY: _isDoneToday ? 20 : 25,
-                      ),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: _isDoneToday ? 20 : 24,
+                  // CARD
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(
+                          sigmaX: _isDoneToday ? 20 : 25,
+                          sigmaY: _isDoneToday ? 20 : 25,
                         ),
-                        decoration: BoxDecoration(
-                          // Glassmorphism background (pinned = lighter/cooler + accent tint, regular = warmer)
-                          color: _isDoneToday
-                              ? colors.cardDone
-                                  .withOpacity(colors.cardDoneOpacity)
-                              : widget.isPinned
-                                  ? colors.cardPinned.withOpacity(0.78)
-                                  : colors.cardBackground.withOpacity(0.82),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: _isDoneToday
-                                ? const Color(0xFFFFFFFF).withOpacity(0.10)
-                                : colors.borderCard
-                                    .withOpacity(colors.borderCardOpacity),
-                            width: 0.5,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: _isDoneToday ? 20 : 24,
                           ),
-                          boxShadow: [
-                            // Outer shadow for depth
-                            BoxShadow(
-                              color: colors.textPrimary.withOpacity(
-                                _isDoneToday
-                                    ? 0.02
-                                    : widget.isPinned
-                                        ? 0.06
-                                        : 0.04,
-                              ),
-                              blurRadius: _isDoneToday
-                                  ? 8
-                                  : widget.isPinned
-                                      ? 20
-                                      : 16,
-                              offset: Offset(
-                                  0,
-                                  _isDoneToday
-                                      ? 1
-                                      : widget.isPinned
-                                          ? 4
-                                          : 2),
+                          decoration: BoxDecoration(
+                            // Glassmorphism background (pinned = lighter/cooler + accent tint, regular = warmer)
+                            color: _isDoneToday
+                                ? colors.cardDone
+                                    .withOpacity(colors.cardDoneOpacity)
+                                : widget.isPinned
+                                    ? colors.cardPinned.withOpacity(0.78)
+                                    : colors.cardBackground.withOpacity(0.82),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: _isDoneToday
+                                  ? const Color(0xFFFFFFFF).withOpacity(0.10)
+                                  : colors.borderCard
+                                      .withOpacity(colors.borderCardOpacity),
+                              width: 0.5,
                             ),
-                            // Top-edge bevel: white highlight
-                            if (!_isDoneToday)
+                            boxShadow: [
+                              // Outer shadow for depth
                               BoxShadow(
-                                color:
-                                    const Color(0xFFFFFFFF).withOpacity(0.70),
-                                blurRadius: 2,
-                                offset: const Offset(0, 2),
-                                blurStyle: BlurStyle.inner,
+                                color: colors.textPrimary.withOpacity(
+                                  _isDoneToday
+                                      ? 0.02
+                                      : widget.isPinned
+                                          ? 0.06
+                                          : 0.04,
+                                ),
+                                blurRadius: _isDoneToday
+                                    ? 8
+                                    : widget.isPinned
+                                        ? 20
+                                        : 16,
+                                offset: Offset(
+                                    0,
+                                    _isDoneToday
+                                        ? 1
+                                        : widget.isPinned
+                                            ? 4
+                                            : 2),
                               ),
-                            // Bottom-edge bevel: warm dark lip
-                            if (!_isDoneToday)
-                              BoxShadow(
-                                color: colors.tabBarFade.withOpacity(0.25),
-                                blurRadius: 1,
-                                offset: const Offset(0, -1),
-                                blurStyle: BlurStyle.inner,
-                              ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            // Checkmark (only when completed) with animation
-                            if (_isDoneToday) ...[
-                              FadeTransition(
-                                opacity: _checkmarkFadeAnimation,
-                                child: ScaleTransition(
-                                  scale: _checkmarkScaleAnimation,
-                                  child: Container(
-                                    width: 20,
-                                    height: 20,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: colors.checkmarkBackground
-                                          .withOpacity(0.40),
-                                    ),
-                                    child: Icon(
-                                      CupertinoIcons.checkmark,
-                                      size: 12,
-                                      color: colors.checkmarkFill,
+                              // Top-edge bevel: white highlight
+                              if (!_isDoneToday)
+                                BoxShadow(
+                                  color:
+                                      const Color(0xFFFFFFFF).withOpacity(0.70),
+                                  blurRadius: 2,
+                                  offset: const Offset(0, 2),
+                                  blurStyle: BlurStyle.inner,
+                                ),
+                              // Bottom-edge bevel: warm dark lip
+                              if (!_isDoneToday)
+                                BoxShadow(
+                                  color: colors.tabBarFade.withOpacity(0.25),
+                                  blurRadius: 1,
+                                  offset: const Offset(0, -1),
+                                  blurStyle: BlurStyle.inner,
+                                ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              // Checkmark (only when completed) with animation
+                              if (_isDoneToday) ...[
+                                FadeTransition(
+                                  opacity: _checkmarkFadeAnimation,
+                                  child: ScaleTransition(
+                                    scale: _checkmarkScaleAnimation,
+                                    child: Container(
+                                      width: 20,
+                                      height: 20,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: colors.checkmarkBackground
+                                            .withOpacity(0.40),
+                                      ),
+                                      child: Icon(
+                                        CupertinoIcons.checkmark,
+                                        size: 12,
+                                        color: colors.checkmarkFill,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: 12),
-                            ],
+                                const SizedBox(width: 12),
+                              ],
 
-                            // Habit title with animated fade
-                            Expanded(
-                              child: AnimatedBuilder(
-                                animation: _textFadeAnimation,
-                                builder: (context, child) {
-                                  return Opacity(
-                                    opacity: _isDoneToday
-                                        ? _textFadeAnimation.value
-                                        : 1.0,
-                                    child: Text(
-                                      localizeHabitName(widget.habitTitle, l10n),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontSize: _isDoneToday ? 15 : 16,
-                                        fontWeight: FontWeight.w500,
-                                        color: _isDoneToday
-                                            ? colors.textSecondary
-                                            : colors.textPrimary,
-                                        fontFamily: AppTextStyles.bodyFont(context),
-                                        decoration: _isDoneToday
-                                            ? TextDecoration.lineThrough
-                                            : TextDecoration.none,
-                                        decorationColor: colors.textSecondary,
+                              // Habit title with animated fade
+                              Expanded(
+                                child: AnimatedBuilder(
+                                  animation: _textFadeAnimation,
+                                  builder: (context, child) {
+                                    return Opacity(
+                                      opacity: _isDoneToday
+                                          ? _textFadeAnimation.value
+                                          : 1.0,
+                                      child: Text(
+                                        localizeHabitName(
+                                            widget.habitTitle, l10n),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: _isDoneToday ? 15 : 16,
+                                          fontWeight: FontWeight.w500,
+                                          color: _isDoneToday
+                                              ? colors.textSecondary
+                                              : colors.textPrimary,
+                                          fontFamily:
+                                              AppTextStyles.bodyFont(context),
+                                          decoration: _isDoneToday
+                                              ? TextDecoration.lineThrough
+                                              : TextDecoration.none,
+                                          decorationColor: colors.textSecondary,
+                                        ),
                                       ),
-                                    ),
-                                  );
-                                },
+                                    );
+                                  },
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
       ),
-    ),
     );
 
     final wrappedCard = Padding(
@@ -3617,7 +3725,7 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
             ),
             const SizedBox(height: 12),
             Text(
-              l10n.browseAlreadyAddedMessage(habit),
+              l10n.browseAlreadyAddedMessage(localizeHabitName(habit, l10n)),
               style: AppTextStyles.body(context),
               textAlign: TextAlign.center,
             ),
@@ -3641,8 +3749,10 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
     final userState = context.read<UserState>();
     final isPremium = userState.hasSubscription;
     final hasBoost = userState.hasBoost;
-    final canSwap = isPremium || onboardingState.canSwapFromBrowse(hasBoost: hasBoost);
-    final remainingSwaps = onboardingState.getRemainingBrowseSwaps(hasBoost: hasBoost);
+    final canSwap =
+        isPremium || onboardingState.canSwapFromBrowse(hasBoost: hasBoost);
+    final remainingSwaps =
+        onboardingState.getRemainingBrowseSwaps(hasBoost: hasBoost);
     final l10n = AppLocalizations.of(context);
 
     if (!canSwap) {
@@ -3669,8 +3779,8 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
           const SizedBox(height: 12),
           Text(
             isPremium
-                ? l10n.browseSwapConfirmMessage(newHabit)
-                : '${l10n.browseSwapConfirmMessage(newHabit)}\n\n${l10n.browseSwapRemainingCount(remainingSwaps)}',
+                ? l10n.browseSwapConfirmMessage(localizeHabitName(newHabit, l10n))
+                : '${l10n.browseSwapConfirmMessage(localizeHabitName(newHabit, l10n))}\n\n${l10n.browseSwapRemainingCount(remainingSwaps)}',
             style: AppTextStyles.body(context),
             textAlign: TextAlign.center,
           ),
@@ -3724,7 +3834,7 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
           ),
           const SizedBox(height: 12),
           Text(
-            l10n.browseChooseToReplaceMessage(newHabit),
+            l10n.browseChooseToReplaceMessage(localizeHabitName(newHabit, l10n)),
             style: AppTextStyles.body(context),
             textAlign: TextAlign.center,
           ),
@@ -3750,7 +3860,7 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
                       ),
                     ),
                     child: Text(
-                      oldHabit,
+                      localizeHabitName(oldHabit, l10n),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontFamily: AppTextStyles.bodyFont(context),
@@ -3860,7 +3970,7 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
 
                           // Description (Sora to match Unpin modal)
                           Text(
-                            l10n.swapSuccessMessage(newHabit),
+                            l10n.swapSuccessMessage(localizeHabitName(newHabit, l10n)),
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontFamily: AppTextStyles.bodyFont(context),
@@ -3921,7 +4031,8 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
                                     child: Text(
                                       l10n.commonGreat,
                                       style: TextStyle(
-                                        fontFamily: AppTextStyles.bodyFont(context),
+                                        fontFamily:
+                                            AppTextStyles.bodyFont(context),
                                         fontSize: 17,
                                         fontWeight: FontWeight.w600,
                                         color: const Color(0xFFFFFFFF),
@@ -3994,7 +4105,7 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
             ),
             const SizedBox(height: 12),
             Text(
-              l10n.browseHabitAddedMessage(habit),
+              l10n.browseHabitAddedMessage(localizeHabitName(habit, l10n)),
               style: AppTextStyles.body(context),
               textAlign: TextAlign.center,
             ),
@@ -4024,7 +4135,9 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
     final filteredCategories = <String, List<String>>{};
     for (final entry in habitsByCategory.entries) {
       final filtered = entry.value
-          .where((h) => h.toLowerCase().contains(_searchQuery.toLowerCase()))
+          .where((h) =>
+              h.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+              localizeHabitName(h, l10n).toLowerCase().contains(_searchQuery.toLowerCase()))
           .toList();
       if (filtered.isNotEmpty) {
         filteredCategories[entry.key] = filtered;
@@ -4131,8 +4244,7 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
             child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
                 color: const Color(0xFFFFFFFF).withOpacity(0.7),
                 borderRadius: BorderRadius.circular(16),
@@ -4426,6 +4538,17 @@ class _HabitActionScreenState extends State<HabitActionScreen> {
     HapticFeedback.heavyImpact();
     await HabitTracker.markDone(widget.habitTitle);
     AnalyticsService.logHabitCompleted(widget.habitTitle);
+
+    // Record the moment
+    await MomentsService.record(
+      Moment(
+        id: DateTime.now().toUtc().toIso8601String(),
+        habitName: widget.habitTitle,
+        habitEmoji: '✦',
+        completedAt: DateTime.now().toUtc(),
+      ),
+    );
+    MilestoneService.invalidate();
 
     // Show heart + support for 1 second
     await Future.delayed(const Duration(milliseconds: 1000));

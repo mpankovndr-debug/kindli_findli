@@ -5,12 +5,16 @@ import '../models/moment.dart';
 
 class MomentsService {
   static const String _key = 'moments_collection';
+  static const int _maxMoments = 1000;
 
   /// Records a new moment. Call this every time a habit is completed.
   static Future<void> record(Moment moment) async {
     final prefs = await SharedPreferences.getInstance();
     final all = await getAll();
     all.insert(0, moment); // newest first
+    if (all.length > _maxMoments) {
+      all.removeRange(_maxMoments, all.length);
+    }
     final encoded = jsonEncode(all.map((m) => m.toJson()).toList());
     await prefs.setString(_key, encoded);
   }
@@ -42,7 +46,7 @@ class MomentsService {
     final Map<String, List<Moment>> grouped = {};
 
     for (final moment in all) {
-      final key = _monthLabel(moment.completedAt, l10n);
+      final key = _monthLabel(moment.completedAt.toLocal(), l10n);
       grouped.putIfAbsent(key, () => []).add(moment);
     }
 

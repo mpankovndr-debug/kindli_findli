@@ -173,7 +173,7 @@ class ThemePicker extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Intended+',
+                        AppLocalizations.of(context).appNameIntendedPlus,
                         style: TextStyle(
                           fontSize: 11,
                           color: Colors.black.withValues(alpha: 0.3),

@@ -238,7 +238,7 @@ class _HabitRevealScreenState extends State<HabitRevealScreen>
                       // Habits list (animated)
                       Expanded(
                         child: ListView.builder(
-                          padding: const EdgeInsets.only(bottom: 200),
+                          padding: const EdgeInsets.only(bottom: 280),
                           itemCount: state.userHabits.length,
                           itemBuilder: (context, index) {
                             return Padding(

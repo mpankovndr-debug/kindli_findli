@@ -21,7 +21,7 @@ class WeekStatsService {
   /// whether the habits are still in the user's active list.
   /// [habits] is used only to cache display-name mappings.
   static Future<WeekStats> calculate(List<String> habits, DateTime now) async {
-    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+    final startOfWeek = DateTime(now.year, now.month, now.day - (now.weekday - 1));
 
     // Cache title mappings for current habits so they survive habit changes.
     final prefs = await SharedPreferences.getInstance();
@@ -30,7 +30,6 @@ class WeekStatsService {
       prefs.setString('habit_title_$id', habit);
     }
 
-    int totalCompletions = 0;
     final Map<String, int> habitCounts = {};
     final List<bool> dailyActivity = List.filled(7, false);
 
@@ -43,7 +42,6 @@ class WeekStatsService {
       }
 
       for (final id in completedIds) {
-        totalCompletions++;
         final title = await HabitTracker.titleForId(id);
         habitCounts[title] = (habitCounts[title] ?? 0) + 1;
       }
@@ -53,7 +51,7 @@ class WeekStatsService {
       ..sort((a, b) => b.value.compareTo(a.value));
 
     return WeekStats(
-      completionCount: totalCompletions,
+      completionCount: dailyActivity.where((d) => d).length,
       completedHabits: sortedHabits.map((e) => e.key).toList(),
       dailyActivity: dailyActivity,
     );

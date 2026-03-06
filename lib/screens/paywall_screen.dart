@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Colors;
+import 'package:flutter/material.dart' show Colors, ScaffoldMessenger, SnackBar;
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -269,6 +269,15 @@ class _PaywallScreenState extends State<PaywallScreen>
   }
 
   Widget _buildPricingOptions(AppColorScheme colors, AppLocalizations l10n) {
+    final rc = context.read<RevenueCatService>();
+    final monthlyPrice = rc.monthlyPriceString ?? l10n.paywallMonthlyPrice;
+    final yearlyPrice = rc.yearlyPriceString ?? l10n.paywallYearlyPrice;
+    final lifetimePrice = rc.lifetimePriceString ?? l10n.paywallLifetimePrice;
+    final savingsPercent = rc.yearlySavingsPercent;
+    final saveBadgeText = savingsPercent != null
+        ? l10n.paywallSavePercent(savingsPercent)
+        : l10n.paywallYearlySave;
+
     return Column(
       children: [
         // Monthly option
@@ -276,7 +285,7 @@ class _PaywallScreenState extends State<PaywallScreen>
           colors: colors,
           plan: 'monthly',
           label: l10n.paywallMonthly,
-          price: l10n.paywallMonthlyPrice,
+          price: monthlyPrice,
           pricePerPeriod: l10n.paywallMonthlyPeriod,
           badge: null,
           isSelected: _selectedPlan == 'monthly',
@@ -290,10 +299,10 @@ class _PaywallScreenState extends State<PaywallScreen>
           colors: colors,
           plan: 'yearly',
           label: l10n.paywallYearly,
-          price: l10n.paywallYearlyPrice,
+          price: yearlyPrice,
           pricePerPeriod: l10n.paywallYearlyPeriod,
           badge: _PricingBadge(
-            text: l10n.paywallYearlySave,
+            text: saveBadgeText,
             primaryColor: colors.ctaPrimary,
             secondaryColor: colors.success,
           ),
@@ -308,7 +317,7 @@ class _PaywallScreenState extends State<PaywallScreen>
           colors: colors,
           plan: 'lifetime',
           label: l10n.paywallLifetime,
-          price: l10n.paywallLifetimePrice,
+          price: lifetimePrice,
           pricePerPeriod: l10n.paywallLifetimePeriod,
           badge: _PricingBadge(
             text: l10n.paywallLifetimeBadge,
@@ -522,6 +531,11 @@ class _PaywallScreenState extends State<PaywallScreen>
                       }
                     } catch (_) {
                       AnalyticsService.logPurchaseFailed();
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(l10n.boostPurchaseError)),
+                        );
+                      }
                     } finally {
                       if (mounted) setState(() => _isLoading = false);
                     }
@@ -546,13 +560,16 @@ class _PaywallScreenState extends State<PaywallScreen>
   }
 
   Widget _buildDisclaimer(AppColorScheme colors, AppLocalizations l10n) {
-    final text = _selectedPlan == 'lifetime'
-        ? l10n.paywallLifetimeHint
-        : l10n.paywallTrialHint(
-            _selectedPlan == 'yearly'
-                ? '${l10n.paywallYearlyPrice}/${l10n.paywallYearly.toLowerCase()}'
-                : '${l10n.paywallMonthlyPrice}/${l10n.paywallMonthly.toLowerCase()}',
-          );
+    final rc = context.read<RevenueCatService>();
+    final String text;
+    if (_selectedPlan == 'lifetime') {
+      text = l10n.paywallLifetimeHint;
+    } else {
+      final price = _selectedPlan == 'yearly'
+          ? '${rc.yearlyPriceString ?? l10n.paywallYearlyPrice}/${l10n.paywallYearly.toLowerCase()}'
+          : '${rc.monthlyPriceString ?? l10n.paywallMonthlyPrice}/${l10n.paywallMonthly.toLowerCase()}';
+      text = l10n.paywallTrialHint(price);
+    }
     return Text(
       text,
       style: TextStyle(
@@ -612,8 +629,22 @@ class _PaywallScreenState extends State<PaywallScreen>
                           AnalyticsService.logRestoreCompleted();
                           Navigator.pop(context);
                         }
-                      } catch (_) {
-                        // Restore error
+                      } catch (e) {
+                        if (mounted) {
+                          showCupertinoDialog(
+                            context: context,
+                            builder: (_) => CupertinoAlertDialog(
+                              title: Text(l10n.restoreError),
+                              actions: [
+                                CupertinoDialogAction(
+                                  isDefaultAction: true,
+                                  child: Text(l10n.ok),
+                                  onPressed: () => Navigator.pop(context),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
                       } finally {
                         if (mounted) setState(() => _isLoading = false);
                       }
