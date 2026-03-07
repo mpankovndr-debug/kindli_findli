@@ -112,6 +112,7 @@ class RevenueCatService extends ChangeNotifier {
 
   /// Refresh purchase status from RevenueCat
   Future<void> refreshPurchaseStatus() async {
+    if (!_isInitialized) return;
     try {
       final customerInfo = await Purchases.getCustomerInfo();
       _updatePremiumStatus(customerInfo);

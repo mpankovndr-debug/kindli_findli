@@ -3,8 +3,7 @@ import 'dart:ui';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart'
-    show CircleAvatar, Colors, NetworkImage;
+import 'package:flutter/material.dart' show CircleAvatar, Colors, NetworkImage;
 import '../widgets/app_toast.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/services.dart';
@@ -136,8 +135,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title: const Text('Sign in failed'),
         content: Text(
           kDebugMode
-            ? 'Something went wrong. Please try again.\n\nDebug: $error'
-            : 'Something went wrong. Please try again.',
+              ? 'Something went wrong. Please try again.\n\nDebug: $error'
+              : 'Something went wrong. Please try again.',
         ),
         actions: [
           CupertinoDialogAction(
@@ -641,14 +640,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         final productId = entitlement.productIdentifier;
         if (productId.contains('monthly')) {
           plan = l10n.paywallMonthly;
-          final monthlyPrice = rc.monthlyPriceString ?? l10n.paywallMonthlyPrice;
-          price =
-              '$monthlyPrice/${l10n.paywallMonthly.toLowerCase()}';
+          final monthlyPrice =
+              rc.monthlyPriceString ?? l10n.paywallMonthlyPrice;
+          price = '$monthlyPrice/${l10n.paywallMonthly.toLowerCase()}';
         } else if (productId.contains('yearly')) {
           plan = l10n.paywallYearly;
           final yearlyPrice = rc.yearlyPriceString ?? l10n.paywallYearlyPrice;
-          price =
-              '$yearlyPrice/${l10n.paywallYearly.toLowerCase()}';
+          price = '$yearlyPrice/${l10n.paywallYearly.toLowerCase()}';
         }
         final expDate = entitlement.expirationDate;
         if (expDate != null) {
@@ -2020,13 +2018,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       .read<RevenueCatService>()
                                       .restorePurchases();
                                   if (mounted) {
-                                    AppToast.show(context, result
+                                    AppToast.show(
+                                        context,
+                                        result
                                             ? l10n.restoreSuccess
                                             : l10n.restoreNotFound);
                                   }
                                 } catch (_) {
                                   if (mounted) {
-                                    AppToast.show(context, l10n.restoreNotFound);
+                                    AppToast.show(
+                                        context, l10n.restoreNotFound);
                                   }
                                 }
                               },
@@ -2394,7 +2395,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           Navigator.pop(context);
                                           final revenueCat =
                                               context.read<RevenueCatService>();
-                                          final userState = context.read<UserState>();
+                                          final userState =
+                                              context.read<UserState>();
                                           final themeProvider =
                                               context.read<ThemeProvider>();
                                           final nav = Navigator.of(context);
@@ -2402,19 +2404,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           await revenueCat.logOut();
                                           await AuthService.signOut();
 
-                                          await NotificationScheduler.cancelAll();
+                                          await NotificationScheduler
+                                              .cancelAll();
 
                                           // Clear only auth-related prefs, preserve habits/theme/onboarding
-                                          final prefs =
-                                              await SharedPreferences.getInstance();
+                                          final prefs = await SharedPreferences
+                                              .getInstance();
                                           await prefs.remove('user_name');
 
                                           userState.reset();
                                           userNameNotifier.value = null;
 
                                           // Reset to default theme only if current theme requires Intended+
-                                          if (themeProvider.isPremiumTheme(themeProvider.theme)) {
-                                            themeProvider.setTheme(AppTheme.warmClay);
+                                          if (themeProvider.isPremiumTheme(
+                                              themeProvider.theme)) {
+                                            themeProvider
+                                                .setTheme(AppTheme.warmClay);
                                           }
 
                                           nav.pushAndRemoveUntil(
