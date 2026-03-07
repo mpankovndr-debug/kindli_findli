@@ -37,6 +37,7 @@ import 'services/notification_scheduler.dart';
 import 'services/notification_preferences_service.dart';
 import 'services/revenue_cat_service.dart';
 import 'widgets/boost_offer_sheet.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 // ✅ ADD THIS HELPER HERE (before the main() function):
 Future<T?> showIntendedModal<T>({
@@ -268,6 +269,7 @@ Widget styledPrimaryButton({
           onPressed: onPressed,
           child: Text(
             label,
+            textAlign: TextAlign.center,
             style: TextStyle(
               fontFamily: AppTextStyles.bodyFont(ctx),
               fontSize: 17,
@@ -2432,6 +2434,18 @@ class _HabitCardState extends State<_HabitCard>
                                 showDivider: true,
                               ),
 
+                            // Edit — only for custom habits
+                            if (isCustom)
+                              _buildActionRow(
+                                icon: CupertinoIcons.pencil,
+                                label: l10n.editHabitTitle,
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  _showEditDialog();
+                                },
+                                showDivider: true,
+                              ),
+
                             // Delete — only for custom habits
                             if (isCustom)
                               _buildActionRow(
@@ -3247,6 +3261,242 @@ class _HabitCardState extends State<_HabitCard>
     );
   }
 
+  void _showEditDialog() {
+    final onboardingState = context.read<OnboardingState>();
+    final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
+    final l10n = AppLocalizations.of(context);
+    final editController = TextEditingController(text: widget.habitTitle);
+
+    showCupertinoModalPopup(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.5),
+      filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (dialogContext, setDialogState) {
+            final text = editController.text.trim();
+            final canSave = text.isNotEmpty &&
+                text.length >= 3 &&
+                text.length <= 50 &&
+                text != widget.habitTitle &&
+                !ProfanityFilter.containsProfanity(text);
+
+            return GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => Navigator.pop(dialogContext),
+              child: SingleChildScrollView(
+                padding: EdgeInsets.only(
+                  top: 24,
+                  bottom: MediaQuery.of(dialogContext).viewInsets.bottom + 24,
+                  left: 24,
+                  right: 24,
+                ),
+                child: Center(
+                  child: GestureDetector(
+                    onTap: () {},
+                    child: Container(
+                    constraints: const BoxConstraints(maxWidth: 384),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(32),
+                      boxShadow: [
+                        BoxShadow(
+                          color: colors.modalShadow.withOpacity(0.4),
+                          blurRadius: 70,
+                          offset: const Offset(0, 25),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(32),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: const Alignment(-0.3, -0.5),
+                              end: const Alignment(0.3, 0.5),
+                              colors: [
+                                colors.modalBg1.withOpacity(0.96),
+                                colors.modalBg2.withOpacity(0.93),
+                                colors.modalBg3.withOpacity(0.95),
+                              ],
+                              stops: const [0.0, 0.5, 1.0],
+                            ),
+                            borderRadius: BorderRadius.circular(32),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.5),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 28, vertical: 32),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  l10n.editHabitTitle,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontFamily: 'Sora',
+                                    fontSize: 27,
+                                    fontWeight: FontWeight.w600,
+                                    color: colors.textPrimary,
+                                    letterSpacing: -0.4,
+                                    height: 1.25,
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+                                CupertinoTextField(
+                                  controller: editController,
+                                  autofocus: true,
+                                  maxLength: 50,
+                                  onChanged: (_) => setDialogState(() {}),
+                                  style: TextStyle(
+                                    fontSize: 17,
+                                    color: colors.textPrimary,
+                                    fontFamily: AppTextStyles.bodyFont(dialogContext),
+                                  ),
+                                  placeholderStyle: TextStyle(
+                                    fontSize: 17,
+                                    color: colors.textSecondary,
+                                    fontFamily: AppTextStyles.bodyFont(dialogContext),
+                                  ),
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFFFFFF).withOpacity(0.7),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: colors.buttonDark.withOpacity(0.12),
+                                      width: 1,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  l10n.customHabitCharCount(editController.text.length),
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                    color: colors.textSecondary,
+                                    fontFamily: AppTextStyles.bodyFont(dialogContext),
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+                                Container(
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: canSave
+                                          ? [
+                                              colors.ctaPrimary.withOpacity(0.92),
+                                              colors.ctaSecondary.withOpacity(0.88),
+                                            ]
+                                          : [
+                                              colors.textDisabled.withOpacity(0.3),
+                                              colors.textDisabled.withOpacity(0.2),
+                                            ],
+                                    ),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: CupertinoButton(
+                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    onPressed: canSave
+                                        ? () async {
+                                            Navigator.pop(dialogContext);
+                                            await onboardingState.renameCustomHabit(
+                                                widget.habitTitle, text);
+                                          }
+                                        : null,
+                                    child: Text(
+                                      l10n.editHabitSave,
+                                      style: TextStyle(
+                                        fontFamily: AppTextStyles.bodyFont(dialogContext),
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w600,
+                                        color: canSave
+                                            ? Colors.white
+                                            : colors.textSecondary,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 14),
+                                GestureDetector(
+                                  onTap: () => Navigator.pop(dialogContext),
+                                  child: Container(
+                                    width: double.infinity,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(20),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: colors.buttonDark.withOpacity(0.12),
+                                          blurRadius: 16,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(20),
+                                      child: BackdropFilter(
+                                        filter: ImageFilter.blur(
+                                            sigmaX: 20, sigmaY: 20),
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 16),
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(
+                                              begin: Alignment.topLeft,
+                                              end: Alignment.bottomRight,
+                                              colors: [
+                                                Colors.white.withOpacity(0.5),
+                                                colors.surfaceLight
+                                                    .withOpacity(0.35),
+                                              ],
+                                            ),
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                            border: Border.all(
+                                              color:
+                                                  Colors.white.withOpacity(0.4),
+                                              width: 1.5,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            l10n.commonCancel,
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              fontFamily:
+                                                  AppTextStyles.bodyFont(dialogContext),
+                                              fontSize: 17,
+                                              fontWeight: FontWeight.w600,
+                                              color: colors.textPrimary,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   void _showDeleteConfirmation() {
     final onboardingState = context.read<OnboardingState>();
     final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
@@ -3472,8 +3722,8 @@ class _HabitCardState extends State<_HabitCard>
           onLongPress: _handleLongPress,
           child: ScaleTransition(
             scale: _scaleAnimation,
-            child: SizedBox(
-              height: _isDoneToday ? 64 : 72,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: _isDoneToday ? 64 : 72),
               child: Row(
                 children: [
                   // LEFT ACCENT BAR (only show if not completed)
@@ -3641,25 +3891,71 @@ class _HabitCardState extends State<_HabitCard>
     final wrappedCard = Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: isCustom
-          ? Dismissible(
-              key: ValueKey('dismiss_${widget.habitTitle}'),
-              direction: DismissDirection.endToStart,
-              confirmDismiss: (_) async {
-                _showDeleteConfirmation();
-                return false; // Don't auto-dismiss; modal handles removal
-              },
-              background: Container(
-                alignment: Alignment.centerRight,
-                padding: const EdgeInsets.only(right: 20),
-                decoration: BoxDecoration(
-                  color: colors.error.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Icon(
-                  CupertinoIcons.trash,
-                  color: colors.error,
-                  size: 22,
-                ),
+          ? Slidable(
+              key: ValueKey('slidable_${widget.habitTitle}'),
+              endActionPane: ActionPane(
+                motion: const BehindMotion(),
+                extentRatio: 0.32,
+                children: [
+                  CustomSlidableAction(
+                    onPressed: (_) {},
+                    backgroundColor: Colors.transparent,
+                    padding: EdgeInsets.zero,
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 4, right: 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          GestureDetector(
+                            onTap: _showEditDialog,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: BackdropFilter(
+                                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                                child: Container(
+                                  width: 44,
+                                  height: 44,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.3),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: Colors.white.withOpacity(0.4),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Icon(CupertinoIcons.pencil, size: 20, color: colors.textSecondary),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          GestureDetector(
+                            onTap: _showDeleteConfirmation,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: BackdropFilter(
+                                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                                child: Container(
+                                  width: 44,
+                                  height: 44,
+                                  decoration: BoxDecoration(
+                                    color: colors.destructive.withOpacity(0.08),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: colors.destructive.withOpacity(0.15),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Icon(CupertinoIcons.trash, size: 20, color: colors.destructive.withOpacity(0.7)),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
               child: card,
             )

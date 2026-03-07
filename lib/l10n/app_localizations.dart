@@ -884,6 +884,18 @@ abstract class AppLocalizations {
   /// **'Add to my habits'**
   String get customHabitSubmit;
 
+  /// No description provided for @editHabitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit habit'**
+  String get editHabitTitle;
+
+  /// No description provided for @editHabitSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get editHabitSave;
+
   /// No description provided for @customHabitCreatedTitle.
   ///
   /// In en, this message translates to:
@@ -2827,6 +2839,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Signed in with Apple'**
   String get profileSignedInApple;
+
+  /// No description provided for @signOutWarningTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out?'**
+  String get signOutWarningTitle;
+
+  /// No description provided for @signOutWarningMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data stays on this device only. You won\'t be able to access it on other devices or after reinstalling.'**
+  String get signOutWarningMessage;
 
   /// No description provided for @profileSignOut.
   ///

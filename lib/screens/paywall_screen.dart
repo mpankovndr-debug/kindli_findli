@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Colors;
+import 'package:flutter/material.dart' show Colors, Flexible, Wrap, WrapAlignment, WrapCrossAlignment;
 import '../widgets/app_toast.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -30,6 +30,14 @@ class _PaywallScreenState extends State<PaywallScreen>
   @override
   void initState() {
     super.initState();
+    // Defensive check: if user is already subscribed, pop immediately
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (context.read<RevenueCatService>().isPremium) {
+        Navigator.of(context).pop();
+        return;
+      }
+    });
     AnalyticsService.logScreenView('paywall');
     AnalyticsService.logPaywallShown(widget.source);
     _bulletController = AnimationController(
@@ -57,10 +65,11 @@ class _PaywallScreenState extends State<PaywallScreen>
     final colors = context.watch<ThemeProvider>().colors;
     final l10n = AppLocalizations.of(context);
 
-    return Center(
+    return SafeArea(
       child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(vertical: 24),
-        child: SafeArea(
+        child: Align(
+          alignment: Alignment.topCenter,
           child: Container(
             width: size.width * 0.9,
             constraints: const BoxConstraints(maxWidth: 448),
@@ -109,64 +118,11 @@ class _PaywallScreenState extends State<PaywallScreen>
                   ),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
-                    child: Stack(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            _buildTulipIcon(colors),
-                            const SizedBox(height: 20),
-                            Text(
-                              l10n.paywallTitle,
-                              style: TextStyle(
-                                fontFamily: 'Sora',
-                                fontSize: 30,
-                                fontWeight: FontWeight.w600,
-                                color: colors.textPrimary,
-                                letterSpacing: -0.5,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              l10n.paywallDescription,
-                              style: TextStyle(
-                                fontFamily: AppTextStyles.bodyFont(context),
-                                fontSize: 14,
-                                fontWeight: FontWeight.w400,
-                                color: colors.ctaPrimary.withOpacity(0.9),
-                                height: 1.6,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 24),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 4),
-                              child: Column(
-                                children: [
-                                  _buildAnimatedBullet(0, CupertinoIcons.star_fill, l10n.paywallFeature1),
-                                  const SizedBox(height: 16),
-                                  _buildAnimatedBullet(1, CupertinoIcons.arrow_2_circlepath, l10n.paywallFeature2),
-                                  const SizedBox(height: 16),
-                                  _buildAnimatedBullet(2, CupertinoIcons.arrow_up_circle, l10n.paywallFeature3),
-                                  const SizedBox(height: 16),
-                                  _buildAnimatedBullet(3, CupertinoIcons.chat_bubble, l10n.paywallFeature4),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-                            _buildPricingOptions(colors, l10n),
-                            const SizedBox(height: 20),
-                            _buildCTAButton(colors, l10n),
-                            const SizedBox(height: 8),
-                            _buildDisclaimer(colors, l10n),
-                            const SizedBox(height: 12),
-                            _buildContinueFreeSection(colors, l10n),
-                          ],
-                        ),
-                        Positioned(
-                          top: 0,
-                          right: 0,
+                        Align(
+                          alignment: Alignment.topRight,
                           child: GestureDetector(
                             onTap: () => Navigator.pop(context),
                             child: Container(
@@ -195,6 +151,54 @@ class _PaywallScreenState extends State<PaywallScreen>
                             ),
                           ),
                         ),
+                        _buildTulipIcon(colors),
+                        const SizedBox(height: 16),
+                        Text(
+                          l10n.paywallTitle,
+                          style: TextStyle(
+                            fontFamily: 'Sora',
+                            fontSize: 30,
+                            fontWeight: FontWeight.w600,
+                            color: colors.textPrimary,
+                            letterSpacing: -0.5,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          l10n.paywallDescription,
+                          style: TextStyle(
+                            fontFamily: AppTextStyles.bodyFont(context),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                            color: colors.ctaPrimary.withOpacity(0.9),
+                            height: 1.6,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 20),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: Column(
+                            children: [
+                              _buildAnimatedBullet(0, CupertinoIcons.star_fill, l10n.paywallFeature1),
+                              const SizedBox(height: 12),
+                              _buildAnimatedBullet(1, CupertinoIcons.arrow_2_circlepath, l10n.paywallFeature2),
+                              const SizedBox(height: 12),
+                              _buildAnimatedBullet(2, CupertinoIcons.arrow_up_circle, l10n.paywallFeature3),
+                              const SizedBox(height: 12),
+                              _buildAnimatedBullet(3, CupertinoIcons.chat_bubble, l10n.paywallFeature4),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        _buildPricingOptions(colors, l10n),
+                        const SizedBox(height: 12),
+                        _buildCTAButton(colors, l10n),
+                        const SizedBox(height: 8),
+                        _buildDisclaimer(colors, l10n),
+                        const SizedBox(height: 8),
+                        _buildContinueFreeSection(colors, l10n),
                       ],
                     ),
                   ),
@@ -394,46 +398,53 @@ class _PaywallScreenState extends State<PaywallScreen>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 // Left: Label and price
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      label,
-                      style: TextStyle(
-                        fontFamily: AppTextStyles.bodyFont(context),
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                        color: colors.textPrimary,
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        label,
+                        style: TextStyle(
+                          fontFamily: AppTextStyles.bodyFont(context),
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          color: colors.textPrimary,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        Text(
-                          price,
-                          style: TextStyle(
-                            fontFamily: 'Sora',
-                            fontSize: 22,
-                            fontWeight: FontWeight.w600,
-                            color: priceColor,
+                      const SizedBox(height: 2),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              price,
+                              style: TextStyle(
+                                fontFamily: 'Sora',
+                                fontSize: 22,
+                                fontWeight: FontWeight.w600,
+                                color: priceColor,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          pricePerPeriod,
-                          style: TextStyle(
-                            fontFamily: AppTextStyles.bodyFont(context),
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: suffixColor,
+                          const SizedBox(width: 6),
+                          Text(
+                            pricePerPeriod,
+                            style: TextStyle(
+                              fontFamily: AppTextStyles.bodyFont(context),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: suffixColor,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
+
+                const SizedBox(width: 12),
 
                 // Right: Radio button
                 Container(
@@ -584,14 +595,14 @@ class _PaywallScreenState extends State<PaywallScreen>
   Widget _buildContinueFreeSection(AppColorScheme colors, AppLocalizations l10n) {
     final separatorStyle = TextStyle(
       fontFamily: AppTextStyles.bodyFont(context),
-      fontSize: 12,
-      color: colors.textDisabled.withValues(alpha: 0.6),
+      fontSize: 13,
+      color: colors.textTertiary.withOpacity(0.5),
     );
     final linkStyle = TextStyle(
       fontFamily: AppTextStyles.bodyFont(context),
-      fontSize: 12,
+      fontSize: 13,
       fontWeight: FontWeight.w400,
-      color: colors.textDisabled,
+      color: colors.textTertiary,
     );
 
     return Column(
@@ -609,8 +620,11 @@ class _PaywallScreenState extends State<PaywallScreen>
             ),
           ),
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        Wrap(
+          alignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 2,
+          runSpacing: 0,
           children: [
             CupertinoButton(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),

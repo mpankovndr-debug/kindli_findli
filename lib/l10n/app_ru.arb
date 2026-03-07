@@ -207,6 +207,8 @@
     }
   },
   "customHabitSubmit": "Добавить",
+  "editHabitTitle": "Редактировать привычку",
+  "editHabitSave": "Сохранить",
   "customHabitCreatedTitle": "Привычка создана",
   "customHabitCreatedMessage": "«{title}» добавлена в твои привычки.",
   "@customHabitCreatedMessage": {
@@ -623,6 +625,8 @@
   "profileSignInApple": "Войти через Apple",
   "profileSignedInGoogle": "Вход выполнен через Google",
   "profileSignedInApple": "Вход выполнен через Apple",
+  "signOutWarningTitle": "Выйти?",
+  "signOutWarningMessage": "Данные хранятся только на этом устройстве. Они не будут доступны на других устройствах или после переустановки.",
   "profileSignOut": "Выйти",
   "profileDeleteData": "Удалить мои данные",
   "profileVersion": "Intended v1.0.0",

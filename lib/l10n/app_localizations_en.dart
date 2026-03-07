@@ -428,6 +428,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get customHabitSubmit => 'Add to my habits';
 
   @override
+  String get editHabitTitle => 'Edit habit';
+
+  @override
+  String get editHabitSave => 'Save';
+
+  @override
   String get customHabitCreatedTitle => 'Habit created';
 
   @override
@@ -1564,6 +1570,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileSignedInApple => 'Signed in with Apple';
+
+  @override
+  String get signOutWarningTitle => 'Sign out?';
+
+  @override
+  String get signOutWarningMessage =>
+      'Your data stays on this device only. You won\'t be able to access it on other devices or after reinstalling.';
 
   @override
   String get profileSignOut => 'Sign out';

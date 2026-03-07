@@ -300,14 +300,6 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
                                               .withOpacity(0.4),
                                           width: 1.5,
                                         ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: colors.textPrimary
-                                                .withOpacity(0.06),
-                                            blurRadius: 32,
-                                            offset: const Offset(0, 8),
-                                          ),
-                                        ],
                                       ),
                                       child: Center(
                                         child: Image.asset(
@@ -688,10 +680,12 @@ class _SignInSheetState extends State<_SignInSheet> {
     setState(() => _isSigningIn = true);
     try {
       final credential = await AuthService.signInWithApple();
+      if (credential == null) return; // User cancelled
       if (mounted) Navigator.pop(context);
       widget.onSignInComplete(credential);
-    } catch (e) {
+    } catch (e, stackTrace) {
       debugPrint('Sign in with Apple error: $e');
+      debugPrint('Stack trace: $stackTrace');
     } finally {
       if (mounted) setState(() => _isSigningIn = false);
     }

@@ -117,7 +117,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (credential?.user != null && context.mounted) {
         await context.read<RevenueCatService>().logIn(credential!.user!.uid);
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      debugPrint('Sign in with Apple error: $e');
+      debugPrint('Stack trace: $stackTrace');
       if (context.mounted) {
         _showSignInError(context, e);
       }
@@ -127,7 +129,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showSignInError(BuildContext context, Object error) {
-    debugPrint('Sign in with Apple error: $error');
+    debugPrint('Sign in error details: $error');
     showCupertinoDialog(
       context: context,
       builder: (ctx) => CupertinoAlertDialog(
@@ -627,8 +629,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _showSubscriptionManagement() async {
     final l10n = AppLocalizations.of(context);
     final rc = context.read<RevenueCatService>();
-    String plan = l10n.paywallLifetime;
-    String price = rc.lifetimePriceString ?? l10n.paywallLifetimePrice;
+    String plan = '';
+    String price = '';
     String renewalDate = '—';
 
     try {
@@ -657,8 +659,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           }
         }
       }
-    } catch (_) {
-      // Fallback: still show modal with generic info
+    } catch (e) {
+      debugPrint('Subscription info error: $e');
+    }
+
+    // Fallback for lifetime or when entitlement lookup failed
+    if (plan.isEmpty) {
+      plan = l10n.paywallLifetime;
+      price = rc.lifetimePriceString ?? l10n.paywallLifetimePrice;
     }
 
     if (!mounted) return;
@@ -2361,37 +2369,69 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             child: CupertinoButton(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 20, vertical: 10),
-                              onPressed: () async {
-                                final revenueCat =
-                                    context.read<RevenueCatService>();
-                                final userState = context.read<UserState>();
-                                final themeProvider =
-                                    context.read<ThemeProvider>();
-                                final nav = Navigator.of(context);
+                              onPressed: () {
+                                showStyledPopup(
+                                  context: context,
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        l10n.signOutWarningTitle,
+                                        style: AppTextStyles.h2(context),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        l10n.signOutWarningMessage,
+                                        style: AppTextStyles.body(context),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      const SizedBox(height: 32),
+                                      styledPrimaryButton(
+                                        label: l10n.profileSignOut,
+                                        color: colors.destructive,
+                                        onPressed: () async {
+                                          Navigator.pop(context);
+                                          final revenueCat =
+                                              context.read<RevenueCatService>();
+                                          final userState = context.read<UserState>();
+                                          final themeProvider =
+                                              context.read<ThemeProvider>();
+                                          final nav = Navigator.of(context);
 
-                                await revenueCat.logOut();
-                                await AuthService.signOut();
+                                          await revenueCat.logOut();
+                                          await AuthService.signOut();
 
-                                await NotificationScheduler.cancelAll();
+                                          await NotificationScheduler.cancelAll();
 
-                                // Clear only auth-related prefs, preserve habits/theme/onboarding
-                                final prefs =
-                                    await SharedPreferences.getInstance();
-                                await prefs.remove('user_name');
+                                          // Clear only auth-related prefs, preserve habits/theme/onboarding
+                                          final prefs =
+                                              await SharedPreferences.getInstance();
+                                          await prefs.remove('user_name');
 
-                                userState.reset();
-                                userNameNotifier.value = null;
+                                          userState.reset();
+                                          userNameNotifier.value = null;
 
-                                // Reset to default theme only if current theme requires Intended+
-                                if (themeProvider.isPremiumTheme(themeProvider.theme)) {
-                                  themeProvider.setTheme(AppTheme.warmClay);
-                                }
+                                          // Reset to default theme only if current theme requires Intended+
+                                          if (themeProvider.isPremiumTheme(themeProvider.theme)) {
+                                            themeProvider.setTheme(AppTheme.warmClay);
+                                          }
 
-                                nav.pushAndRemoveUntil(
-                                  CupertinoPageRoute(
-                                    builder: (_) => const MainTabs(),
+                                          nav.pushAndRemoveUntil(
+                                            CupertinoPageRoute(
+                                              builder: (_) => const MainTabs(),
+                                            ),
+                                            (route) => false,
+                                          );
+                                        },
+                                      ),
+                                      const SizedBox(height: 14),
+                                      styledSecondaryButton(
+                                        label: l10n.commonCancel,
+                                        onPressed: () => Navigator.pop(context),
+                                      ),
+                                    ],
                                   ),
-                                  (route) => false,
                                 );
                               },
                               child: Row(

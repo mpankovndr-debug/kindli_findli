@@ -1,7 +1,7 @@
-import 'dart:convert';
-import 'dart:math';
-
-import 'package:crypto/crypto.dart';
+// TODO: Uncomment when nonce-based Apple Sign-In is re-enabled
+// import 'dart:convert';
+// import 'dart:math';
+// import 'package:crypto/crypto.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -35,27 +35,45 @@ class AuthService {
 
   static Future<UserCredential?> signInWithApple() async {
     try {
-      final rawNonce = _generateNonce();
-      final hashedNonce = sha256.convert(utf8.encode(rawNonce)).toString();
-
       final appleCredential = await SignInWithApple.getAppleIDCredential(
         scopes: [
           AppleIDAuthorizationScopes.email,
           AppleIDAuthorizationScopes.fullName,
         ],
-        nonce: hashedNonce,
       );
+
+      if (appleCredential.identityToken == null) {
+        throw Exception('Apple Sign-In returned null identity token');
+      }
+      debugPrint('idToken prefix: ${appleCredential.identityToken?.substring(0, 20)}');
+
       final oauthCredential = OAuthProvider('apple.com').credential(
         idToken: appleCredential.identityToken,
-        rawNonce: rawNonce,
+        accessToken: appleCredential.authorizationCode,
       );
       final result = await _auth.signInWithCredential(oauthCredential);
+
+      // Apple only sends the name on the FIRST sign-in — save it to Firebase
+      if (result.user?.displayName == null) {
+        final displayName = [appleCredential.givenName, appleCredential.familyName]
+            .where((s) => s != null && s.isNotEmpty)
+            .join(' ');
+        if (displayName.isNotEmpty) {
+          await result.user?.updateDisplayName(displayName);
+        }
+      }
+
       try { _analytics.logLogin(loginMethod: 'apple'); } catch (_) {}
       return result;
     } on SignInWithAppleAuthorizationException catch (e) {
       if (e.code == AuthorizationErrorCode.canceled) {
         return null; // User cancelled — not an error
       }
+      debugPrint('Apple Sign-In auth exception: ${e.code} — ${e.message}');
+      rethrow;
+    } catch (e, stackTrace) {
+      debugPrint('Apple Sign-In error: $e');
+      debugPrint('Stack trace: $stackTrace');
       rethrow;
     }
   }
@@ -78,19 +96,21 @@ class AuthService {
     final user = _auth.currentUser;
     if (user == null) return false;
     try {
-      final rawNonce = _generateNonce();
-      final hashedNonce = sha256.convert(utf8.encode(rawNonce)).toString();
-
       final appleCredential = await SignInWithApple.getAppleIDCredential(
         scopes: [
           AppleIDAuthorizationScopes.email,
           AppleIDAuthorizationScopes.fullName,
         ],
-        nonce: hashedNonce,
       );
+
+      if (appleCredential.identityToken == null) {
+        throw Exception('Apple reauth returned null identity token');
+      }
+      debugPrint('reauth idToken prefix: ${appleCredential.identityToken?.substring(0, 20)}');
+
       final oauthCredential = OAuthProvider('apple.com').credential(
         idToken: appleCredential.identityToken,
-        rawNonce: rawNonce,
+        accessToken: appleCredential.authorizationCode,
       );
       await user.reauthenticateWithCredential(oauthCredential);
 
@@ -104,17 +124,23 @@ class AuthService {
       if (e.code == AuthorizationErrorCode.canceled) {
         return false;
       }
+      debugPrint('Apple reauth auth exception: ${e.code} — ${e.message}');
+      rethrow;
+    } catch (e, stackTrace) {
+      debugPrint('Apple reauth error: $e');
+      debugPrint('Stack trace: $stackTrace');
       rethrow;
     }
   }
 
-  static String _generateNonce([int length = 32]) {
-    const charset =
-        '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
-    final random = Random.secure();
-    return List.generate(length, (_) => charset[random.nextInt(charset.length)])
-        .join();
-  }
+  // TODO: Uncomment when nonce-based Apple Sign-In is re-enabled
+  // static String _generateNonce([int length = 32]) {
+  //   const charset =
+  //       '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
+  //   final random = Random.secure();
+  //   return List.generate(length, (_) => charset[random.nextInt(charset.length)])
+  //       .join();
+  // }
 
   static bool get isAppleUser {
     return _auth.currentUser?.providerData

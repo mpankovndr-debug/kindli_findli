@@ -622,6 +622,59 @@ class OnboardingState extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> renameCustomHabit(String oldTitle, String newTitle) async {
+    final idx = _customHabits.indexOf(oldTitle);
+    if (idx == -1) return;
+    _customHabits[idx] = newTitle;
+
+    final hIdx = userHabits.indexOf(oldTitle);
+    if (hIdx != -1) {
+      userHabits[hIdx] = newTitle;
+    }
+
+    if (_pinnedHabit == oldTitle) {
+      _pinnedHabit = newTitle;
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('custom_habits', _customHabits);
+    await prefs.setStringList('user_habits', userHabits);
+    if (_pinnedHabit == newTitle) {
+      await prefs.setString('pinned_habit', newTitle);
+    }
+
+    // Migrate completion history keys
+    final oldId = _habitId(oldTitle);
+    final newId = _habitId(newTitle);
+    if (oldId != newId) {
+      for (final key in prefs.getKeys().toList()) {
+        if (key.startsWith('habit_done_${oldId}_')) {
+          final date = key.substring('habit_done_${oldId}_'.length);
+          final value = prefs.getBool(key) ?? false;
+          await prefs.setBool('habit_done_${newId}_$date', value);
+          await prefs.remove(key);
+        }
+      }
+      // Migrate title cache
+      final cachedTitle = prefs.getString('habit_title_$oldId');
+      if (cachedTitle != null) {
+        await prefs.setString('habit_title_$newId', newTitle);
+        await prefs.remove('habit_title_$oldId');
+      }
+    }
+
+    notifyListeners();
+  }
+
+  static String _habitId(String habitTitle) {
+    return habitTitle
+        .toLowerCase()
+        .trim()
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
+        .replaceAll(RegExp(r'_+'), '_')
+        .replaceAll(RegExp(r'^_|_$'), '');
+  }
+
   bool isCustomHabit(String habitTitle) {
     return _customHabits.contains(habitTitle);
   }

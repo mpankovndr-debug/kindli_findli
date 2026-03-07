@@ -428,6 +428,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get customHabitSubmit => 'Добавить';
 
   @override
+  String get editHabitTitle => 'Редактировать привычку';
+
+  @override
+  String get editHabitSave => 'Сохранить';
+
+  @override
   String get customHabitCreatedTitle => 'Привычка создана';
 
   @override
@@ -1558,6 +1564,13 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get profileSignedInApple => 'Вход выполнен через Apple';
+
+  @override
+  String get signOutWarningTitle => 'Выйти?';
+
+  @override
+  String get signOutWarningMessage =>
+      'Данные хранятся только на этом устройстве. Они не будут доступны на других устройствах или после переустановки.';
 
   @override
   String get profileSignOut => 'Выйти';
