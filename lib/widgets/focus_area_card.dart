@@ -6,6 +6,7 @@ import '../utils/text_styles.dart';
 
 class FocusAreaCard extends StatefulWidget {
   final String label;
+  final String? subtitle;
   final IconData icon;
   final bool selected;
   final VoidCallback onTap;
@@ -13,6 +14,7 @@ class FocusAreaCard extends StatefulWidget {
   const FocusAreaCard({
     super.key,
     required this.label,
+    this.subtitle,
     required this.icon,
     required this.selected,
     required this.onTap,
@@ -117,16 +119,35 @@ class _FocusAreaCardState extends State<FocusAreaCard>
             ),
             const SizedBox(width: 14),
             Expanded(
-              child: Text(
-                widget.label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontFamily: AppTextStyles.bodyFont(context),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: colors.textPrimary,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontFamily: AppTextStyles.bodyFont(context),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: colors.textPrimary,
+                    ),
+                  ),
+                  if (widget.subtitle != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      widget.subtitle!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: AppTextStyles.bodyFont(context),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                        color: colors.textPrimary.withOpacity(0.55),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
             if (widget.selected)

@@ -26,8 +26,9 @@
       }
     }
   },
-  "welcomeSubtitle": "Маленькие шаги.\nБез давления.",
+  "welcomeSubtitle": "Маленькие ежедневные привычки —\nбез чувства вины.",
   "onboardingTagline": "Намерение важнее совершенства.",
+  "onboardingDescriptor": "Без серий. Без очков. Просто маленькие намерения, которые приносят радость.",
   "onboardingNamePrompt": "Как тебя зовут?",
   "onboardingSkipForNow": "Пропустить",
   "onboardingNameTooLong": "Имя должно быть короче {max} символов",
@@ -41,13 +42,21 @@
   "onboardingNameInappropriate": "Пожалуйста, выбери другое имя",
   "onboardingOops": "Упс",
   "focusAreaHealth": "Здоровье",
+  "focusAreaHealthSub": "Твоё тело скажет спасибо.",
   "focusAreaMood": "Настроение",
+  "focusAreaMoodSub": "Замечай, как себя чувствуешь. Это уже шаг.",
   "focusAreaProductivity": "Продуктивность",
+  "focusAreaProductivitySub": "По одному делу. Этого достаточно.",
   "focusAreaHome": "Дом и порядок",
+  "focusAreaHomeSub": "Маленький порядок — большое спокойствие.",
   "focusAreaRelationships": "Отношения",
+  "focusAreaRelationshipsSub": "Люди, которые важны.",
   "focusAreaCreativity": "Творчество",
+  "focusAreaCreativitySub": "Создавай что угодно.",
   "focusAreaFinances": "Финансы",
+  "focusAreaFinancesSub": "Маленькие шаги к спокойствию за деньги.",
   "focusAreaSelfCare": "Забота о себе",
+  "focusAreaSelfCareSub": "Те маленькие радости, которые ты всё время откладываешь.",
   "focusAreasTitle": "Направления",
   "focusAreasPromptWithName": "Что тебе сейчас важно, {name}?",
   "@focusAreasPromptWithName": {
@@ -123,7 +132,7 @@
       }
     }
   },
-  "habitRevealDescription": "Ты можешь добавлять, убирать или искать другие привычки в любое время. Не нужно делать всё сразу.",
+  "habitRevealDescription": "Выбирай то, что подходит. Пропускай то, что нет. Не нужно делать всё — достаточно одного.",
   "habitRevealBegin": "Давай начнём",
   "habitsHoldForOptions": "Удерживай привычку для опций",
   "habitsCompleteOnboarding": "Заверши настройку, чтобы начать",
@@ -549,12 +558,12 @@
   "@monthSummaryIntentions": { "placeholders": { "count": { "type": "int" } } },
   "monthSummaryTopIntention": "Чаще всего: {intention}",
   "@monthSummaryTopIntention": { "placeholders": { "intention": { "type": "String" } } },
-  "paywallTitle": "Intended+",
-  "paywallDescription": "Intended бесплатен. Intended+ даёт больше свободы сделать приложение своим.",
-  "paywallFeature1": "Создавай привычки, которые подходят именно тебе",
-  "paywallFeature2": "Меняй привычки, когда меняется жизнь",
-  "paywallFeature3": "Карточки достижений, чтобы делиться успехом",
-  "paywallFeature4": "Меняй направления так часто, как нужно",
+  "paywallTitle": "Сделай его полностью своим.",
+  "paywallDescription": "Intended бесплатен навсегда.\nIntended+ убирает ограничения, чтобы ты мог настроить всё под свою жизнь.",
+  "paywallFeature1": "Безлимитные свои привычки — потому что жизнь у всех разная",
+  "paywallFeature2": "Свободно меняй привычки, когда меняется жизнь",
+  "paywallFeature3": "Делись карточками достижений с близкими",
+  "paywallFeature4": "Меняй направления когда угодно — без ожидания",
   "paywallMonthly": "Ежемесячно",
   "paywallMonthlyPrice": "€6,99",
   "paywallMonthlyPeriod": "в месяц",
@@ -584,7 +593,7 @@
   "subscriptionPlan": "Тариф",
   "subscriptionPrice": "Цена",
   "subscriptionRenews": "Продление",
-  "subscriptionThankYou": "Спасибо, что поддерживаешь Intended.\nТвоя подписка помогает нам\nстроить более мягкий способ расти.",
+  "subscriptionThankYou": "Спасибо, что поддерживаешь Intended.\nТы помогаешь нам строить\nмягкую альтернативу культуре продуктивности.",
   "subscriptionManage": "Управление в App Store",
   "profileTitle": "Профиль",
   "profileNameError": "Хм",
@@ -889,5 +898,10 @@
 
   "onboardingAlreadyHaveAccount": "Войти",
   "onboardingSignInWithApple": "Войти через Apple",
-  "onboardingSignInWithGoogle": "Войти через Google"
+  "onboardingSignInWithGoogle": "Войти через Google",
+
+  "onboardingPhilosophyLabel": "Прежде чем мы начнём",
+  "onboardingPhilosophyHeading": "Это не трекер.\nЭто возвращение к себе.",
+  "onboardingPhilosophyBody": "Никаких серий. Никакой вины за пропуск.\nТвой прогресс не обнуляется. Достаточно одного маленького намерения.",
+  "onboardingPhilosophyCta": "Понятно"
 }

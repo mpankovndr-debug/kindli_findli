@@ -68,10 +68,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get welcomeSubtitle => 'Small steps.\nNo pressure.';
+  String get welcomeSubtitle => 'Build small daily habits\nwithout the guilt.';
 
   @override
   String get onboardingTagline => 'Intention, not perfection.';
+
+  @override
+  String get onboardingDescriptor =>
+      'No streaks. No scores. Just small daily intentions that feel good.';
 
   @override
   String get onboardingNamePrompt => 'What should we call you?';
@@ -95,25 +99,49 @@ class AppLocalizationsEn extends AppLocalizations {
   String get focusAreaHealth => 'Health';
 
   @override
+  String get focusAreaHealthSub => 'Your body will thank you.';
+
+  @override
   String get focusAreaMood => 'Mood';
+
+  @override
+  String get focusAreaMoodSub => 'Notice how you feel. That\'s the first step.';
 
   @override
   String get focusAreaProductivity => 'Productivity';
 
   @override
+  String get focusAreaProductivitySub => 'One thing at a time. That\'s plenty.';
+
+  @override
   String get focusAreaHome => 'Home & organization';
+
+  @override
+  String get focusAreaHomeSub => 'Small tidying, big calm.';
 
   @override
   String get focusAreaRelationships => 'Relationships';
 
   @override
+  String get focusAreaRelationshipsSub => 'The people who matter.';
+
+  @override
   String get focusAreaCreativity => 'Creativity';
+
+  @override
+  String get focusAreaCreativitySub => 'Make something. Anything.';
 
   @override
   String get focusAreaFinances => 'Finances';
 
   @override
+  String get focusAreaFinancesSub => 'Tiny money moves, real peace of mind.';
+
+  @override
   String get focusAreaSelfCare => 'Self-care';
+
+  @override
+  String get focusAreaSelfCareSub => 'The small luxuries you keep skipping.';
 
   @override
   String get focusAreasTitle => 'Focus areas';
@@ -214,7 +242,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get habitRevealDescription =>
-      'You can add, remove, or browse more habits anytime. There\'s no pressure to do them all.';
+      'Pick what feels right. Skip what doesn\'t. There\'s no pressure to do them all — one is enough.';
 
   @override
   String get habitRevealBegin => 'Let\'s begin';
@@ -1355,23 +1383,26 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get paywallTitle => 'Intended+';
+  String get paywallTitle => 'Make it fully yours.';
 
   @override
   String get paywallDescription =>
-      'Intended is free forever. Intended+ gives you more freedom to make it yours.';
+      'Intended is free forever.\nIntended+ removes the limits so you can shape it around your life.';
 
   @override
-  String get paywallFeature1 => 'Create habits that truly fit your life';
+  String get paywallFeature1 =>
+      'Unlimited custom habits — because your life isn\'t one-size-fits-all';
 
   @override
-  String get paywallFeature2 => 'Change your habits whenever life changes';
+  String get paywallFeature2 => 'Swap habits freely when life changes';
 
   @override
-  String get paywallFeature3 => 'Shareable milestone achievement cards';
+  String get paywallFeature3 =>
+      'Share milestone cards with people you care about';
 
   @override
-  String get paywallFeature4 => 'Adjust your focus areas as often as you need';
+  String get paywallFeature4 =>
+      'Change focus areas whenever you need — no waiting';
 
   @override
   String get paywallMonthly => 'Monthly';
@@ -1460,7 +1491,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subscriptionThankYou =>
-      'Thank you for supporting Intended.\nYour subscription helps us keep\nbuilding a kinder way to grow.';
+      'Thank you for supporting Intended.\nYou\'re helping us build a kinder\nalternative to hustle culture.';
 
   @override
   String get subscriptionManage => 'Manage in App Store';
@@ -2241,4 +2272,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingSignInWithGoogle => 'Sign in with Google';
+
+  @override
+  String get onboardingPhilosophyLabel => 'Before we begin';
+
+  @override
+  String get onboardingPhilosophyHeading =>
+      'This isn\'t a tracker.\nIt\'s a return to yourself.';
+
+  @override
+  String get onboardingPhilosophyBody =>
+      'No streaks to maintain. No guilt for skipping.\nYour progress never resets. One small intention is enough.';
+
+  @override
+  String get onboardingPhilosophyCta => 'Got it';
 }

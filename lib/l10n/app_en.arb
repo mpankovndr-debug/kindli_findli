@@ -23,9 +23,10 @@
   "welcomeTitle": "Welcome to Intended",
   "welcomeTitleWithName": "Welcome to Intended,\n{name}",
   "@welcomeTitleWithName": { "placeholders": { "name": { "type": "String" } } },
-  "welcomeSubtitle": "Small steps.\nNo pressure.",
+  "welcomeSubtitle": "Build small daily habits\nwithout the guilt.",
 
   "onboardingTagline": "Intention, not perfection.",
+  "onboardingDescriptor": "No streaks. No scores. Just small daily intentions that feel good.",
   "onboardingNamePrompt": "What should we call you?",
   "onboardingSkipForNow": "Skip for now",
   "onboardingNameTooLong": "Name should be under {max} characters",
@@ -34,13 +35,21 @@
   "onboardingOops": "Oops",
 
   "focusAreaHealth": "Health",
+  "focusAreaHealthSub": "Your body will thank you.",
   "focusAreaMood": "Mood",
+  "focusAreaMoodSub": "Notice how you feel. That's the first step.",
   "focusAreaProductivity": "Productivity",
+  "focusAreaProductivitySub": "One thing at a time. That's plenty.",
   "focusAreaHome": "Home & organization",
+  "focusAreaHomeSub": "Small tidying, big calm.",
   "focusAreaRelationships": "Relationships",
+  "focusAreaRelationshipsSub": "The people who matter.",
   "focusAreaCreativity": "Creativity",
+  "focusAreaCreativitySub": "Make something. Anything.",
   "focusAreaFinances": "Finances",
+  "focusAreaFinancesSub": "Tiny money moves, real peace of mind.",
   "focusAreaSelfCare": "Self-care",
+  "focusAreaSelfCareSub": "The small luxuries you keep skipping.",
   "focusAreasTitle": "Focus areas",
   "focusAreasPromptWithName": "What matters to you right now, {name}?",
   "@focusAreasPromptWithName": { "placeholders": { "name": { "type": "String" } } },
@@ -77,7 +86,7 @@
   "@habitRevealSubtitleOneArea": { "placeholders": { "area": { "type": "String" } } },
   "habitRevealSubtitleTwoAreas": "Based on {area1} & {area2}",
   "@habitRevealSubtitleTwoAreas": { "placeholders": { "area1": { "type": "String" }, "area2": { "type": "String" } } },
-  "habitRevealDescription": "You can add, remove, or browse more habits anytime. There's no pressure to do them all.",
+  "habitRevealDescription": "Pick what feels right. Skip what doesn't. There's no pressure to do them all — one is enough.",
   "habitRevealBegin": "Let's begin",
 
   "habitsHoldForOptions": "Long press a habit for options",
@@ -444,12 +453,12 @@
   "monthSummaryTopIntention": "Your most frequent intention: {intention}",
   "@monthSummaryTopIntention": { "placeholders": { "intention": { "type": "String" } } },
 
-  "paywallTitle": "Intended+",
-  "paywallDescription": "Intended is free forever. Intended+ gives you more freedom to make it yours.",
-  "paywallFeature1": "Create habits that truly fit your life",
-  "paywallFeature2": "Change your habits whenever life changes",
-  "paywallFeature3": "Shareable milestone achievement cards",
-  "paywallFeature4": "Adjust your focus areas as often as you need",
+  "paywallTitle": "Make it fully yours.",
+  "paywallDescription": "Intended is free forever.\nIntended+ removes the limits so you can shape it around your life.",
+  "paywallFeature1": "Unlimited custom habits — because your life isn't one-size-fits-all",
+  "paywallFeature2": "Swap habits freely when life changes",
+  "paywallFeature3": "Share milestone cards with people you care about",
+  "paywallFeature4": "Change focus areas whenever you need — no waiting",
   "paywallMonthly": "Monthly",
   "paywallMonthlyPrice": "€6.99",
   "paywallMonthlyPeriod": "per month",
@@ -480,7 +489,7 @@
   "subscriptionPlan": "Plan",
   "subscriptionPrice": "Price",
   "subscriptionRenews": "Renews",
-  "subscriptionThankYou": "Thank you for supporting Intended.\nYour subscription helps us keep\nbuilding a kinder way to grow.",
+  "subscriptionThankYou": "Thank you for supporting Intended.\nYou're helping us build a kinder\nalternative to hustle culture.",
   "subscriptionManage": "Manage in App Store",
 
   "profileTitle": "Profile",
@@ -754,5 +763,10 @@
 
   "onboardingAlreadyHaveAccount": "Sign in",
   "onboardingSignInWithApple": "Sign in with Apple",
-  "onboardingSignInWithGoogle": "Sign in with Google"
+  "onboardingSignInWithGoogle": "Sign in with Google",
+
+  "onboardingPhilosophyLabel": "Before we begin",
+  "onboardingPhilosophyHeading": "This isn't a tracker.\nIt's a return to yourself.",
+  "onboardingPhilosophyBody": "No streaks to maintain. No guilt for skipping.\nYour progress never resets. One small intention is enough.",
+  "onboardingPhilosophyCta": "Got it"
 }

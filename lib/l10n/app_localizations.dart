@@ -215,7 +215,7 @@ abstract class AppLocalizations {
   /// No description provided for @welcomeSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Small steps.\nNo pressure.'**
+  /// **'Build small daily habits\nwithout the guilt.'**
   String get welcomeSubtitle;
 
   /// No description provided for @onboardingTagline.
@@ -223,6 +223,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Intention, not perfection.'**
   String get onboardingTagline;
+
+  /// No description provided for @onboardingDescriptor.
+  ///
+  /// In en, this message translates to:
+  /// **'No streaks. No scores. Just small daily intentions that feel good.'**
+  String get onboardingDescriptor;
 
   /// No description provided for @onboardingNamePrompt.
   ///
@@ -260,11 +266,23 @@ abstract class AppLocalizations {
   /// **'Health'**
   String get focusAreaHealth;
 
+  /// No description provided for @focusAreaHealthSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Your body will thank you.'**
+  String get focusAreaHealthSub;
+
   /// No description provided for @focusAreaMood.
   ///
   /// In en, this message translates to:
   /// **'Mood'**
   String get focusAreaMood;
+
+  /// No description provided for @focusAreaMoodSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Notice how you feel. That\'s the first step.'**
+  String get focusAreaMoodSub;
 
   /// No description provided for @focusAreaProductivity.
   ///
@@ -272,11 +290,23 @@ abstract class AppLocalizations {
   /// **'Productivity'**
   String get focusAreaProductivity;
 
+  /// No description provided for @focusAreaProductivitySub.
+  ///
+  /// In en, this message translates to:
+  /// **'One thing at a time. That\'s plenty.'**
+  String get focusAreaProductivitySub;
+
   /// No description provided for @focusAreaHome.
   ///
   /// In en, this message translates to:
   /// **'Home & organization'**
   String get focusAreaHome;
+
+  /// No description provided for @focusAreaHomeSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Small tidying, big calm.'**
+  String get focusAreaHomeSub;
 
   /// No description provided for @focusAreaRelationships.
   ///
@@ -284,11 +314,23 @@ abstract class AppLocalizations {
   /// **'Relationships'**
   String get focusAreaRelationships;
 
+  /// No description provided for @focusAreaRelationshipsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'The people who matter.'**
+  String get focusAreaRelationshipsSub;
+
   /// No description provided for @focusAreaCreativity.
   ///
   /// In en, this message translates to:
   /// **'Creativity'**
   String get focusAreaCreativity;
+
+  /// No description provided for @focusAreaCreativitySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Make something. Anything.'**
+  String get focusAreaCreativitySub;
 
   /// No description provided for @focusAreaFinances.
   ///
@@ -296,11 +338,23 @@ abstract class AppLocalizations {
   /// **'Finances'**
   String get focusAreaFinances;
 
+  /// No description provided for @focusAreaFinancesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Tiny money moves, real peace of mind.'**
+  String get focusAreaFinancesSub;
+
   /// No description provided for @focusAreaSelfCare.
   ///
   /// In en, this message translates to:
   /// **'Self-care'**
   String get focusAreaSelfCare;
+
+  /// No description provided for @focusAreaSelfCareSub.
+  ///
+  /// In en, this message translates to:
+  /// **'The small luxuries you keep skipping.'**
+  String get focusAreaSelfCareSub;
 
   /// No description provided for @focusAreasTitle.
   ///
@@ -467,7 +521,7 @@ abstract class AppLocalizations {
   /// No description provided for @habitRevealDescription.
   ///
   /// In en, this message translates to:
-  /// **'You can add, remove, or browse more habits anytime. There\'s no pressure to do them all.'**
+  /// **'Pick what feels right. Skip what doesn\'t. There\'s no pressure to do them all — one is enough.'**
   String get habitRevealDescription;
 
   /// No description provided for @habitRevealBegin.
@@ -2441,37 +2495,37 @@ abstract class AppLocalizations {
   /// No description provided for @paywallTitle.
   ///
   /// In en, this message translates to:
-  /// **'Intended+'**
+  /// **'Make it fully yours.'**
   String get paywallTitle;
 
   /// No description provided for @paywallDescription.
   ///
   /// In en, this message translates to:
-  /// **'Intended is free forever. Intended+ gives you more freedom to make it yours.'**
+  /// **'Intended is free forever.\nIntended+ removes the limits so you can shape it around your life.'**
   String get paywallDescription;
 
   /// No description provided for @paywallFeature1.
   ///
   /// In en, this message translates to:
-  /// **'Create habits that truly fit your life'**
+  /// **'Unlimited custom habits — because your life isn\'t one-size-fits-all'**
   String get paywallFeature1;
 
   /// No description provided for @paywallFeature2.
   ///
   /// In en, this message translates to:
-  /// **'Change your habits whenever life changes'**
+  /// **'Swap habits freely when life changes'**
   String get paywallFeature2;
 
   /// No description provided for @paywallFeature3.
   ///
   /// In en, this message translates to:
-  /// **'Shareable milestone achievement cards'**
+  /// **'Share milestone cards with people you care about'**
   String get paywallFeature3;
 
   /// No description provided for @paywallFeature4.
   ///
   /// In en, this message translates to:
-  /// **'Adjust your focus areas as often as you need'**
+  /// **'Change focus areas whenever you need — no waiting'**
   String get paywallFeature4;
 
   /// No description provided for @paywallMonthly.
@@ -2639,7 +2693,7 @@ abstract class AppLocalizations {
   /// No description provided for @subscriptionThankYou.
   ///
   /// In en, this message translates to:
-  /// **'Thank you for supporting Intended.\nYour subscription helps us keep\nbuilding a kinder way to grow.'**
+  /// **'Thank you for supporting Intended.\nYou\'re helping us build a kinder\nalternative to hustle culture.'**
   String get subscriptionThankYou;
 
   /// No description provided for @subscriptionManage.
@@ -4075,6 +4129,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sign in with Google'**
   String get onboardingSignInWithGoogle;
+
+  /// No description provided for @onboardingPhilosophyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Before we begin'**
+  String get onboardingPhilosophyLabel;
+
+  /// No description provided for @onboardingPhilosophyHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'This isn\'t a tracker.\nIt\'s a return to yourself.'**
+  String get onboardingPhilosophyHeading;
+
+  /// No description provided for @onboardingPhilosophyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'No streaks to maintain. No guilt for skipping.\nYour progress never resets. One small intention is enough.'**
+  String get onboardingPhilosophyBody;
+
+  /// No description provided for @onboardingPhilosophyCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get onboardingPhilosophyCta;
 }
 
 class _AppLocalizationsDelegate

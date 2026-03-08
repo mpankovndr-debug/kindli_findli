@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import 'daily_reminder_screen.dart';
 import 'onboarding_state.dart';
+import '../features/onboarding/screens/philosophy_screen.dart';
 import '../l10n/app_localizations.dart';
 import '../services/analytics_service.dart';
 import '../theme/app_colors.dart';
@@ -60,6 +61,30 @@ class FocusAreasScreen extends StatelessWidget {
         return l10n.focusAreaSelfCare;
       default:
         return area;
+    }
+  }
+
+  /// Returns the localized subtitle for a focus area identifier.
+  static String? localizedAreaSubtitle(AppLocalizations l10n, String area) {
+    switch (area) {
+      case 'Health':
+        return l10n.focusAreaHealthSub;
+      case 'Mood':
+        return l10n.focusAreaMoodSub;
+      case 'Productivity':
+        return l10n.focusAreaProductivitySub;
+      case 'Home & organization':
+        return l10n.focusAreaHomeSub;
+      case 'Relationships':
+        return l10n.focusAreaRelationshipsSub;
+      case 'Creativity':
+        return l10n.focusAreaCreativitySub;
+      case 'Finances':
+        return l10n.focusAreaFinancesSub;
+      case 'Self-care':
+        return l10n.focusAreaSelfCareSub;
+      default:
+        return null;
     }
   }
 
@@ -205,10 +230,29 @@ class FocusAreasScreen extends StatelessWidget {
     AnalyticsService.logScreenView('focus_areas');
     AnalyticsService.logOnboardingStepCompleted('focus_areas');
 
+    final selectedAreas =
+        context.read<OnboardingState>().focusAreas.toList();
+
     Navigator.push(
       context,
       PageRouteBuilder(
-        pageBuilder: (_, __, ___) => const DailyReminderScreen(),
+        pageBuilder: (_, __, ___) => PhilosophyScreen(
+          selectedAreas: selectedAreas,
+          onContinue: () {
+            AnalyticsService.logScreenView('philosophy');
+            AnalyticsService.logOnboardingStepCompleted('philosophy');
+            Navigator.push(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (_, __, ___) => const DailyReminderScreen(),
+                transitionDuration: const Duration(milliseconds: 400),
+                transitionsBuilder: (_, animation, __, child) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
+              ),
+            );
+          },
+        ),
         transitionDuration: const Duration(milliseconds: 400),
         transitionsBuilder: (_, animation, __, child) {
           return FadeTransition(opacity: animation, child: child);
@@ -333,6 +377,7 @@ class FocusAreasScreen extends StatelessWidget {
                               padding: const EdgeInsets.only(bottom: 14),
                               child: FocusAreaCard(
                                 label: localizedAreaName(l10n, area),
+                                subtitle: localizedAreaSubtitle(l10n, area),
                                 icon: areaIcons[area]!,
                                 selected: selected,
                                 onTap: () => _handleAreaTap(context, area),

@@ -2952,6 +2952,8 @@ class _FocusAreaChangeScreenState extends State<_FocusAreaChangeScreen> {
                               child: FocusAreaCard(
                                 label: FocusAreasScreen.localizedAreaName(
                                     l10n, area),
+                                subtitle: FocusAreasScreen.localizedAreaSubtitle(
+                                    l10n, area),
                                 icon: FocusAreasScreen.areaIcons[area]!,
                                 selected: selected,
                                 onTap: () => _toggleArea(area),

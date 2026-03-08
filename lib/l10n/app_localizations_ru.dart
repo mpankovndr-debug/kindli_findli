@@ -68,10 +68,15 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get welcomeSubtitle => 'Маленькие шаги.\nБез давления.';
+  String get welcomeSubtitle =>
+      'Маленькие ежедневные привычки —\nбез чувства вины.';
 
   @override
   String get onboardingTagline => 'Намерение важнее совершенства.';
+
+  @override
+  String get onboardingDescriptor =>
+      'Без серий. Без очков. Просто маленькие намерения, которые приносят радость.';
 
   @override
   String get onboardingNamePrompt => 'Как тебя зовут?';
@@ -94,25 +99,50 @@ class AppLocalizationsRu extends AppLocalizations {
   String get focusAreaHealth => 'Здоровье';
 
   @override
+  String get focusAreaHealthSub => 'Твоё тело скажет спасибо.';
+
+  @override
   String get focusAreaMood => 'Настроение';
+
+  @override
+  String get focusAreaMoodSub => 'Замечай, как себя чувствуешь. Это уже шаг.';
 
   @override
   String get focusAreaProductivity => 'Продуктивность';
 
   @override
+  String get focusAreaProductivitySub => 'По одному делу. Этого достаточно.';
+
+  @override
   String get focusAreaHome => 'Дом и порядок';
+
+  @override
+  String get focusAreaHomeSub => 'Маленький порядок — большое спокойствие.';
 
   @override
   String get focusAreaRelationships => 'Отношения';
 
   @override
+  String get focusAreaRelationshipsSub => 'Люди, которые важны.';
+
+  @override
   String get focusAreaCreativity => 'Творчество';
+
+  @override
+  String get focusAreaCreativitySub => 'Создавай что угодно.';
 
   @override
   String get focusAreaFinances => 'Финансы';
 
   @override
+  String get focusAreaFinancesSub => 'Маленькие шаги к спокойствию за деньги.';
+
+  @override
   String get focusAreaSelfCare => 'Забота о себе';
+
+  @override
+  String get focusAreaSelfCareSub =>
+      'Те маленькие радости, которые ты всё время откладываешь.';
 
   @override
   String get focusAreasTitle => 'Направления';
@@ -213,7 +243,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get habitRevealDescription =>
-      'Ты можешь добавлять, убирать или искать другие привычки в любое время. Не нужно делать всё сразу.';
+      'Выбирай то, что подходит. Пропускай то, что нет. Не нужно делать всё — достаточно одного.';
 
   @override
   String get habitRevealBegin => 'Давай начнём';
@@ -1346,24 +1376,24 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get paywallTitle => 'Intended+';
+  String get paywallTitle => 'Сделай его полностью своим.';
 
   @override
   String get paywallDescription =>
-      'Intended бесплатен. Intended+ даёт больше свободы сделать приложение своим.';
+      'Intended бесплатен навсегда.\nIntended+ убирает ограничения, чтобы ты мог настроить всё под свою жизнь.';
 
   @override
   String get paywallFeature1 =>
-      'Создавай привычки, которые подходят именно тебе';
+      'Безлимитные свои привычки — потому что жизнь у всех разная';
 
   @override
-  String get paywallFeature2 => 'Меняй привычки, когда меняется жизнь';
+  String get paywallFeature2 => 'Свободно меняй привычки, когда меняется жизнь';
 
   @override
-  String get paywallFeature3 => 'Карточки достижений, чтобы делиться успехом';
+  String get paywallFeature3 => 'Делись карточками достижений с близкими';
 
   @override
-  String get paywallFeature4 => 'Меняй направления так часто, как нужно';
+  String get paywallFeature4 => 'Меняй направления когда угодно — без ожидания';
 
   @override
   String get paywallMonthly => 'Ежемесячно';
@@ -1453,7 +1483,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get subscriptionThankYou =>
-      'Спасибо, что поддерживаешь Intended.\nТвоя подписка помогает нам\nстроить более мягкий способ расти.';
+      'Спасибо, что поддерживаешь Intended.\nТы помогаешь нам строить\nмягкую альтернативу культуре продуктивности.';
 
   @override
   String get subscriptionManage => 'Управление в App Store';
@@ -2239,4 +2269,18 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get onboardingSignInWithGoogle => 'Войти через Google';
+
+  @override
+  String get onboardingPhilosophyLabel => 'Прежде чем мы начнём';
+
+  @override
+  String get onboardingPhilosophyHeading =>
+      'Это не трекер.\nЭто возвращение к себе.';
+
+  @override
+  String get onboardingPhilosophyBody =>
+      'Никаких серий. Никакой вины за пропуск.\nТвой прогресс не обнуляется. Достаточно одного маленького намерения.';
+
+  @override
+  String get onboardingPhilosophyCta => 'Понятно';
 }

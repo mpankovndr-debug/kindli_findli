@@ -336,16 +336,32 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
                           // Tagline
                           FadeTransition(
                             opacity: _fadeTagline,
-                            child: Text(
-                              l10n.onboardingTagline,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontFamily: AppTextStyles.bodyFont(context),
-                                fontSize: 17,
-                                fontWeight: FontWeight.w500,
-                                color: colors.ctaSecondary,
-                                height: 1.6,
-                              ),
+                            child: Column(
+                              children: [
+                                Text(
+                                  l10n.onboardingTagline,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontFamily: AppTextStyles.bodyFont(context),
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w500,
+                                    color: colors.ctaSecondary,
+                                    height: 1.6,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  l10n.onboardingDescriptor,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontFamily: AppTextStyles.bodyFont(context),
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w400,
+                                    color: colors.ctaSecondary.withOpacity(0.7),
+                                    height: 1.5,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
 
