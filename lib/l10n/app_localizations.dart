@@ -227,7 +227,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingDescriptor.
   ///
   /// In en, this message translates to:
-  /// **'No streaks. No scores. Just small daily intentions that feel good.'**
+  /// **'No streaks. No scores. Just small steps that bring you closer to yourself.'**
   String get onboardingDescriptor;
 
   /// No description provided for @onboardingNamePrompt.
@@ -931,6 +931,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count}/50 characters'**
   String customHabitCharCount(int count);
+
+  /// No description provided for @customHabitFocusAreaLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Which area is this for?'**
+  String get customHabitFocusAreaLabel;
 
   /// No description provided for @customHabitSubmit.
   ///
@@ -4298,6 +4304,12 @@ abstract class AppLocalizations {
   /// **'Share'**
   String get reflectionShare;
 
+  /// No description provided for @insightsGrowthHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Insights get sharper every week'**
+  String get insightsGrowthHint;
+
   /// No description provided for @reflectionTeaser.
   ///
   /// In en, this message translates to:
@@ -4381,6 +4393,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'All habits from this pack are already active'**
   String get packSwapAllActive;
+
+  /// No description provided for @packSectionHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'CURATED PACKS'**
+  String get packSectionHeader;
+
+  /// No description provided for @packHabitsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 habit} other{{count} habits}}'**
+  String packHabitsCount(int count);
+
+  /// No description provided for @packFreeBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get packFreeBadge;
+
+  /// No description provided for @packStartButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Start {packName}'**
+  String packStartButton(String packName);
+
+  /// No description provided for @packHabitsInPack.
+  ///
+  /// In en, this message translates to:
+  /// **'HABITS IN THIS PACK'**
+  String get packHabitsInPack;
+
+  /// No description provided for @packAllActive.
+  ///
+  /// In en, this message translates to:
+  /// **'All habits already active'**
+  String get packAllActive;
+
+  /// No description provided for @packHabitActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get packHabitActive;
+
+  /// No description provided for @packGentleMorningsName.
+  ///
+  /// In en, this message translates to:
+  /// **'Gentle Mornings'**
+  String get packGentleMorningsName;
+
+  /// No description provided for @packGentleMorningsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A small morning ritual that doesn\'t feel like a 5am hustle routine'**
+  String get packGentleMorningsSubtitle;
+
+  /// No description provided for @packGentleMorningsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Four tiny habits that work as a gentle sequence — hydrate, breathe fresh air, center yourself, then orient your day. No alarms at dawn required.'**
+  String get packGentleMorningsDescription;
+
+  /// No description provided for @packWindingDownName.
+  ///
+  /// In en, this message translates to:
+  /// **'Winding Down'**
+  String get packWindingDownName;
+
+  /// No description provided for @packWindingDownSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'An evening decompression set. Intentionally short.'**
+  String get packWindingDownSubtitle;
+
+  /// No description provided for @packWindingDownDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'A small ritual for letting the day go. Stop, reflect, get comfortable, enjoy one thing. That\'s the whole evening plan.'**
+  String get packWindingDownDescription;
+
+  /// No description provided for @packTinyResetsName.
+  ///
+  /// In en, this message translates to:
+  /// **'Tiny Resets'**
+  String get packTinyResetsName;
+
+  /// No description provided for @packTinyResetsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'For mid-week moments when everything feels chaotic'**
+  String get packTinyResetsSubtitle;
+
+  /// No description provided for @packTinyResetsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'When overwhelm hits, these four micro-actions create a small pocket of control. Not a productivity system — a rescue kit.'**
+  String get packTinyResetsDescription;
 
   /// No description provided for @packCreativeSparkName.
   ///

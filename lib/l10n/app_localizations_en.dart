@@ -75,7 +75,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingDescriptor =>
-      'No streaks. No scores. Just small daily intentions that feel good.';
+      'No streaks. No scores. Just small steps that bring you closer to yourself.';
 
   @override
   String get onboardingNamePrompt => 'What should we call you?';
@@ -451,6 +451,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String customHabitCharCount(int count) {
     return '$count/50 characters';
   }
+
+  @override
+  String get customHabitFocusAreaLabel => 'Which area is this for?';
 
   @override
   String get customHabitSubmit => 'Add to my habits';
@@ -2400,6 +2403,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reflectionShare => 'Share';
 
   @override
+  String get insightsGrowthHint => 'Insights get sharper every week';
+
+  @override
   String get reflectionTeaser => 'There\'s more to your week';
 
   @override
@@ -2447,6 +2453,70 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get packSwapAllActive =>
       'All habits from this pack are already active';
+
+  @override
+  String get packSectionHeader => 'CURATED PACKS';
+
+  @override
+  String packHabitsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count habits',
+      one: '1 habit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get packFreeBadge => 'Free';
+
+  @override
+  String packStartButton(String packName) {
+    return 'Start $packName';
+  }
+
+  @override
+  String get packHabitsInPack => 'HABITS IN THIS PACK';
+
+  @override
+  String get packAllActive => 'All habits already active';
+
+  @override
+  String get packHabitActive => 'Active';
+
+  @override
+  String get packGentleMorningsName => 'Gentle Mornings';
+
+  @override
+  String get packGentleMorningsSubtitle =>
+      'A small morning ritual that doesn\'t feel like a 5am hustle routine';
+
+  @override
+  String get packGentleMorningsDescription =>
+      'Four tiny habits that work as a gentle sequence — hydrate, breathe fresh air, center yourself, then orient your day. No alarms at dawn required.';
+
+  @override
+  String get packWindingDownName => 'Winding Down';
+
+  @override
+  String get packWindingDownSubtitle =>
+      'An evening decompression set. Intentionally short.';
+
+  @override
+  String get packWindingDownDescription =>
+      'A small ritual for letting the day go. Stop, reflect, get comfortable, enjoy one thing. That\'s the whole evening plan.';
+
+  @override
+  String get packTinyResetsName => 'Tiny Resets';
+
+  @override
+  String get packTinyResetsSubtitle =>
+      'For mid-week moments when everything feels chaotic';
+
+  @override
+  String get packTinyResetsDescription =>
+      'When overwhelm hits, these four micro-actions create a small pocket of control. Not a productivity system — a rescue kit.';
 
   @override
   String get packCreativeSparkName => 'Creative Spark';

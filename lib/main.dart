@@ -20,6 +20,7 @@ import 'utils/habit_l10n.dart';
 import 'theme/app_colors.dart';
 import 'theme/theme_provider.dart';
 import 'onboarding_v2/onboarding_state.dart';
+import 'onboarding_v2/focus_areas_screen.dart';
 import 'onboarding_v2/welcome_v2_screen.dart';
 import 'state/user_state.dart';
 import 'screens/paywall_screen.dart';
@@ -29,6 +30,7 @@ import 'screens/habit_completion_modal.dart';
 import 'models/moment.dart';
 import 'services/moments_service.dart';
 import 'services/milestone_service.dart';
+import 'services/reflection_service.dart';
 import 'utils/profanity_filter.dart'; // Add this
 import 'utils/responsive_utils.dart';
 import 'utils/text_styles.dart';
@@ -523,6 +525,7 @@ void main() {
       // Create OnboardingState instance and load saved habits
       final onboardingState = OnboardingState();
       await onboardingState.loadUserHabits();
+      await ReflectionService.loadCustomHabitFocusAreas();
 
       // Sync the saved name to OnboardingState
       if (savedName != null &&
@@ -1947,6 +1950,7 @@ class _CreateCustomHabitScreen extends StatefulWidget {
 
 class _CreateCustomHabitScreenState extends State<_CreateCustomHabitScreen> {
   final _controller = TextEditingController();
+  String? _selectedFocusArea;
 
   bool get _canSave {
     final text = _controller.text.trim();
@@ -1954,6 +1958,17 @@ class _CreateCustomHabitScreenState extends State<_CreateCustomHabitScreen> {
         text.length >= 3 &&
         text.length <= 50 &&
         !ProfanityFilter.containsProfanity(text);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Default to first category
+    final allCategories =
+        OnboardingState.habitsByCategory.keys.toList();
+    if (allCategories.isNotEmpty) {
+      _selectedFocusArea = allCategories.first;
+    }
   }
 
   @override
@@ -1972,7 +1987,7 @@ class _CreateCustomHabitScreenState extends State<_CreateCustomHabitScreen> {
     final navContext = navigator.context;
 
     await onboardingState.addCustomHabit(habitTitle,
-        hasBoost: userState.hasBoost);
+        hasBoost: userState.hasBoost, focusArea: _selectedFocusArea);
     AnalyticsService.logCustomHabitCreated(habitTitle);
 
     if (!mounted) return;
@@ -2143,6 +2158,114 @@ class _CreateCustomHabitScreenState extends State<_CreateCustomHabitScreen> {
                           fontFamily: AppTextStyles.bodyFont(context),
                         ),
                       ),
+
+                      // ============================================================
+                      // FOCUS AREA PICKER
+                      // ============================================================
+                      Builder(builder: (context) {
+                        final allCategories =
+                            OnboardingState.habitsByCategory.keys.toList();
+                        if (allCategories.isEmpty) {
+                          return const SizedBox.shrink();
+                        }
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 28),
+                            Text(
+                              l10n.customHabitFocusAreaLabel,
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                                color: colors.textSecondary,
+                                fontFamily: AppTextStyles.bodyFont(context),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Wrap(
+                              spacing: 10,
+                              runSpacing: 10,
+                              children: allCategories.map((area) {
+                                final isSelected =
+                                    _selectedFocusArea == area;
+                                final catColor =
+                                    AppColors.categoryColors[area] ??
+                                        colors.accentMuted;
+                                final icon =
+                                    FocusAreasScreen.areaIcons[area];
+                                return GestureDetector(
+                                  onTap: () {
+                                    setState(
+                                        () => _selectedFocusArea = area);
+                                  },
+                                  child: AnimatedContainer(
+                                    duration: const Duration(
+                                        milliseconds: 200),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 14, vertical: 10),
+                                    decoration: BoxDecoration(
+                                      color: isSelected
+                                          ? catColor.withOpacity(0.18)
+                                          : isDark
+                                              ? Color.lerp(colors.cardBackground,
+                                                  catColor, 0.08)!
+                                                  .withOpacity(colors
+                                                      .cardBackgroundOpacity)
+                                              : Color.lerp(const Color(0xFFFFFFFF),
+                                                  catColor, 0.10)!
+                                                  .withOpacity(0.5),
+                                      borderRadius:
+                                          BorderRadius.circular(20),
+                                      border: Border.all(
+                                        color: isSelected
+                                            ? catColor.withOpacity(0.5)
+                                            : isDark
+                                                ? colors.borderCard
+                                                    .withOpacity(colors
+                                                        .borderCardOpacity)
+                                                : colors.buttonDark
+                                                    .withOpacity(0.12),
+                                        width: isSelected ? 1.5 : 1,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        if (icon != null) ...[
+                                          Icon(
+                                            icon,
+                                            size: 16,
+                                            color: isSelected
+                                                ? catColor
+                                                : colors.textSecondary,
+                                          ),
+                                          const SizedBox(width: 6),
+                                        ],
+                                        Text(
+                                          localizeCategoryName(
+                                              area, l10n),
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: isSelected
+                                                ? FontWeight.w600
+                                                : FontWeight.w500,
+                                            color: isSelected
+                                                ? colors.textPrimary
+                                                : colors.textSecondary,
+                                            fontFamily:
+                                                AppTextStyles.bodyFont(
+                                                    context),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ],
+                        );
+                      }),
 
                       const Spacer(),
 
@@ -3636,10 +3759,17 @@ class _HabitCardState extends State<_HabitCard>
 
     // Determine accent color based on state
     final Color effectiveAccentColor;
-    if (isCustom) {
-      effectiveAccentColor = colors.accentCustom; // Dusty rose
-    } else if (widget.isPinned) {
+    if (widget.isPinned) {
       effectiveAccentColor = colors.pinnedAccent; // Theme-aware pinned accent
+    } else if (isCustom) {
+      // Use focus area color for custom habits
+      final customArea = context
+          .read<OnboardingState>()
+          .customHabitFocusAreas[widget.habitTitle];
+      effectiveAccentColor = customArea != null
+          ? (AppColors.categoryColors[customArea] ??
+              colors.accentCustom)
+          : colors.accentCustom;
     } else {
       effectiveAccentColor =
           widget.accentColor ?? colors.accentRegular; // Warm taupe
@@ -3908,17 +4038,8 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
-  // Category accent colors — static theme-independent
-  static const Map<String, Color> categoryColors = {
-    'Health': AppColors.catHealth, // Terracotta
-    'Mood': AppColors.catMood, // Dusty Plum
-    'Productivity': AppColors.catProductivity, // Dusty Olive
-    'Home & organization': AppColors.catHome, // Warm Sage
-    'Relationships': AppColors.catRelationships, // Soft Clay
-    'Creativity': AppColors.catCreativity, // Dusty Mauve
-    'Finances': AppColors.catFinances, // Warm Amber
-    'Self-care': AppColors.catSelfCare, // Warm Sand
-  };
+  // Category accent colors — use shared map from AppColors
+  static const Map<String, Color> categoryColors = AppColors.categoryColors;
 
   @override
   void initState() {
@@ -4570,7 +4691,7 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
                   Padding(
                     padding: const EdgeInsets.only(left: 4, bottom: 14),
                     child: Text(
-                      'CURATED PACKS',
+                      l10n.packSectionHeader,
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -4629,14 +4750,20 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
                             ),
                           ),
                         ),
-                        ...habits.map((habit) => Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: _BrowseHabitCard(
-                                habitTitle: habit,
-                                accentColor: accentColor,
-                                onAdd: () => _addHabit(habit),
-                              ),
-                            )),
+                        ...habits.map((habit) {
+                          final isCustomActive = onboardingState
+                              .isCustomHabit(habit);
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: _BrowseHabitCard(
+                              habitTitle: habit,
+                              accentColor: accentColor,
+                              onAdd: isCustomActive
+                                  ? null
+                                  : () => _addHabit(habit),
+                            ),
+                          );
+                        }),
                       ],
                     ),
                   );
@@ -4668,6 +4795,14 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
           result[category] = availableHabits;
         }
       }
+
+      // Add custom habits assigned to this category (already active ones)
+      for (final customHabit in state.customHabits) {
+        final area = state.customHabitFocusAreas[customHabit];
+        if (area == category && state.userHabits.contains(customHabit)) {
+          result.putIfAbsent(category, () => []).insert(0, customHabit);
+        }
+      }
     }
 
     return result;
@@ -4681,12 +4816,12 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
 class _BrowseHabitCard extends StatelessWidget {
   final String habitTitle;
   final Color accentColor;
-  final VoidCallback onAdd;
+  final VoidCallback? onAdd;
 
   const _BrowseHabitCard({
     required this.habitTitle,
     required this.accentColor,
-    required this.onAdd,
+    this.onAdd,
   });
 
   @override
@@ -4760,31 +4895,50 @@ class _BrowseHabitCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 16),
 
-                      // Add button
-                      GestureDetector(
-                        onTap: onAdd,
-                        child: Container(
-                          width: 42,
-                          height: 42,
-                          decoration: BoxDecoration(
-                            color: colors.ctaPrimary,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: colors.ctaPrimary.withOpacity(0.3),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
+                      // Add button or Active badge
+                      if (onAdd != null)
+                        GestureDetector(
+                          onTap: onAdd,
+                          child: Container(
+                            width: 42,
+                            height: 42,
+                            decoration: BoxDecoration(
+                              color: colors.ctaPrimary,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: colors.ctaPrimary.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            alignment: Alignment.center,
+                            child: const Icon(
+                              CupertinoIcons.plus,
+                              size: 20,
+                              color: Color(0xFFFFFFFF),
+                            ),
                           ),
-                          alignment: Alignment.center,
-                          child: const Icon(
-                            CupertinoIcons.plus,
-                            size: 20,
-                            color: Color(0xFFFFFFFF),
+                        )
+                      else
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: accentColor.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            l10n.packHabitActive,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: accentColor,
+                              fontFamily: 'DMSans',
+                            ),
                           ),
                         ),
-                      ),
                     ],
                   ),
                 ),
@@ -4795,6 +4949,48 @@ class _BrowseHabitCard extends StatelessWidget {
       ),
     );
   }
+}
+
+// ============================================================
+// PACK LOCALIZATION HELPER
+// ============================================================
+
+({String name, String subtitle, String description}) _localizedPack(
+  AppLocalizations l10n,
+  CuratedPack pack,
+) {
+  return switch (pack.id) {
+    'gentle_mornings' => (
+      name: l10n.packGentleMorningsName,
+      subtitle: l10n.packGentleMorningsSubtitle,
+      description: l10n.packGentleMorningsDescription,
+    ),
+    'winding_down' => (
+      name: l10n.packWindingDownName,
+      subtitle: l10n.packWindingDownSubtitle,
+      description: l10n.packWindingDownDescription,
+    ),
+    'tiny_resets' => (
+      name: l10n.packTinyResetsName,
+      subtitle: l10n.packTinyResetsSubtitle,
+      description: l10n.packTinyResetsDescription,
+    ),
+    'creative_spark' => (
+      name: l10n.packCreativeSparkName,
+      subtitle: l10n.packCreativeSparkSubtitle,
+      description: l10n.packCreativeSparkDescription,
+    ),
+    'stay_connected' => (
+      name: l10n.packStayConnectedName,
+      subtitle: l10n.packStayConnectedSubtitle,
+      description: l10n.packStayConnectedDescription,
+    ),
+    _ => (
+      name: pack.name,
+      subtitle: pack.subtitle,
+      description: pack.description,
+    ),
+  };
 }
 
 // ============================================================
@@ -4814,6 +5010,8 @@ class _CuratedPackCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.watch<ThemeProvider>().colors;
     final isDark = context.watch<ThemeProvider>().theme.isDark;
+    final l10n = AppLocalizations.of(context);
+    final lp = _localizedPack(l10n, pack);
 
     return GestureDetector(
       onTap: onTap,
@@ -4884,7 +5082,7 @@ class _CuratedPackCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  pack.name,
+                  lp.name,
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -4897,7 +5095,7 @@ class _CuratedPackCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${pack.habitIds.length} habits',
+                  l10n.packHabitsCount(pack.habitIds.length),
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
@@ -4907,7 +5105,7 @@ class _CuratedPackCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  pack.subtitle,
+                  lp.subtitle,
                   style: TextStyle(
                     fontSize: 11,
                     color: colors.textSecondary.withOpacity(0.7),
@@ -4957,7 +5155,7 @@ class _PackTierBadge extends StatelessWidget {
         ),
       ),
       child: Text(
-        isFree ? 'Free' : 'Intended+',
+        isFree ? AppLocalizations.of(context).packFreeBadge : 'Intended+',
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w600,
@@ -4985,6 +5183,8 @@ class _PackDetailSheet extends StatelessWidget {
     final colors = themeProvider.colors;
     final isDark = themeProvider.theme.isDark;
     final onboardingState = context.watch<OnboardingState>();
+    final l10n = AppLocalizations.of(context);
+    final lp = _localizedPack(l10n, pack);
 
     // Count how many habits are already active
     final alreadyActive =
@@ -5054,7 +5254,7 @@ class _PackDetailSheet extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        pack.name,
+                        lp.name,
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.w600,
@@ -5070,7 +5270,7 @@ class _PackDetailSheet extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  pack.subtitle,
+                  lp.subtitle,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 15,
@@ -5082,7 +5282,7 @@ class _PackDetailSheet extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  pack.description,
+                  lp.description,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
@@ -5098,7 +5298,7 @@ class _PackDetailSheet extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(left: 4, bottom: 14),
                   child: Text(
-                    'HABITS IN THIS PACK',
+                    l10n.packHabitsInPack,
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
@@ -5117,7 +5317,7 @@ class _PackDetailSheet extends StatelessWidget {
                           .map((e) => e.key)
                           .firstOrNull;
                   final accentColor = category != null
-                      ? (_BrowseHabitsSheetState.categoryColors[category] ??
+                      ? (AppColors.categoryColors[category] ??
                           colors.accentMuted)
                       : colors.accentMuted;
                   final isActive = onboardingState.userHabits.contains(habitId);
@@ -5194,7 +5394,7 @@ class _PackDetailSheet extends StatelessWidget {
                                                 BorderRadius.circular(8),
                                           ),
                                           child: Text(
-                                            'Active',
+                                            l10n.packHabitActive,
                                             style: TextStyle(
                                               fontSize: 11,
                                               fontWeight: FontWeight.w600,
@@ -5265,7 +5465,7 @@ class _PackStartButton extends StatelessWidget {
         ),
         alignment: Alignment.center,
         child: Text(
-          'All habits already active',
+          AppLocalizations.of(context).packAllActive,
           style: TextStyle(
             fontFamily: AppTextStyles.bodyFont(context),
             fontSize: 16,
@@ -5317,7 +5517,7 @@ class _PackStartButton extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 16),
               borderRadius: BorderRadius.circular(20),
               child: Text(
-                'Start this pack',
+                AppLocalizations.of(context).packStartButton(_localizedPack(AppLocalizations.of(context), pack).name),
                 style: TextStyle(
                   fontFamily: AppTextStyles.bodyFont(context),
                   fontSize: 17,
@@ -5353,16 +5553,20 @@ class _PackStartButton extends StatelessWidget {
     final newHabits = pack.habitIds
         .where((h) => !onboardingState.userHabits.contains(h))
         .toList();
-    final totalAfter = onboardingState.userHabits.length + newHabits.length;
 
-    // If adding would push total above 6, show swap flow
-    if (newHabits.isNotEmpty && totalAfter > 6) {
+    // Habits that exist but aren't part of this pack (candidates to swap out)
+    final habitsOutsidePack = onboardingState.userHabits
+        .where((h) => !pack.habitIds.contains(h))
+        .where((h) => !onboardingState.customHabits.contains(h))
+        .toList();
+
+    // Show swap flow whenever user has habits outside the pack
+    if (habitsOutsidePack.isNotEmpty && newHabits.isNotEmpty) {
       if (!context.mounted) return;
       Navigator.pop(context); // Close detail sheet
       showCupertinoModalPopup(
         context: context,
         barrierColor: Colors.black.withValues(alpha: 0.5),
-        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
         builder: (_) => _PackSwapSheet(
           pack: pack,
           newHabitsCount: newHabits.length,
@@ -5371,21 +5575,24 @@ class _PackStartButton extends StatelessWidget {
       return;
     }
 
-    // Room available — add directly
-    final added = await onboardingState.addHabitsFromPack(pack.habitIds);
+    // Grab root overlay before async gap
+    final rootOverlay = Overlay.of(context, rootOverlay: true);
+    final nav = Navigator.of(context);
+    final l10n = AppLocalizations.of(context);
+    final lp = _localizedPack(l10n, pack);
 
-    if (!context.mounted) return;
+    // No conflicts — add directly
+    final added = await onboardingState.addHabitsFromPack(pack.habitIds);
+    await onboardingState.applyPackFocusAreas(pack.focusAreas);
 
     HapticFeedback.mediumImpact();
 
-    // Grab root overlay before popping, so toast has a valid context
-    final rootOverlay = Overlay.of(context, rootOverlay: true);
     final alreadyActive = pack.habitIds.length - added;
     final message = alreadyActive > 0
         ? '$added new habits added ($alreadyActive already active)'
-        : '${pack.name} added — $added habits ready to go';
+        : '${lp.name} added — $added habits ready to go';
 
-    Navigator.pop(context); // Close detail sheet
+    nav.pop(); // Close detail sheet
     AppToast.showOnOverlay(rootOverlay, message);
   }
 }
@@ -5423,6 +5630,7 @@ class _PackSwapSheetState extends State<_PackSwapSheet> {
   Future<void> _confirm() async {
     final state = context.read<OnboardingState>();
     final l10n = AppLocalizations.of(context);
+    final lp = _localizedPack(l10n, widget.pack);
 
     // Set aside selected habits
     await state.setAsideHabits(_selected.toList());
@@ -5430,13 +5638,16 @@ class _PackSwapSheetState extends State<_PackSwapSheet> {
     // Add pack habits
     final added = await state.addHabitsFromPack(widget.pack.habitIds);
 
+    // Update focus areas to match the pack
+    await state.applyPackFocusAreas(widget.pack.focusAreas);
+
     if (!mounted) return;
 
     HapticFeedback.mediumImpact();
     Navigator.pop(context);
 
     final message = added > 0
-        ? '${widget.pack.name} ${l10n.packSwapAdded(added)}'
+        ? '${lp.name} ${l10n.packSwapAdded(added)}'
         : l10n.packSwapAllActive;
     AppToast.show(context, message);
   }
@@ -5529,7 +5740,7 @@ class _PackSwapSheetState extends State<_PackSwapSheet> {
                     child: Column(
                       children: [
                         for (final habit in swappable)
-                          _buildHabitRow(habit, colors),
+                          _buildHabitRow(habit, colors, l10n),
                       ],
                     ),
                   ),
@@ -5565,7 +5776,7 @@ class _PackSwapSheetState extends State<_PackSwapSheet> {
                           borderRadius: BorderRadius.circular(20),
                           child: Text(
                             l10n.packSwapConfirm(
-                                _selected.length, widget.pack.name),
+                                _selected.length, _localizedPack(l10n, widget.pack).name),
                             style: TextStyle(
                               fontFamily: AppTextStyles.bodyFont(context),
                               fontSize: 16,
@@ -5589,7 +5800,7 @@ class _PackSwapSheetState extends State<_PackSwapSheet> {
     );
   }
 
-  Widget _buildHabitRow(String habit, AppColorScheme colors) {
+  Widget _buildHabitRow(String habit, AppColorScheme colors, AppLocalizations l10n) {
     final isChecked = _selected.contains(habit);
 
     return GestureDetector(
@@ -5640,7 +5851,7 @@ class _PackSwapSheetState extends State<_PackSwapSheet> {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                habit,
+                localizeHabitName(habit, l10n),
                 style: TextStyle(
                   fontFamily: 'DM Sans',
                   fontSize: 15,

@@ -138,7 +138,7 @@ class ThemePicker extends StatelessWidget {
           children: [
             Expanded(
               child: AspectRatio(
-                aspectRatio: compact ? 1.4 : 1.1,
+                aspectRatio: compact ? 2.0 : 1.1,
                 child: _buildCard(context, themes[i], themeProvider, currentTheme),
               ),
             ),
@@ -146,7 +146,7 @@ class ThemePicker extends StatelessWidget {
             if (i + 1 < themes.length)
               Expanded(
                 child: AspectRatio(
-                  aspectRatio: compact ? 1.4 : 1.1,
+                  aspectRatio: compact ? 2.0 : 1.1,
                   child: _buildCard(context, themes[i + 1], themeProvider, currentTheme),
                 ),
               )
@@ -215,32 +215,57 @@ class ThemePicker extends StatelessWidget {
                   ),
                 ],
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 8),
-                  Container(
-                    width: 28,
-                    height: 28,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: entry.accentColor,
+              child: compact
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 22,
+                          height: 22,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: entry.accentColor,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          entry.name,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.75)
+                                : Colors.black.withValues(alpha: 0.65),
+                          ),
+                        ),
+                      ],
+                    )
+                  : Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 8),
+                        Container(
+                          width: 28,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: entry.accentColor,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          entry.name,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.75)
+                                : Colors.black.withValues(alpha: 0.65),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    entry.name,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.75)
-                          : Colors.black.withValues(alpha: 0.65),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                ],
-              ),
             ),
             if (isSelected)
               Positioned(
@@ -268,40 +293,64 @@ class ThemePicker extends StatelessWidget {
                     color: entry.swatchColor,
                   ),
                   child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.lock_rounded,
-                          size: 20,
-                          color: isDark
-                              ? Colors.white.withValues(alpha: 0.35)
-                              : Colors.black.withValues(alpha: 0.3),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          tierLabel ?? AppLocalizations.of(context).appNameIntendedPlus,
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: isDark
-                                ? Colors.white.withValues(alpha: 0.35)
-                                : Colors.black.withValues(alpha: 0.3),
-                            fontWeight: FontWeight.w500,
+                    child: compact
+                        ? Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.lock_rounded,
+                                size: 16,
+                                color: isDark
+                                    ? Colors.white.withValues(alpha: 0.35)
+                                    : Colors.black.withValues(alpha: 0.3),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                entry.name,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  color: isDark
+                                      ? Colors.white.withValues(alpha: 0.50)
+                                      : Colors.black.withValues(alpha: 0.45),
+                                ),
+                              ),
+                            ],
+                          )
+                        : Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.lock_rounded,
+                                size: 20,
+                                color: isDark
+                                    ? Colors.white.withValues(alpha: 0.35)
+                                    : Colors.black.withValues(alpha: 0.3),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                tierLabel ?? AppLocalizations.of(context).appNameIntendedPlus,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: isDark
+                                      ? Colors.white.withValues(alpha: 0.35)
+                                      : Colors.black.withValues(alpha: 0.3),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                entry.name,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  color: isDark
+                                      ? Colors.white.withValues(alpha: 0.50)
+                                      : Colors.black.withValues(alpha: 0.45),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          entry.name,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                            color: isDark
-                                ? Colors.white.withValues(alpha: 0.50)
-                                : Colors.black.withValues(alpha: 0.45),
-                          ),
-                        ),
-                      ],
-                    ),
                   ),
                 ),
               ),

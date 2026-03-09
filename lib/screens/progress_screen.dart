@@ -16,6 +16,8 @@ import '../utils/text_styles.dart';
 import '../models/share_card_type.dart';
 import '../services/milestone_service.dart';
 import '../state/user_state.dart';
+import '../models/reflection_data.dart';
+import '../services/reflection_service.dart';
 import '../widgets/weekly_reflection_card.dart';
 import 'moments_collection_screen.dart';
 import 'share_card_picker_screen.dart';
@@ -49,6 +51,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
   }
 
   Future<WeekStats>? _weekStatsFuture;
+  ReflectionData? _reflectionData;
 
   List<String> _getAffirmations(AppLocalizations l10n) => [
     l10n.affirmation1, l10n.affirmation2, l10n.affirmation3,
@@ -76,6 +79,12 @@ class _ProgressScreenState extends State<ProgressScreen> {
     setState(() {
       _weekStatsFuture = WeekStatsService.calculate(habits, DateTime.now());
     });
+    _loadReflection();
+  }
+
+  Future<void> _loadReflection() async {
+    final data = await ReflectionService.getCurrentReflection();
+    if (mounted) setState(() => _reflectionData = data);
   }
 
   @override
@@ -217,6 +226,23 @@ class _ProgressScreenState extends State<ProgressScreen> {
                             padding: const EdgeInsets.only(bottom: 24),
                             child: WeeklyReflectionCard(stats: stats),
                           ),
+
+                          // 2. Insights growth hint (weeks 1-2)
+                          if (_reflectionData != null && !_reflectionData!.hasPatternData)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 20),
+                              child: Text(
+                                l10n.insightsGrowthHint,
+                                style: TextStyle(
+                                  fontFamily: 'DM Sans',
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w400,
+                                  color: colors.textSecondary.withValues(alpha: 0.6),
+                                  height: 1.4,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
 
                           // 3. Motivational Text
                           Padding(

@@ -177,6 +177,18 @@ class AppColors {
   static const Color catFinances =      Color(0xFFC49B5A);
   static const Color catSelfCare =      Color(0xFFB8A089);
 
+  /// Maps focus area name → category accent color.
+  static const Map<String, Color> categoryColors = {
+    'Health': catHealth,
+    'Mood': catMood,
+    'Productivity': catProductivity,
+    'Home & organization': catHome,
+    'Relationships': catRelationships,
+    'Creativity': catCreativity,
+    'Finances': catFinances,
+    'Self-care': catSelfCare,
+  };
+
   static const AppColorScheme warmClay = AppColorScheme(
     bgGradientTop:               Color(0xFFF2D4B0),
     bgGradientMid:               Color(0xFFE8BFA0),

@@ -315,12 +315,35 @@ class ReflectionService {
     return '${fmt.format(start)} – ${fmt.format(end)}';
   }
 
-  /// Maps a habit title to its focus-area category (null for custom habits).
+  /// Maps a habit title to its focus-area category.
+  /// For custom habits, looks up their assigned focus area from prefs.
   static String? _categoryForHabit(String habit) {
     for (final entry in OnboardingState.habitsByCategory.entries) {
       if (entry.value.contains(habit)) return entry.key;
     }
-    return null;
+    // Check custom habit focus areas from persisted data
+    return _customHabitFocusAreas[habit];
+  }
+
+  static Map<String, String> _customHabitFocusAreas = {};
+
+  /// Public accessor for other services (e.g. MilestoneService).
+  static String? customHabitFocusAreaFor(String habit) =>
+      _customHabitFocusAreas[habit];
+
+  /// Call once at startup or before reflection calculation to load custom
+  /// habit focus area mappings.
+  static Future<void> loadCustomHabitFocusAreas() async {
+    final prefs = await SharedPreferences.getInstance();
+    final json = prefs.getString('custom_habit_focus_areas');
+    if (json != null) {
+      try {
+        _customHabitFocusAreas =
+            Map<String, String>.from(jsonDecode(json) as Map);
+      } catch (_) {
+        _customHabitFocusAreas = {};
+      }
+    }
   }
 
   /// Stores the current week's [dailyActivity] in the rolling 4-week history.

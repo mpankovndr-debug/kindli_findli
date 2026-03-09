@@ -76,7 +76,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get onboardingDescriptor =>
-      'Без серий. Без очков. Просто маленькие намерения, которые приносят радость.';
+      'Без стриков. Без оценок. Просто маленькие шаги, которые возвращают тебя к себе.';
 
   @override
   String get onboardingNamePrompt => 'Как тебя зовут?';
@@ -453,6 +453,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String customHabitCharCount(int count) {
     return '$count/50 символов';
   }
+
+  @override
+  String get customHabitFocusAreaLabel => 'К какому направлению это относится?';
 
   @override
   String get customHabitSubmit => 'Добавить';
@@ -924,7 +927,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get warmthMsg11 =>
-      'Нет серии, которую можно прервать. Нет очков, которые можно потерять. Просто ты.';
+      'Нет стрика, который можно прервать. Нет оценок, которые можно потерять. Просто ты.';
 
   @override
   String get warmthMsg12 => 'Самые мягкие дни тоже важны.';
@@ -1260,7 +1263,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get affirmation32 => 'Быть мягче к себе — это не сдаваться.';
 
   @override
-  String get affirmation33 => 'Не нужна причина, чтобы быть к себе добрее.';
+  String get affirmation33 =>
+      'Тебе не нужна причина, чтобы быть к себе добрее.';
 
   @override
   String get affirmation34 => 'То, что ты делаешь прямо сейчас — достаточно.';
@@ -1391,13 +1395,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get paywallFeature1 => 'Все 10 цветовых тем, включая тёмный режим';
 
   @override
-  String get paywallFeature2 => 'Наборы привычек: заботливо собранные ритуалы';
+  String get paywallFeature2 => 'Готовые наборы привычек на каждый день';
 
   @override
-  String get paywallFeature3 => 'Еженедельные рефлексии и инсайты';
+  String get paywallFeature3 => 'Еженедельные инсайты, чтобы лучше узнать себя';
 
   @override
-  String get paywallFeature4 => 'Безлимитные привычки, замены и направления';
+  String get paywallFeature4 => 'Безлимитные привычки, замены и фокусы';
 
   @override
   String get paywallMonthly => 'Ежемесячно';
@@ -1729,19 +1733,19 @@ class AppLocalizationsRu extends AppLocalizations {
   String get themeSoftDusk => 'Розовые сумерки';
 
   @override
-  String get themeDeepFocus => 'Глубокий фокус';
+  String get themeDeepFocus => 'Тёмный уют';
 
   @override
-  String get themeForestFloor => 'Лесная тропа';
+  String get themeForestFloor => 'Утренний лес';
 
   @override
   String get themeGoldenHour => 'Золотой час';
 
   @override
-  String get themeNightBloom => 'Ночное цветение';
+  String get themeNightBloom => 'Ночное небо';
 
   @override
-  String get themeSandDune => 'Песчаная дюна';
+  String get themeSandDune => 'Тёплый песок';
 
   @override
   String get browseHabitsTitle => 'Все привычки';
@@ -2319,7 +2323,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get onboardingPhilosophyBody =>
-      'Никаких серий. Никакой вины за пропуск.\nТвой прогресс не обнуляется. Достаточно одного маленького намерения.';
+      'Никаких стриков. Никакой вины за пропуск.\nТвой прогресс не обнуляется. Достаточно одного лишь намерения.';
 
   @override
   String get onboardingPhilosophyCta => 'Понятно';
@@ -2329,28 +2333,21 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get reflectionAnchor7 =>
-      'Ты был(а) здесь каждый день на этой неделе. Не идеально — но по-настоящему.';
+      '7 из 7. Целая неделя заботы о себе — так держать!';
 
   @override
   String reflectionAnchor56(int days) {
-    return 'Ты заглянул(а) $days из 7 дней на этой неделе. Это $days дней, когда ты решил(а) попробовать.';
+    return '$days из 7 дней. Это $days дней, когда ты выбираешь себя.';
   }
 
   @override
   String reflectionAnchor34(int days) {
-    return 'Ты был(а) здесь $days дня на этой неделе. Это $days дня, когда ты решил(а) попробовать.';
+    return '$days дня. Это $days дня, когда ты выбираешь себя.';
   }
 
   @override
   String reflectionAnchor12(int days) {
-    String _temp0 = intl.Intl.pluralLogic(
-      days,
-      locale: localeName,
-      other: '$days раз',
-      few: '$days раза',
-      one: '1 раз',
-    );
-    return 'Ты заглянул(а) $_temp0 на этой неделе. Даже один день считается — ты не исчез(ла).';
+    return '$days раз. Даже один день считается — ты не пропадаешь.';
   }
 
   @override
@@ -2373,35 +2370,38 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String reflectionFocusDominant(String area) {
-    return 'В последнее время тебя тянет к привычкам из категории «$area». Кажется, сейчас это для тебя важно.';
+    return 'На этой неделе тебя тянет к «$area». Кажется, сейчас это важно.';
   }
 
   @override
   String reflectionFocusBalanced(String area1, String area2) {
-    return 'На этой неделе ты распределил(а) энергию между «$area1» и «$area2». Сбалансированная неделя.';
+    return 'Энергия этой недели распределилась между «$area1» и «$area2». Сбалансированная неделя.';
   }
 
   @override
   String get reflectionReframeComeback =>
-      'Прошлая неделя была тише. На этой ты вернулся(-ась). В этом и смысл.';
+      'Прошлая неделя была тише. А на этой — возвращение. В этом и смысл.';
 
   @override
   String reflectionReframeRefresh(int count) {
-    return 'Ты обновил(а) привычки $count раз(а) на этой неделе — это не отказ, это адаптация.';
+    return 'Привычки обновились $count раз на этой неделе — это не отказ, это адаптация.';
   }
 
   @override
   String get reflectionReframeSwap =>
-      'Ты заменил(а) привычку на этой неделе. Понять, что не подходит — тоже прогресс.';
+      'Одна привычка заменена на этой неделе. Понять, что не подходит — тоже прогресс.';
 
   @override
   String get reflectionShare => 'Поделиться';
 
   @override
-  String get reflectionTeaser => 'Это ещё не всё о твоей неделе';
+  String get insightsGrowthHint => 'Инсайты становятся точнее с каждой неделей';
 
   @override
-  String get reflectionSectionThisWeek => 'НА ЭТОЙ НЕДЕЛЕ';
+  String get reflectionTeaser => 'Узнай больше о своей неделе';
+
+  @override
+  String get reflectionSectionThisWeek => 'ЭТА НЕДЕЛЯ';
 
   @override
   String get reflectionSectionYourRhythm => 'ТВОЙ РИТМ';
@@ -2430,7 +2430,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get packSwapSubtitle =>
-      'Чтобы сохранить порядок, выберите привычки, которые хотите убрать. Ваши собственные привычки всегда останутся.';
+      'Чтобы сохранить порядок, выберите привычки, которые хотите убрать. Ваши собственные привычки будут всегда с вами.';
 
   @override
   String packSwapConfirm(int count, String packName) {
@@ -2446,7 +2446,72 @@ class AppLocalizationsRu extends AppLocalizations {
   String get packSwapAllActive => 'Все привычки из этого набора уже активны';
 
   @override
-  String get packCreativeSparkName => 'Творческая искра';
+  String get packSectionHeader => 'ГОТОВЫЕ НАБОРЫ ПРИВЫЧЕК';
+
+  @override
+  String packHabitsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count привычек',
+      few: '$count привычки',
+      one: '1 привычка',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get packFreeBadge => 'Бесплатно';
+
+  @override
+  String packStartButton(String packName) {
+    return 'Активировать «$packName»';
+  }
+
+  @override
+  String get packHabitsInPack => 'ПРИВЫЧКИ В НАБОРЕ';
+
+  @override
+  String get packAllActive => 'Все привычки уже активны';
+
+  @override
+  String get packHabitActive => 'Активна';
+
+  @override
+  String get packGentleMorningsName => 'Мягкое утро';
+
+  @override
+  String get packGentleMorningsSubtitle =>
+      'Утренний ритуал, который не похож на подъём в 5 утра';
+
+  @override
+  String get packGentleMorningsDescription =>
+      'Четыре маленькие привычки как мягкая последовательность — выпить воды, подышать свежим воздухом, сосредоточиться и наметить день. Ранний подъём не нужен.';
+
+  @override
+  String get packWindingDownName => 'Вечерний покой';
+
+  @override
+  String get packWindingDownSubtitle =>
+      'Вечерний набор для перезагрузки. Специально короткий.';
+
+  @override
+  String get packWindingDownDescription =>
+      'Маленький ритуал, чтобы отпустить день. Остановиться, подумать, устроиться поудобнее, насладиться чем-то одним. Вот и весь вечерний план.';
+
+  @override
+  String get packTinyResetsName => 'Мини-перезагрузка';
+
+  @override
+  String get packTinyResetsSubtitle =>
+      'Когда среди недели всё летит в тартарары';
+
+  @override
+  String get packTinyResetsDescription =>
+      'Когда накрывает — четыре микро-действия создают островок контроля. Не система продуктивности — набор первой помощи.';
+
+  @override
+  String get packCreativeSparkName => 'Творческий импульс';
 
   @override
   String get packCreativeSparkSubtitle =>
@@ -2457,11 +2522,11 @@ class AppLocalizationsRu extends AppLocalizations {
       'Три крошечные творческие привычки, которые помогут выйти из головы и начать делать. Не про мастерство — про игру.';
 
   @override
-  String get packStayConnectedName => 'Оставайся на связи';
+  String get packStayConnectedName => 'На связи';
 
   @override
   String get packStayConnectedSubtitle =>
-      'Те, кто важен — одним маленьким жестом за раз.';
+      'Те, кто важен — один маленький жест за раз.';
 
   @override
   String get packStayConnectedDescription =>

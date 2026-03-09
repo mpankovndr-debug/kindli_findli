@@ -568,91 +568,76 @@ class _ProfileScreenState extends State<ProfileScreen> {
     showCupertinoModalPopup(
       context: context,
       barrierColor: Colors.black.withOpacity(0.5),
-      filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
       builder: (context) => Consumer<ThemeProvider>(
         builder: (context, themeProvider, _) {
           final colors = themeProvider.colors;
-          return Container(
-            child: ClipRRect(
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(32)),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        colors.modalBg1.withOpacity(0.98),
-                        colors.modalBg2.withOpacity(0.96),
-                        colors.modalBg3.withOpacity(0.98),
-                      ],
-                    ),
-                    borderRadius:
-                        const BorderRadius.vertical(top: Radius.circular(32)),
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.6),
-                      width: 1.5,
-                    ),
-                  ),
-                  child: SafeArea(
-                    top: false,
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxHeight: MediaQuery.of(context).size.height * 0.85,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // Drag handle
-                            Container(
-                              width: 36,
-                              height: 4,
-                              decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(2),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            // Title
-                            Text(
-                              l10n.profileChangeSpace,
-                              style: TextStyle(
-                                fontFamily: AppTextStyles.bodyFont(context),
-                                fontSize: 17,
-                                fontWeight: FontWeight.w600,
-                                color: colors.textPrimary,
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            // Theme picker (scrollable)
-                            Flexible(
-                              child: SingleChildScrollView(
-                                child: ThemePicker(
-                                  isPremium: userState.hasSubscription,
-                                  hasBoost: userState.hasBoost,
-                                  compact: true,
-                                  onPremiumTap: () {
-                                    Navigator.pop(context);
-                                    _showUpgradeScreen().then((_) {
-                                      if (mounted) _showAppearancePicker(this.context);
-                                    });
-                                  },
-                                  onBoostTap: () {
-                                    Navigator.pop(context);
-                                    _showUpgradeScreen().then((_) {
-                                      if (mounted) _showAppearancePicker(this.context);
-                                    });
-                                  },
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                          ],
+          return ClipRRect(
+            borderRadius:
+                const BorderRadius.vertical(top: Radius.circular(32)),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    colors.modalBg1.withOpacity(0.98),
+                    colors.modalBg2.withOpacity(0.96),
+                    colors.modalBg3.withOpacity(0.98),
+                  ],
+                ),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(32)),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.6),
+                  width: 1.5,
+                ),
+              ),
+              child: SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Drag handle
+                      Container(
+                        width: 36,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(2),
                         ),
                       ),
-                    ),
+                      const SizedBox(height: 12),
+                      // Title
+                      Text(
+                        l10n.profileChangeSpace,
+                        style: TextStyle(
+                          fontFamily: AppTextStyles.bodyFont(context),
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                          color: colors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      // Theme picker
+                      ThemePicker(
+                        isPremium: userState.hasSubscription,
+                        hasBoost: userState.hasBoost,
+                        compact: true,
+                        onPremiumTap: () {
+                          Navigator.pop(context);
+                          _showUpgradeScreen().then((_) {
+                            if (mounted) _showAppearancePicker(this.context);
+                          });
+                        },
+                        onBoostTap: () {
+                          Navigator.pop(context);
+                          _showUpgradeScreen().then((_) {
+                            if (mounted) _showAppearancePicker(this.context);
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                    ],
                   ),
                 ),
               ),

@@ -14,6 +14,7 @@ class OnboardingState extends ChangeNotifier {
   bool _onboardingComplete = false;
   List<String> userHabits = [];
   List<String> _customHabits = [];
+  Map<String, String> _customHabitFocusAreas = {}; // habitTitle -> focusArea
   static const int _maxCustomHabitsFree = 2;
   static const int _maxCustomHabitsBoost = 3;
   static const int _maxSwapsFree = 2;
@@ -44,6 +45,8 @@ class OnboardingState extends ChangeNotifier {
   bool get onboardingComplete => _onboardingComplete;
   String? get pinnedHabit => _pinnedHabit;
   List<String> get customHabits => List.unmodifiable(_customHabits);
+  Map<String, String> get customHabitFocusAreas =>
+      Map.unmodifiable(_customHabitFocusAreas);
 
   // All available habits by category (EXPANDED TO 12 EACH)
   static const Map<String, List<String>> habitsByCategory = {
@@ -283,6 +286,15 @@ class OnboardingState extends ChangeNotifier {
     return added;
   }
 
+  /// Updates focus areas to match a curated pack without regenerating habits.
+  Future<void> applyPackFocusAreas(List<String> packFocusAreas) async {
+    _focusAreas.clear();
+    _focusAreas.addAll(packFocusAreas);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('focus_areas', _focusAreas);
+    notifyListeners();
+  }
+
   // Load habits from storage
   Future<void> loadUserHabits() async {
     final prefs = await SharedPreferences.getInstance();
@@ -311,6 +323,17 @@ class OnboardingState extends ChangeNotifier {
         _customHabits = savedCustom;
       }
 
+      // Load custom habit focus area mapping
+      final focusAreasJson = prefs.getString('custom_habit_focus_areas');
+      if (focusAreasJson != null) {
+        try {
+          _customHabitFocusAreas = Map<String, String>.from(
+              jsonDecode(focusAreasJson) as Map);
+        } catch (_) {
+          _customHabitFocusAreas = {};
+        }
+      }
+
       // Migration: infer focus areas from existing habits for users who
       // completed onboarding before focus areas were persisted.
       if (_focusAreas.isEmpty && _onboardingComplete) {
@@ -326,7 +349,9 @@ class OnboardingState extends ChangeNotifier {
     } else {
       // No saved habits = fresh start — clear any stale custom habits from prefs
       _customHabits.clear();
+      _customHabitFocusAreas.clear();
       await prefs.remove('custom_habits');
+      await prefs.remove('custom_habit_focus_areas');
       await prefs.remove('pinned_habit');
     }
     
@@ -343,7 +368,24 @@ class OnboardingState extends ChangeNotifier {
       final stale = _customHabits.where((h) => !userHabits.contains(h)).toList();
       if (stale.isNotEmpty) {
         _customHabits.removeWhere((h) => stale.contains(h));
+        for (final h in stale) {
+          _customHabitFocusAreas.remove(h);
+        }
         await prefs.setStringList('custom_habits', _customHabits);
+        await _saveCustomHabitFocusAreas(prefs);
+      }
+
+      // Migration: assign first active focus area to custom habits without one
+      bool migrated = false;
+      for (final habit in _customHabits) {
+        if (!_customHabitFocusAreas.containsKey(habit) &&
+            _focusAreas.isNotEmpty) {
+          _customHabitFocusAreas[habit] = _focusAreas.first;
+          migrated = true;
+        }
+      }
+      if (migrated) {
+        await _saveCustomHabitFocusAreas(prefs);
       }
     }
 
@@ -453,14 +495,15 @@ class OnboardingState extends ChangeNotifier {
     return _pinnedHabit == null;
   }
 
-  // Get category for a habit
+  // Get category for a habit (includes custom habit focus areas)
   String? getCategoryForHabit(String habit) {
     for (final entry in habitsByCategory.entries) {
       if (entry.value.contains(habit)) {
         return entry.key;
       }
     }
-    return null;
+    // Check custom habit focus areas
+    return _customHabitFocusAreas[habit];
   }
 
   /// Max swaps for the user's current tier (free or boost).
@@ -628,23 +671,31 @@ class OnboardingState extends ChangeNotifier {
     return _customHabits.length < maxCustomHabits(hasBoost: hasBoost);
   }
 
-  Future<void> addCustomHabit(String habitTitle, {bool hasBoost = false}) async {
+  Future<void> addCustomHabit(String habitTitle, {bool hasBoost = false, String? focusArea}) async {
     if (!canAddCustomHabit(hasBoost: hasBoost)) return;
     if (userHabits.any((h) => h.toLowerCase() == habitTitle.toLowerCase())) return;
 
     _customHabits.add(habitTitle);
     userHabits.add(habitTitle);
-    
+
+    // Assign focus area (default to first active focus area)
+    final area = focusArea ?? (_focusAreas.isNotEmpty ? _focusAreas.first : null);
+    if (area != null) {
+      _customHabitFocusAreas[habitTitle] = area;
+    }
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('custom_habits', _customHabits);
     await prefs.setStringList('user_habits', userHabits);
-    
+    await _saveCustomHabitFocusAreas(prefs);
+
     notifyListeners();
   }
 
   Future<void> removeCustomHabit(String habitTitle) async {
     _customHabits.remove(habitTitle);
     userHabits.remove(habitTitle);
+    _customHabitFocusAreas.remove(habitTitle);
 
     // Clear pinned habit if the deleted habit was pinned
     if (_pinnedHabit == habitTitle) {
@@ -654,6 +705,7 @@ class OnboardingState extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('custom_habits', _customHabits);
     await prefs.setStringList('user_habits', userHabits);
+    await _saveCustomHabitFocusAreas(prefs);
     if (_pinnedHabit == null) {
       await prefs.remove('pinned_habit');
     }
@@ -675,9 +727,16 @@ class OnboardingState extends ChangeNotifier {
       _pinnedHabit = newTitle;
     }
 
+    // Migrate focus area mapping
+    final area = _customHabitFocusAreas.remove(oldTitle);
+    if (area != null) {
+      _customHabitFocusAreas[newTitle] = area;
+    }
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('custom_habits', _customHabits);
     await prefs.setStringList('user_habits', userHabits);
+    await _saveCustomHabitFocusAreas(prefs);
     if (_pinnedHabit == newTitle) {
       await prefs.setString('pinned_habit', newTitle);
     }
@@ -718,6 +777,12 @@ class OnboardingState extends ChangeNotifier {
     return _customHabits.contains(habitTitle);
   }
 
+  /// Persists custom habit → focus area mapping as JSON.
+  Future<void> _saveCustomHabitFocusAreas(SharedPreferences prefs) async {
+    await prefs.setString(
+        'custom_habit_focus_areas', jsonEncode(_customHabitFocusAreas));
+  }
+
   Future<void> reset() async {
     _welcomeSeen = false;
     _name = null;
@@ -726,6 +791,7 @@ class OnboardingState extends ChangeNotifier {
     _onboardingComplete = false;
     userHabits.clear();
     _customHabits.clear();
+    _customHabitFocusAreas.clear();
     _pinnedHabit = null;
     _swapsUsed.clear();
     _lastSwapReset = null;
@@ -738,6 +804,7 @@ class OnboardingState extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('user_habits');
     await prefs.remove('custom_habits');
+    await prefs.remove('custom_habit_focus_areas');
     await prefs.remove('pinned_habit');
     await prefs.remove('swaps_used');
     await prefs.remove('last_swap_reset');

@@ -1,6 +1,7 @@
 import '../onboarding_v2/onboarding_state.dart';
 import 'app_usage_service.dart';
 import 'moments_service.dart';
+import 'reflection_service.dart';
 
 /// Holds computed milestone data, cached per session.
 class MilestoneData {
@@ -27,7 +28,8 @@ class MilestoneService {
     for (final entry in OnboardingState.habitsByCategory.entries) {
       if (entry.value.contains(habit)) return entry.key;
     }
-    return null;
+    // Check custom habit focus areas (loaded by ReflectionService)
+    return ReflectionService.customHabitFocusAreaFor(habit);
   }
 
   /// Returns milestone data, computing once per session.
