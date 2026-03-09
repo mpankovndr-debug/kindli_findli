@@ -122,26 +122,14 @@ class _AppToastWidgetState extends State<_AppToastWidget>
                     vertical: 18,
                   ),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        const Color(0xFFFFFFFF).withOpacity(0.55),
-                        colors.surfaceLight.withOpacity(0.40),
-                      ],
-                    ),
+                    color: colors.cardBackground
+                        .withOpacity(colors.cardBackgroundOpacity),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: const Color(0xFFFFFFFF).withOpacity(0.45),
-                      width: 1.5,
+                      color: colors.borderCard
+                          .withOpacity(colors.borderCardOpacity),
+                      width: 1,
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: colors.textPrimary.withOpacity(0.10),
-                        blurRadius: 20,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
                   ),
                   child: Text(
                     widget.message,
@@ -150,7 +138,7 @@ class _AppToastWidgetState extends State<_AppToastWidget>
                       fontFamily: AppTextStyles.bodyFont(context),
                       fontSize: 15,
                       fontWeight: FontWeight.w500,
-                      color: colors.toastText,
+                      color: colors.textPrimary,
                       height: 1.5,
                     ),
                   ),

@@ -68,7 +68,6 @@ const Map<String, _L10nGetter> _habitNameGetters = {
 
   // Productivity
   'Set one priority': _hSetPriority,
-  'Clear one small thing': _hClearSmallThing,
   'Plan tomorrow in one sentence': _hPlanTomorrow,
   'Do a 30-second reset': _hThirtySecondReset,
   'Write down one idea': _hWriteIdea,
@@ -181,7 +180,6 @@ String _hPermissionToRest(AppLocalizations l) => l.habitPermissionToRest;
 
 // Productivity
 String _hSetPriority(AppLocalizations l) => l.habitSetPriority;
-String _hClearSmallThing(AppLocalizations l) => l.habitClearSmallThing;
 String _hPlanTomorrow(AppLocalizations l) => l.habitPlanTomorrow;
 String _hThirtySecondReset(AppLocalizations l) => l.habitThirtySecondReset;
 String _hWriteIdea(AppLocalizations l) => l.habitWriteIdea;

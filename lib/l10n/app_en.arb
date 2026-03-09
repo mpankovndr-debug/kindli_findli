@@ -623,7 +623,6 @@
   "habitPermissionToRest": "Give yourself permission to rest",
 
   "habitSetPriority": "Set one priority today",
-  "habitClearSmallThing": "Clear one small thing",
   "habitPlanTomorrow": "Plan tomorrow in one sentence",
   "habitThirtySecondReset": "Do a 1-minute reset",
   "habitWriteIdea": "Unsubscribe from an unnecessary email list",
@@ -843,6 +842,7 @@
   "packHabitsInPack": "HABITS IN THIS PACK",
   "packAllActive": "All habits already active",
   "packHabitActive": "Active",
+  "packActiveBadge": "Active",
 
   "packGentleMorningsName": "Gentle Mornings",
   "packGentleMorningsSubtitle": "A small morning ritual that doesn't feel like a 5am hustle routine",

@@ -3410,12 +3410,6 @@ abstract class AppLocalizations {
   /// **'Set one priority today'**
   String get habitSetPriority;
 
-  /// No description provided for @habitClearSmallThing.
-  ///
-  /// In en, this message translates to:
-  /// **'Clear one small thing'**
-  String get habitClearSmallThing;
-
   /// No description provided for @habitPlanTomorrow.
   ///
   /// In en, this message translates to:
@@ -4435,6 +4429,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Active'**
   String get packHabitActive;
+
+  /// No description provided for @packActiveBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get packActiveBadge;
 
   /// No description provided for @packGentleMorningsName.
   ///

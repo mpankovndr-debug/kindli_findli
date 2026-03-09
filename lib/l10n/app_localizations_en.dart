@@ -1894,9 +1894,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get habitSetPriority => 'Set one priority today';
 
   @override
-  String get habitClearSmallThing => 'Clear one small thing';
-
-  @override
   String get habitPlanTomorrow => 'Plan tomorrow in one sentence';
 
   @override
@@ -2484,6 +2481,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get packHabitActive => 'Active';
+
+  @override
+  String get packActiveBadge => 'Active';
 
   @override
   String get packGentleMorningsName => 'Gentle Mornings';

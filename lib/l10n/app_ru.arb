@@ -763,7 +763,6 @@
   "habitAskNeed": "Спроси себя: «Что мне сейчас нужно?»",
   "habitPermissionToRest": "Разреши себе отдохнуть",
   "habitSetPriority": "Определи один приоритет на сегодня",
-  "habitClearSmallThing": "Разберись с одной мелочью",
   "habitPlanTomorrow": "Опиши завтрашний день одним предложением",
   "habitThirtySecondReset": "Перезагрузка на 1 минуту",
   "habitWriteIdea": "Отпишись от ненужной рассылки",
@@ -978,6 +977,7 @@
   "packHabitsInPack": "ПРИВЫЧКИ В НАБОРЕ",
   "packAllActive": "Все привычки уже активны",
   "packHabitActive": "Активна",
+  "packActiveBadge": "Активен",
 
   "packGentleMorningsName": "Мягкое утро",
   "packGentleMorningsSubtitle": "Утренний ритуал, который не похож на подъём в 5 утра",

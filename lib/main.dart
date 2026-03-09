@@ -4701,25 +4701,39 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
                       ),
                     ),
                   ),
-                  SizedBox(
-                    height: 158,
-                    child: ScrollConfiguration(
-                      behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        padding: EdgeInsets.zero,
-                        itemCount: CuratedPacks.all.length,
-                        separatorBuilder: (_, __) => const SizedBox(width: 12),
-                        itemBuilder: (context, index) {
-                          final pack = CuratedPacks.all[index];
-                          return _CuratedPackCard(
-                            pack: pack,
-                            onTap: () => _showPackDetail(pack),
-                          );
-                        },
+                  Builder(builder: (context) {
+                    final userHabits = context.watch<OnboardingState>().userHabits;
+                    bool isPackActive(CuratedPack p) =>
+                        p.habitIds.every((h) => userHabits.contains(h));
+                    final sortedPacks = List<CuratedPack>.from(CuratedPacks.all)
+                      ..sort((a, b) {
+                        final aActive = isPackActive(a);
+                        final bActive = isPackActive(b);
+                        if (aActive != bActive) return aActive ? -1 : 1;
+                        return a.sortOrder.compareTo(b.sortOrder);
+                      });
+                    return SizedBox(
+                      height: 158,
+                      child: ScrollConfiguration(
+                        behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          padding: EdgeInsets.zero,
+                          itemCount: sortedPacks.length,
+                          separatorBuilder: (_, __) => const SizedBox(width: 12),
+                          itemBuilder: (context, index) {
+                            final pack = sortedPacks[index];
+                            final active = isPackActive(pack);
+                            return _CuratedPackCard(
+                              pack: pack,
+                              isActive: active,
+                              onTap: () => _showPackDetail(pack),
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                  ),
+                    );
+                  }),
                   const SizedBox(height: 20),
                 ],
 
@@ -5000,10 +5014,12 @@ class _BrowseHabitCard extends StatelessWidget {
 class _CuratedPackCard extends StatelessWidget {
   final CuratedPack pack;
   final VoidCallback onTap;
+  final bool isActive;
 
   const _CuratedPackCard({
     required this.pack,
     required this.onTap,
+    this.isActive = false,
   });
 
   @override
@@ -5020,10 +5036,12 @@ class _CuratedPackCard extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isDark
-                ? colors.borderCard.withOpacity(colors.borderCardOpacity)
-                : const Color(0xFFFFFFFF).withOpacity(0.8),
-            width: 1,
+            color: isActive
+                ? colors.ctaPrimary.withOpacity(0.5)
+                : isDark
+                    ? colors.borderCard.withOpacity(colors.borderCardOpacity)
+                    : const Color(0xFFFFFFFF).withOpacity(0.8),
+            width: isActive ? 1.5 : 1,
           ),
           boxShadow: [
             BoxShadow(
@@ -5116,7 +5134,7 @@ class _CuratedPackCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const Spacer(),
-                _PackTierBadge(pack: pack),
+                _PackTierBadge(pack: pack, isActive: isActive),
               ],
             ),
           ),
@@ -5132,13 +5150,39 @@ class _CuratedPackCard extends StatelessWidget {
 
 class _PackTierBadge extends StatelessWidget {
   final CuratedPack pack;
+  final bool isActive;
 
-  const _PackTierBadge({required this.pack});
+  const _PackTierBadge({required this.pack, this.isActive = false});
 
   @override
   Widget build(BuildContext context) {
     final colors = context.watch<ThemeProvider>().colors;
     final isFree = pack.isFree;
+    final l10n = AppLocalizations.of(context);
+
+    if (isActive) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          color: colors.ctaPrimary.withOpacity(0.20),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: colors.ctaPrimary.withOpacity(0.35),
+            width: 1,
+          ),
+        ),
+        child: Text(
+          l10n.packActiveBadge,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: colors.ctaPrimary,
+            fontFamily: 'DMSans',
+            letterSpacing: 0.1,
+          ),
+        ),
+      );
+    }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -5155,7 +5199,7 @@ class _PackTierBadge extends StatelessWidget {
         ),
       ),
       child: Text(
-        isFree ? AppLocalizations.of(context).packFreeBadge : 'Intended+',
+        isFree ? l10n.packFreeBadge : 'Intended+',
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w600,
@@ -5264,7 +5308,7 @@ class _PackDetailSheet extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 10),
-                      _PackTierBadge(pack: pack),
+                      _PackTierBadge(pack: pack, isActive: allActive),
                     ],
                   ),
                 ),

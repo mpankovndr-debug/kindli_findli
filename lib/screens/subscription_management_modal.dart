@@ -54,35 +54,14 @@ class SubscriptionManagementModal extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.fromLTRB(28, 36, 28, 36),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: const Alignment(0.0, 2.41), // 145° angle
-                      end: const Alignment(0.0, -2.41),
-                      colors: [
-                        colors.modalBg1.withOpacity(0.96),
-                        colors.modalBg2.withOpacity(0.93),
-                        colors.modalBg3.withOpacity(0.95),
-                      ],
-                      stops: const [0.0, 0.5, 1.0],
-                    ),
+                    color: colors.cardBackground
+                        .withOpacity(colors.cardBackgroundOpacity),
                     borderRadius: BorderRadius.circular(32),
                     border: Border.all(
-                      color: const Color(0xFFFFFFFF).withOpacity(0.5),
-                      width: 1.5,
+                      color: colors.borderCard
+                          .withOpacity(colors.borderCardOpacity),
+                      width: 1,
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: colors.modalShadow.withOpacity(0.2),
-                        blurRadius: 40,
-                        offset: const Offset(0, 16),
-                      ),
-                      BoxShadow(
-                        color: const Color(0xFFFFFFFF).withOpacity(0.25),
-                        blurRadius: 0,
-                        offset: const Offset(0, 1),
-                        spreadRadius: 0,
-                        blurStyle: BlurStyle.inner,
-                      ),
-                    ],
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -128,33 +107,14 @@ class SubscriptionManagementModal extends StatelessWidget {
                           child: Container(
                             padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  const Color(0xFFFFFFFF).withOpacity(0.45),
-                                  colors.surfaceLight.withOpacity(0.3),
-                                ],
-                              ),
+                              color: colors.cardBackground
+                                  .withOpacity(colors.cardBackgroundOpacity),
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                color: const Color(0xFFFFFFFF).withOpacity(0.4),
-                                width: 1.5,
+                                color: colors.borderCard
+                                    .withOpacity(colors.borderCardOpacity),
+                                width: 1,
                               ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: colors.textPrimary.withOpacity(0.1),
-                                  blurRadius: 16,
-                                  offset: const Offset(0, 4),
-                                ),
-                                BoxShadow(
-                                  color: const Color(0xFFFFFFFF).withOpacity(0.5),
-                                  blurRadius: 0,
-                                  offset: const Offset(0, 1),
-                                  spreadRadius: 0,
-                                  blurStyle: BlurStyle.inner,
-                                ),
-                              ],
                             ),
                             child: Column(
                               children: [
@@ -222,29 +182,11 @@ class SubscriptionManagementModal extends StatelessWidget {
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                   colors: [
-                                    colors.ctaPrimary.withOpacity(0.92),
-                                    colors.ctaSecondary.withOpacity(0.88),
+                                    colors.ctaPrimary,
+                                    colors.ctaSecondary,
                                   ],
                                 ),
                                 borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: colors.ctaPrimary.withOpacity(0.4),
-                                  width: 1,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: colors.textPrimary.withOpacity(0.3),
-                                    blurRadius: 24,
-                                    offset: const Offset(0, 6),
-                                  ),
-                                  BoxShadow(
-                                    color: const Color(0xFFFFFFFF).withOpacity(0.15),
-                                    blurRadius: 0,
-                                    offset: const Offset(0, 1),
-                                    spreadRadius: 0,
-                                    blurStyle: BlurStyle.inner,
-                                  ),
-                                ],
                               ),
                               child: CupertinoButton(
                                 onPressed: _openAppStoreSubscriptions,

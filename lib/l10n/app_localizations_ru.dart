@@ -1888,9 +1888,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get habitSetPriority => 'Определи один приоритет на сегодня';
 
   @override
-  String get habitClearSmallThing => 'Разберись с одной мелочью';
-
-  @override
   String get habitPlanTomorrow => 'Опиши завтрашний день одним предложением';
 
   @override
@@ -2476,6 +2473,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get packHabitActive => 'Активна';
+
+  @override
+  String get packActiveBadge => 'Активен';
 
   @override
   String get packGentleMorningsName => 'Мягкое утро';

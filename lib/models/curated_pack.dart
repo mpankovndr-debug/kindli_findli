@@ -82,11 +82,11 @@ class CuratedPacks {
     description:
         'When overwhelm hits, these four micro-actions create a small pocket '
         'of control. Not a productivity system — a rescue kit.',
-    focusAreas: ['Productivity', 'Home & organization', 'Self-care'],
+    focusAreas: ['Productivity', 'Home & organization', 'Health', 'Self-care'],
     habitIds: [
       'Do a 30-second reset',
       'Tidy one small thing',
-      'Clear one small thing',
+      'Take 3 slow breaths',
       'Do one kind thing for yourself',
     ],
     tier: CuratedPackTier.premium,

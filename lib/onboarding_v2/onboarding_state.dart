@@ -83,7 +83,6 @@ class OnboardingState extends ChangeNotifier {
     ],
     'Productivity': [
       'Set one priority',
-      'Clear one small thing',
       'Plan tomorrow in one sentence',
       'Do a 30-second reset',
       'Write down one idea',
