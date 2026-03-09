@@ -222,7 +222,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get themeSelectionPremiumHint =>
-      'Clear Sky and Morning Slate are available with Intended+. Try it free for 7 days after setup.';
+      'Deep Focus and more themes are available with Intended+. Try it free for 7 days after setup.';
 
   @override
   String get habitRevealTitle => 'Here\'s what we picked for you';
@@ -1383,32 +1383,36 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get paywallTitle => 'Make it fully yours.';
+  String momentsShowAll(int count) {
+    return 'Show all $count moments';
+  }
+
+  @override
+  String get paywallTitle => 'Intended+ grows with you';
 
   @override
   String get paywallDescription =>
-      'Intended is free forever.\nIntended+ removes the limits so you can shape it around your life.';
+      'More ways to understand yourself — with more on the way.';
 
   @override
-  String get paywallFeature1 =>
-      'Unlimited custom habits — because your life isn\'t one-size-fits-all';
+  String get paywallFeature1 => 'All 10 color themes including dark mode';
 
   @override
-  String get paywallFeature2 => 'Swap habits freely when life changes';
+  String get paywallFeature2 =>
+      'Curated habit packs: thoughtfully assembled routines';
 
   @override
-  String get paywallFeature3 =>
-      'Share milestone cards with people you care about';
+  String get paywallFeature3 => 'Weekly reflections & insights';
 
   @override
   String get paywallFeature4 =>
-      'Change focus areas whenever you need — no waiting';
+      'Unlimited custom habits, swaps, and focus areas';
 
   @override
   String get paywallMonthly => 'Monthly';
 
   @override
-  String get paywallMonthlyPrice => '€6.99';
+  String get paywallMonthlyPrice => '€5.99';
 
   @override
   String get paywallMonthlyPeriod => 'per month';
@@ -1417,13 +1421,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallYearly => 'Yearly';
 
   @override
-  String get paywallYearlyPrice => '€49.99';
+  String get paywallYearlyPrice => '€39.99';
 
   @override
   String get paywallYearlyPeriod => 'per year';
 
   @override
-  String get paywallYearlySave => 'Save 40%';
+  String get paywallYearlySave => 'Save 44%';
 
   @override
   String paywallSavePercent(int percent) {
@@ -1434,7 +1438,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallLifetime => 'Lifetime';
 
   @override
-  String get paywallLifetimePrice => '€89.99';
+  String get paywallLifetimePrice => '€69.99';
 
   @override
   String get paywallLifetimePeriod => 'one-time';
@@ -1473,6 +1477,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get paywallPrivacy => 'Privacy';
+
+  @override
+  String get paywallFooter =>
+      'New features added regularly. Your subscription supports independent development.';
 
   @override
   String get subscriptionTitle => 'Intended+';
@@ -1725,6 +1733,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get themeMorningSlate => 'Morning Slate';
+
+  @override
+  String get themeSoftDusk => 'Soft Dusk';
+
+  @override
+  String get themeDeepFocus => 'Deep Focus';
+
+  @override
+  String get themeForestFloor => 'Forest Floor';
+
+  @override
+  String get themeGoldenHour => 'Golden Hour';
+
+  @override
+  String get themeNightBloom => 'Night Bloom';
+
+  @override
+  String get themeSandDune => 'Sand Dune';
 
   @override
   String get browseHabitsTitle => 'Browse Habits';
@@ -2088,7 +2114,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shareCardShowedUpPhrase => 'I showed up for myself this week';
 
   @override
-  String get shareCardTimes => 'times';
+  String shareCardTimes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'times',
+      one: 'time',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String shareCardFocusedOn(String area) {
+    return 'Focused on: $area';
+  }
 
   @override
   String get shareCardTagline => 'intention, not perfection';
@@ -2168,7 +2207,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get boostCardSubtitle => 'A little extra room to grow.';
+  String get boostCardSubtitle =>
+      'Unlock dark mode + 1 extra custom habit and focus area.';
 
   @override
   String get boostOrDivider => 'or';
@@ -2181,25 +2221,25 @@ class AppLocalizationsEn extends AppLocalizations {
       'Something went wrong with the purchase. Please try again.';
 
   @override
-  String get boostBenefit1 => '3 custom habits';
+  String get boostBenefit1 => 'Deep Focus dark theme';
 
   @override
-  String get boostBenefit1Detail => 'up from 2';
+  String get boostBenefit1Detail => '';
 
   @override
-  String get boostBenefit2 => '3 focus areas';
+  String get boostBenefit2 => '+1 custom habit';
 
   @override
-  String get boostBenefit2Detail => 'up from 2';
+  String get boostBenefit2Detail => '3 total';
 
   @override
-  String get boostBenefit3 => '3 habit swaps/month';
+  String get boostBenefit3 => '+1 focus area';
 
   @override
-  String get boostBenefit3Detail => 'up from 2';
+  String get boostBenefit3Detail => '3 total';
 
   @override
-  String get boostBenefit4 => '\'Showing up\' milestone card';
+  String get boostBenefit4 => '+1 habit swap per month';
 
   @override
   String get boostOfferHabitTitle => 'Want one more habit?';
@@ -2286,4 +2326,147 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingPhilosophyCta => 'Got it';
+
+  @override
+  String get reflectionTitle => 'Your week';
+
+  @override
+  String get reflectionAnchor7 =>
+      'You showed up every single day this week. Not perfect — present.';
+
+  @override
+  String reflectionAnchor56(int days) {
+    return 'You showed up $days out of 7 days this week. That\'s $days days you chose to try.';
+  }
+
+  @override
+  String reflectionAnchor34(int days) {
+    return 'You showed up $days days this week. That\'s $days days you chose to try.';
+  }
+
+  @override
+  String reflectionAnchor12(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days times',
+      one: '1 time',
+    );
+    return 'You checked in $_temp0 this week. Even one day counts — you didn\'t disappear.';
+  }
+
+  @override
+  String get reflectionAnchor0 =>
+      'Quiet week. That\'s okay. You\'re here now, and that\'s what matters.';
+
+  @override
+  String reflectionPatternOneDay(String dayName) {
+    return 'Looks like $dayName is when you really show up. Three weeks in a row now.';
+  }
+
+  @override
+  String reflectionPatternTwoDays(String dayName1, String dayName2) {
+    return '$dayName1 and $dayName2 seem to be your days.';
+  }
+
+  @override
+  String get reflectionPatternNone =>
+      'Your rhythm is still finding its shape. That\'s normal — keep going.';
+
+  @override
+  String reflectionFocusDominant(String area) {
+    return 'You\'ve been drawn to $area habits lately. That seems important to you right now.';
+  }
+
+  @override
+  String reflectionFocusBalanced(String area1, String area2) {
+    return 'You spread your energy across $area1 and $area2 this week. A balanced week.';
+  }
+
+  @override
+  String get reflectionReframeComeback =>
+      'Last week was quieter. This week you came back. That\'s the whole point.';
+
+  @override
+  String reflectionReframeRefresh(int count) {
+    return 'You refreshed your habits $count time(s) this week — that\'s not quitting, that\'s adapting.';
+  }
+
+  @override
+  String get reflectionReframeSwap =>
+      'You swapped out a habit this week. Knowing what doesn\'t work is progress too.';
+
+  @override
+  String get reflectionShare => 'Share';
+
+  @override
+  String get reflectionTeaser => 'There\'s more to your week';
+
+  @override
+  String get reflectionSectionThisWeek => 'THIS WEEK';
+
+  @override
+  String get reflectionSectionYourRhythm => 'YOUR RHYTHM';
+
+  @override
+  String get reflectionSectionYourFocus => 'YOUR FOCUS';
+
+  @override
+  String get reflectionSectionNotice => 'SOMETHING TO NOTICE';
+
+  @override
+  String get tipPinHabit => 'Long press on a habit to pin it to the top';
+
+  @override
+  String get tipCuratedPack =>
+      'Try a curated pack — find them in Browse all habits';
+
+  @override
+  String get tipGotIt => 'Got it';
+
+  @override
+  String get tipSkipAll => 'Skip tips';
+
+  @override
+  String get packSwapTitle => 'Make room for your new pack';
+
+  @override
+  String get packSwapSubtitle =>
+      'To keep your space focused, pick which habits to set aside. Your custom habits will always stay.';
+
+  @override
+  String packSwapConfirm(int count, String packName) {
+    return 'Set aside $count and add $packName';
+  }
+
+  @override
+  String packSwapAdded(int count) {
+    return 'added — $count new habits ready to go';
+  }
+
+  @override
+  String get packSwapAllActive =>
+      'All habits from this pack are already active';
+
+  @override
+  String get packCreativeSparkName => 'Creative Spark';
+
+  @override
+  String get packCreativeSparkSubtitle =>
+      'Small acts of making. No talent required.';
+
+  @override
+  String get packCreativeSparkDescription =>
+      'Three tiny creative habits that get you out of your head and into your hands. Not about being good — about being playful.';
+
+  @override
+  String get packStayConnectedName => 'Stay Connected';
+
+  @override
+  String get packStayConnectedSubtitle =>
+      'The people who matter, one small gesture at a time.';
+
+  @override
+  String get packStayConnectedDescription =>
+      'Four micro-habits for staying close to the people in your life. Not grand gestures — just showing up.';
 }

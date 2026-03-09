@@ -11,6 +11,8 @@ class IntentionShareCard extends StatelessWidget {
   final String timesText;
   final String descriptorText;
   final String? userName;
+  final List<bool>? dailyActivity;
+  final String? focusAreaText;
 
   const IntentionShareCard({
     super.key,
@@ -19,6 +21,8 @@ class IntentionShareCard extends StatelessWidget {
     required this.timesText,
     required this.descriptorText,
     this.userName,
+    this.dailyActivity,
+    this.focusAreaText,
   });
 
   @override
@@ -220,12 +224,73 @@ class IntentionShareCard extends StatelessWidget {
             ),
           ),
 
+          // Day dots row (M T W T F S S)
+          if (dailyActivity != null && dailyActivity!.length == 7)
+            Positioned(
+              left: 80,
+              right: 80,
+              top: 1160,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(7, (i) {
+                  const labels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+                  final active = dailyActivity![i];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 18),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 20,
+                          height: 20,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: active
+                                ? heroTop.withOpacity(0.85)
+                                : textDark.withOpacity(0.12),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          labels[i],
+                          style: TextStyle(
+                            fontFamily: 'Sora',
+                            fontSize: 28,
+                            fontWeight: FontWeight.w500,
+                            color: textDark.withOpacity(active ? 0.60 : 0.25),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+              ),
+            ),
+
+          // Focus area text
+          if (focusAreaText != null && focusAreaText!.isNotEmpty)
+            Positioned(
+              left: 80,
+              right: 80,
+              top: 1280,
+              child: Text(
+                focusAreaText!,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'InstrumentSans',
+                  fontSize: 40,
+                  fontWeight: FontWeight.w400,
+                  color: textDark.withOpacity(0.45),
+                  height: 1.3,
+                ),
+              ),
+            ),
+
           // P.S. Name — only if user has a name
           if (userName != null && userName!.isNotEmpty)
             Positioned(
               left: 0,
               right: 0,
-              top: 1180,
+              top: dailyActivity != null ? 1360 : 1180,
               child: Center(
                 child: Text(
                   'P.S. $userName',

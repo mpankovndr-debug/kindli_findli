@@ -122,6 +122,7 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
                       ThemePicker(
                         isPremium: false,
                         onPremiumTap: _showPremiumHintAnimated,
+                        onboardingMode: true,
                       ),
                       Padding(
                         padding: const EdgeInsets.only(top: 12),

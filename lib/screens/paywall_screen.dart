@@ -67,6 +67,7 @@ class _PaywallScreenState extends State<PaywallScreen>
 
     return SafeArea(
       child: SingleChildScrollView(
+        clipBehavior: Clip.none,
         padding: const EdgeInsets.symmetric(vertical: 24),
         child: Align(
           alignment: Alignment.topCenter,
@@ -96,19 +97,19 @@ class _PaywallScreenState extends State<PaywallScreen>
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: colors.modalShadow.withOpacity(0.35),
-                        blurRadius: 70,
-                        offset: const Offset(0, 25),
+                        color: colors.modalShadow.withOpacity(0.2),
+                        blurRadius: 40,
+                        offset: const Offset(0, 16),
                       ),
                       BoxShadow(
-                        color: const Color(0xFFFFFFFF).withOpacity(0.6),
+                        color: const Color(0xFFFFFFFF).withOpacity(0.25),
                         blurRadius: 0,
                         offset: const Offset(0, 1),
                         spreadRadius: 0,
                         blurStyle: BlurStyle.inner,
                       ),
                       BoxShadow(
-                        color: colors.modalInnerShadow.withOpacity(0.15),
+                        color: colors.modalInnerShadow.withOpacity(0.1),
                         blurRadius: 0,
                         offset: const Offset(0, -1),
                         spreadRadius: 0,
@@ -181,13 +182,13 @@ class _PaywallScreenState extends State<PaywallScreen>
                           padding: const EdgeInsets.symmetric(horizontal: 4),
                           child: Column(
                             children: [
-                              _buildAnimatedBullet(0, CupertinoIcons.star_fill, l10n.paywallFeature1),
+                              _buildAnimatedBullet(0, CupertinoIcons.paintbrush, l10n.paywallFeature1),
                               const SizedBox(height: 12),
-                              _buildAnimatedBullet(1, CupertinoIcons.arrow_2_circlepath, l10n.paywallFeature2),
+                              _buildAnimatedBullet(1, CupertinoIcons.cube, l10n.paywallFeature2),
                               const SizedBox(height: 12),
-                              _buildAnimatedBullet(2, CupertinoIcons.arrow_up_circle, l10n.paywallFeature3),
+                              _buildAnimatedBullet(2, CupertinoIcons.lightbulb, l10n.paywallFeature3),
                               const SizedBox(height: 12),
-                              _buildAnimatedBullet(3, CupertinoIcons.chat_bubble, l10n.paywallFeature4),
+                              _buildAnimatedBullet(3, CupertinoIcons.star, l10n.paywallFeature4),
                             ],
                           ),
                         ),
@@ -197,6 +198,18 @@ class _PaywallScreenState extends State<PaywallScreen>
                         _buildCTAButton(colors, l10n),
                         const SizedBox(height: 8),
                         _buildDisclaimer(colors, l10n),
+                        const SizedBox(height: 12),
+                        Text(
+                          l10n.paywallFooter,
+                          style: TextStyle(
+                            fontFamily: AppTextStyles.bodyFont(context),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                            color: colors.textTertiary.withOpacity(0.7),
+                            height: 1.4,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                         const SizedBox(height: 8),
                         _buildContinueFreeSection(colors, l10n),
                       ],

@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../services/reflection_service.dart';
+
 class OnboardingState extends ChangeNotifier {
   bool _welcomeSeen = false;
   String? _name;
@@ -246,6 +248,41 @@ class OnboardingState extends ChangeNotifier {
     }
   }
 
+  /// Removes habits from the active list (returns them to the browse pool).
+  /// Custom habits are never removed by this method.
+  Future<void> setAsideHabits(List<String> habitsToRemove) async {
+    for (final habit in habitsToRemove) {
+      if (_customHabits.contains(habit)) continue;
+      userHabits.remove(habit);
+    }
+    if (_pinnedHabit != null && !userHabits.contains(_pinnedHabit)) {
+      _pinnedHabit = null;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('pinned_habit');
+    }
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('user_habits', userHabits);
+    notifyListeners();
+  }
+
+  /// Adds multiple habits from a curated pack, skipping any already active.
+  /// Returns the number of newly added habits.
+  Future<int> addHabitsFromPack(List<String> habitIds) async {
+    int added = 0;
+    for (final habit in habitIds) {
+      if (!userHabits.contains(habit)) {
+        userHabits.add(habit);
+        added++;
+      }
+    }
+    if (added > 0) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList('user_habits', userHabits);
+      notifyListeners();
+    }
+    return added;
+  }
+
   // Load habits from storage
   Future<void> loadUserHabits() async {
     final prefs = await SharedPreferences.getInstance();
@@ -462,6 +499,7 @@ class OnboardingState extends ChangeNotifier {
 
     // Increment swap count
     _swapsUsed[category] = (_swapsUsed[category] ?? 0) + 1;
+    ReflectionService.incrementSwapCount();
 
     // Notify UI immediately so cards update before async saves
     notifyListeners();
@@ -568,9 +606,10 @@ class OnboardingState extends ChangeNotifier {
 
   Future<void> refreshHabits() async {
     if (!canRefreshHabits()) return;
-    
+
     _habitRefreshCount++;
     _lastHabitRefresh = DateTime.now();
+    ReflectionService.incrementRefreshCount();
     
     // Save state
     final prefs = await SharedPreferences.getInstance();

@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import '../l10n/app_localizations.dart';
@@ -225,7 +226,10 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.watch<ThemeProvider>().colors;
+    final themeProvider = context.watch<ThemeProvider>();
+    final colors = themeProvider.colors;
+    final isDark = themeProvider.theme.isDark;
+    // isDark used in barrier color below
 
     return AnimatedBuilder(
       animation: _modalEntranceController,
@@ -235,8 +239,8 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
           child: ScaleTransition(
             scale: _modalScaleAnimation,
             child: Container(
-              color: colors.textPrimary.withOpacity(
-                0.50 * _modalEntranceFadeAnimation.value,
+              color: (isDark ? colors.barrierColor : colors.textPrimary).withOpacity(
+                (isDark ? 0.65 : 0.50) * _modalEntranceFadeAnimation.value,
               ),
               child: FadeTransition(
                 opacity: _modalEntranceFadeAnimation,
@@ -257,43 +261,57 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
   }
 
   Widget _buildQuestionView(AppColorScheme colors) {
+    final themeProvider = context.read<ThemeProvider>();
+    final isDark = themeProvider.theme.isDark;
     final l10n = AppLocalizations.of(context);
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24),
       constraints: const BoxConstraints(maxWidth: 384),
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(28, 32, 28, 36),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: const Alignment(0.0, 1.0), // bottom
-            end: const Alignment(0.0, -1.0), // top
-            colors: [
-              colors.modalBg1,
-              colors.modalBg2,
-              colors.modalBg3,
-            ],
-            stops: const [0.0, 0.5, 1.0],
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(32),
+        boxShadow: [
+          BoxShadow(
+            color: colors.modalShadow.withOpacity(0.2),
+            blurRadius: 40,
+            offset: const Offset(0, 16),
           ),
-          borderRadius: BorderRadius.circular(32),
-          border: Border.all(
-            color: const Color(0xFFFFFFFF).withOpacity(0.5),
-            width: 1.5,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: colors.modalShadow.withOpacity(0.35),
-              blurRadius: 70,
-              offset: const Offset(0, 25),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(32),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(28, 32, 28, 36),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: const Alignment(0.0, 1.0),
+                end: const Alignment(0.0, -1.0),
+                colors: [
+                  colors.modalBg1.withOpacity(isDark ? 0.75 : 1.0),
+                  colors.modalBg2.withOpacity(isDark ? 0.70 : 1.0),
+                  colors.modalBg3.withOpacity(isDark ? 0.75 : 1.0),
+                ],
+                stops: const [0.0, 0.5, 1.0],
+              ),
+              borderRadius: BorderRadius.circular(32),
+              border: Border.all(
+                color: isDark
+                    ? colors.borderCard.withOpacity(colors.borderCardOpacity)
+                    : const Color(0xFFFFFFFF).withOpacity(0.5),
+                width: 1.5,
+              ),
+              boxShadow: [
+                if (!isDark)
+                  BoxShadow(
+                    color: const Color(0xFFFFFFFF).withOpacity(0.25),
+                    blurRadius: 0,
+                    offset: const Offset(0, 1),
+                    spreadRadius: 0,
+                    blurStyle: BlurStyle.inner,
+                  ),
+              ],
             ),
-            BoxShadow(
-              color: const Color(0xFFFFFFFF).withOpacity(0.6),
-              blurRadius: 0,
-              offset: const Offset(0, 1),
-              spreadRadius: 0,
-              blurStyle: BlurStyle.inner,
-            ),
-          ],
-        ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -357,17 +375,18 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: colors.textPrimary.withOpacity(0.3),
-                                  blurRadius: 24,
+                                  color: colors.textPrimary.withOpacity(isDark ? 0.15 : 0.3),
+                                  blurRadius: isDark ? 12 : 24,
                                   offset: const Offset(0, 6),
                                 ),
-                                BoxShadow(
-                                  color: const Color(0xFFFFFFFF).withOpacity(0.15),
-                                  blurRadius: 0,
-                                  offset: const Offset(0, 1),
-                                  spreadRadius: 0,
-                                  blurStyle: BlurStyle.inner,
-                                ),
+                                if (!isDark)
+                                  BoxShadow(
+                                    color: const Color(0xFFFFFFFF).withOpacity(0.15),
+                                    blurRadius: 0,
+                                    offset: const Offset(0, 1),
+                                    spreadRadius: 0,
+                                    blurStyle: BlurStyle.inner,
+                                  ),
                               ],
                             ),
                             child: Text(
@@ -377,7 +396,7 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
                                 fontFamily: AppTextStyles.bodyFont(context),
                                 fontSize: 17,
                                 fontWeight: FontWeight.w600,
-                                color: const Color(0xFFFFFFFF),
+                                color: colors.buttonText,
                               ),
                             ),
                           ),
@@ -409,56 +428,72 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
               ],
             ),
           ),
+        ),
+      ),
     );
   }
 
   Widget _buildCelebrationView(AppColorScheme colors) {
+    final isDark = context.read<ThemeProvider>().theme.isDark;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24),
       constraints: const BoxConstraints(maxWidth: 384),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 48),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: const Alignment(0.0, 1.0), // bottom
-            end: const Alignment(0.0, -1.0), // top
-            colors: [
-              colors.modalBg1,
-              colors.modalBg2,
-              colors.modalBg3,
-            ],
-            stops: const [0.0, 0.5, 1.0],
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: colors.modalShadow.withOpacity(0.2),
+            blurRadius: 40,
+            offset: const Offset(0, 16),
           ),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: const Color(0xFFFFFFFF).withOpacity(0.5),
-            width: 1.5,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: colors.modalShadow.withOpacity(0.35),
-              blurRadius: 70,
-              offset: const Offset(0, 25),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 48),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: const Alignment(0.0, 1.0),
+                end: const Alignment(0.0, -1.0),
+                colors: [
+                  colors.modalBg1.withOpacity(isDark ? 0.75 : 1.0),
+                  colors.modalBg2.withOpacity(isDark ? 0.70 : 1.0),
+                  colors.modalBg3.withOpacity(isDark ? 0.75 : 1.0),
+                ],
+                stops: const [0.0, 0.5, 1.0],
+              ),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: isDark
+                    ? colors.borderCard.withOpacity(colors.borderCardOpacity)
+                    : const Color(0xFFFFFFFF).withOpacity(0.5),
+                width: 1.5,
+              ),
+              boxShadow: [
+                if (!isDark)
+                  BoxShadow(
+                    color: const Color(0xFFFFFFFF).withOpacity(0.25),
+                    blurRadius: 0,
+                    offset: const Offset(0, 1),
+                    spreadRadius: 0,
+                    blurStyle: BlurStyle.inner,
+                  ),
+                if (!isDark)
+                  BoxShadow(
+                    color: colors.modalInnerShadow.withOpacity(0.1),
+                    blurRadius: 0,
+                    offset: const Offset(0, -1),
+                    spreadRadius: 0,
+                    blurStyle: BlurStyle.inner,
+                  ),
+              ],
             ),
-            BoxShadow(
-              color: const Color(0xFFFFFFFF).withOpacity(0.6),
-              blurRadius: 0,
-              offset: const Offset(0, 1),
-              spreadRadius: 0,
-              blurStyle: BlurStyle.inner,
-            ),
-            BoxShadow(
-              color: colors.modalInnerShadow.withOpacity(0.15),
-              blurRadius: 0,
-              offset: const Offset(0, -1),
-              spreadRadius: 0,
-              blurStyle: BlurStyle.inner,
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
             // Heart icon with scale animation
             ScaleTransition(
               scale: _heartScaleAnimation,
@@ -503,6 +538,8 @@ class _HabitCompletionModalState extends State<HabitCompletionModal>
               ),
             ),
           ],
+        ),
+      ),
         ),
       ),
     );

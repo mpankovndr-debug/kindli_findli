@@ -335,7 +335,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showChangeFocusAreasConfirmation() {
-    final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
+    final tp = Provider.of<ThemeProvider>(context, listen: false);
+    final colors = tp.colors;
+    final isDarkDialog = tp.theme.isDark;
     final l10n = AppLocalizations.of(context);
 
     showCupertinoDialog(
@@ -368,22 +370,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       borderRadius: BorderRadius.circular(32),
                       border: Border.all(
-                        color: const Color(0xFFFFFFFF).withOpacity(0.5),
+                        color: isDarkDialog
+                            ? colors.borderCard.withOpacity(colors.borderCardOpacity)
+                            : const Color(0xFFFFFFFF).withOpacity(0.5),
                         width: 1.5,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: colors.modalShadow.withOpacity(0.4),
-                          blurRadius: 70,
-                          offset: const Offset(0, 25),
+                          color: colors.modalShadow.withOpacity(0.2),
+                          blurRadius: 40,
+                          offset: const Offset(0, 16),
                         ),
-                        BoxShadow(
-                          color: const Color(0xFFFFFFFF).withOpacity(0.6),
-                          blurRadius: 0,
-                          offset: const Offset(0, 1),
-                          spreadRadius: 0,
-                          blurStyle: BlurStyle.inner,
-                        ),
+                        if (!isDarkDialog)
+                          BoxShadow(
+                            color: const Color(0xFFFFFFFF).withOpacity(0.25),
+                            blurRadius: 0,
+                            offset: const Offset(0, 1),
+                            spreadRadius: 0,
+                            blurStyle: BlurStyle.inner,
+                          ),
                       ],
                     ),
                     child: Column(
@@ -531,14 +536,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  void _showUpgradeScreen() {
-    if (context.read<RevenueCatService>().isPremium) return;
-    showCupertinoModalPopup(
+  Future<void> _showUpgradeScreen() {
+    if (context.read<RevenueCatService>().isPremium) return Future.value();
+    return showCupertinoModalPopup(
       context: context,
       barrierColor: Colors.black.withOpacity(0.5),
       filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
       builder: (context) => const PaywallScreen(source: 'profile'),
     );
+  }
+
+  String _localizedThemeName(AppTheme theme, AppLocalizations l10n) {
+    return switch (theme) {
+      AppTheme.warmClay => l10n.themeWarmClay,
+      AppTheme.iris => l10n.themeIris,
+      AppTheme.clearSky => l10n.themeClearSky,
+      AppTheme.morningSlate => l10n.themeMorningSlate,
+      AppTheme.softDusk => l10n.themeSoftDusk,
+      AppTheme.deepFocus => l10n.themeDeepFocus,
+      AppTheme.forestFloor => l10n.themeForestFloor,
+      AppTheme.goldenHour => l10n.themeGoldenHour,
+      AppTheme.nightBloom => l10n.themeNightBloom,
+      AppTheme.sandDune => l10n.themeSandDune,
+    };
   }
 
   void _showAppearancePicker(BuildContext context) {
@@ -576,43 +596,61 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   child: SafeArea(
                     top: false,
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Drag handle
-                          Container(
-                            width: 36,
-                            height: 4,
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(2),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: MediaQuery.of(context).size.height * 0.85,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Drag handle
+                            Container(
+                              width: 36,
+                              height: 4,
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(2),
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 12),
-                          // Title
-                          Text(
-                            l10n.profileChangeSpace,
-                            style: TextStyle(
-                              fontFamily: AppTextStyles.bodyFont(context),
-                              fontSize: 17,
-                              fontWeight: FontWeight.w600,
-                              color: colors.textPrimary,
+                            const SizedBox(height: 12),
+                            // Title
+                            Text(
+                              l10n.profileChangeSpace,
+                              style: TextStyle(
+                                fontFamily: AppTextStyles.bodyFont(context),
+                                fontSize: 17,
+                                fontWeight: FontWeight.w600,
+                                color: colors.textPrimary,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 20),
-                          // Theme picker
-                          ThemePicker(
-                            isPremium: userState.hasSubscription,
-                            compact: true,
-                            onPremiumTap: () {
-                              Navigator.pop(context);
-                              _showUpgradeScreen();
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                        ],
+                            const SizedBox(height: 20),
+                            // Theme picker (scrollable)
+                            Flexible(
+                              child: SingleChildScrollView(
+                                child: ThemePicker(
+                                  isPremium: userState.hasSubscription,
+                                  hasBoost: userState.hasBoost,
+                                  compact: true,
+                                  onPremiumTap: () {
+                                    Navigator.pop(context);
+                                    _showUpgradeScreen().then((_) {
+                                      if (mounted) _showAppearancePicker(this.context);
+                                    });
+                                  },
+                                  onBoostTap: () {
+                                    Navigator.pop(context);
+                                    _showUpgradeScreen().then((_) {
+                                      if (mounted) _showAppearancePicker(this.context);
+                                    });
+                                  },
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -1065,7 +1103,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final onboardingState = context.watch<OnboardingState>();
     final hasHabits = onboardingState.userHabits.isNotEmpty;
     final focusAreas = onboardingState.focusAreas;
-    final colors = context.watch<ThemeProvider>().colors;
+    final themeProvider = context.watch<ThemeProvider>();
+    final colors = themeProvider.colors;
+    final isDark = themeProvider.theme.isDark;
 
     return CupertinoPageScaffold(
       backgroundColor: Colors.transparent,
@@ -1911,15 +1951,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
-                                  child: Text(
-                                    l10n.profileAppearance,
-                                    style: TextStyle(
-                                      fontFamily:
-                                          AppTextStyles.bodyFont(context),
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                      color: colors.textPrimary,
-                                    ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        l10n.profileAppearance,
+                                        style: TextStyle(
+                                          fontFamily:
+                                              AppTextStyles.bodyFont(context),
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500,
+                                          color: colors.textPrimary,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        _localizedThemeName(context.watch<ThemeProvider>().theme, l10n),
+                                        style: TextStyle(
+                                          fontFamily:
+                                              AppTextStyles.bodyFont(context),
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w400,
+                                          color: colors.textSecondary,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                                 Icon(
@@ -1958,7 +2014,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             .withOpacity(colors.profileCardOpacity),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: const Color(0xFFFFFFFF).withOpacity(0.6),
+                          color: isDark
+                              ? colors.borderCard.withOpacity(colors.borderCardOpacity)
+                              : const Color(0xFFFFFFFF).withOpacity(0.6),
                           width: 1,
                         ),
                         boxShadow: [
@@ -2121,7 +2179,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             .withOpacity(colors.profileCardOpacity),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: const Color(0xFFFFFFFF).withOpacity(0.6),
+                          color: isDark
+                              ? colors.borderCard.withOpacity(colors.borderCardOpacity)
+                              : const Color(0xFFFFFFFF).withOpacity(0.6),
                           width: 1,
                         ),
                         boxShadow: [
@@ -2356,7 +2416,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   .withOpacity(colors.profileCardOpacity),
                               borderRadius: BorderRadius.circular(100),
                               border: Border.all(
-                                color: const Color(0xFFFFFFFF).withOpacity(0.6),
+                                color: isDark
+                                    ? colors.borderCard.withOpacity(colors.borderCardOpacity)
+                                    : const Color(0xFFFFFFFF).withOpacity(0.6),
                                 width: 1,
                               ),
                               boxShadow: [
@@ -2415,9 +2477,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           userState.reset();
                                           userNameNotifier.value = null;
 
-                                          // Reset to default theme only if current theme requires Intended+
+                                          // Reset to default theme if current theme requires a paid tier
                                           if (themeProvider.isPremiumTheme(
-                                              themeProvider.theme)) {
+                                                  themeProvider.theme) ||
+                                              themeProvider.isBoostTheme(
+                                                  themeProvider.theme)) {
                                             themeProvider
                                                 .setTheme(AppTheme.warmClay);
                                           }
@@ -2513,7 +2577,9 @@ class _GlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.watch<ThemeProvider>().colors;
+    final themeProvider = context.watch<ThemeProvider>();
+    final colors = themeProvider.colors;
+    final isDark = themeProvider.theme.isDark;
 
     return Container(
       padding: padding ?? const EdgeInsets.all(24),
@@ -2521,7 +2587,9 @@ class _GlassCard extends StatelessWidget {
         color: colors.profileCard.withOpacity(colors.profileCardOpacity),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: const Color(0xFFFFFFFF).withOpacity(0.6),
+          color: isDark
+              ? colors.borderCard.withOpacity(colors.borderCardOpacity)
+              : const Color(0xFFFFFFFF).withOpacity(0.6),
           width: 1,
         ),
         boxShadow: [

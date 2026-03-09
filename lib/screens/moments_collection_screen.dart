@@ -4,12 +4,44 @@ import '../l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../models/moment.dart';
+import '../models/reflection_data.dart';
 import '../utils/habit_l10n.dart';
 import '../services/analytics_service.dart';
 import '../services/moments_service.dart';
+import '../services/reflection_service.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme_provider.dart';
 import '../utils/text_styles.dart';
+
+/// Unified timeline entry — either a habit moment or a weekly reflection.
+class _TimelineEntry {
+  final Moment? moment;
+  final ReflectionData? reflection;
+  final DateTime sortDate;
+
+  _TimelineEntry.habit(this.moment)
+      : reflection = null,
+        sortDate = moment!.completedAt;
+
+  _TimelineEntry.weeklyReflection(this.reflection)
+      : moment = null,
+        sortDate = _reflectionSortDate(reflection!);
+
+  bool get isReflection => reflection != null;
+
+  /// Derive a sort date from validUntil (end of Sunday) → use Monday of that week.
+  static DateTime _reflectionSortDate(ReflectionData data) {
+    if (data.validUntil != null) {
+      final until = DateTime.tryParse(data.validUntil!);
+      if (until != null) {
+        // validUntil = Sunday 23:59:59 → Monday = until - 6 days
+        return until.subtract(const Duration(days: 6));
+      }
+    }
+    // Fallback: parse weekRange "Mar 3 – Mar 9" isn't reliable, use epoch.
+    return DateTime(2020);
+  }
+}
 
 class MomentsCollectionScreen extends StatefulWidget {
   const MomentsCollectionScreen({super.key});
@@ -20,10 +52,13 @@ class MomentsCollectionScreen extends StatefulWidget {
 }
 
 class _MomentsCollectionScreenState extends State<MomentsCollectionScreen> {
-  Map<String, List<Moment>> _grouped = {};
+  Map<String, List<_TimelineEntry>> _grouped = {};
   bool _loading = true;
   bool _didLoad = false;
   final Set<String> _expandedMonths = {};
+  final Set<String> _expandedReflections = {};
+  bool _currentMonthShowAll = false;
+  static const int _initialVisibleCount = 5;
 
   @override
   void didChangeDependencies() {
@@ -37,13 +72,41 @@ class _MomentsCollectionScreenState extends State<MomentsCollectionScreen> {
 
   Future<void> _load() async {
     final l10n = AppLocalizations.of(context);
-    final grouped = await MomentsService.getGroupedByMonth(l10n);
+    final moments = await MomentsService.getAll();
+    final reflections = await ReflectionService.getReflectionHistory();
+
+    // Build unified timeline entries.
+    final entries = <_TimelineEntry>[
+      ...moments.map((m) => _TimelineEntry.habit(m)),
+      ...reflections.map((r) => _TimelineEntry.weeklyReflection(r)),
+    ];
+
+    // Sort newest first.
+    entries.sort((a, b) => b.sortDate.compareTo(a.sortDate));
+
+    // Group by month label.
+    final Map<String, List<_TimelineEntry>> grouped = {};
+    for (final entry in entries) {
+      final key = _monthLabel(entry.sortDate.toLocal(), l10n);
+      grouped.putIfAbsent(key, () => []).add(entry);
+    }
+
     if (mounted) {
       setState(() {
         _grouped = grouped;
         _loading = false;
       });
     }
+  }
+
+  static String _monthLabel(DateTime date, AppLocalizations l10n) {
+    final months = [
+      l10n.monthJanuary, l10n.monthFebruary, l10n.monthMarch,
+      l10n.monthApril, l10n.monthMay, l10n.monthJune,
+      l10n.monthJuly, l10n.monthAugust, l10n.monthSeptember,
+      l10n.monthOctober, l10n.monthNovember, l10n.monthDecember,
+    ];
+    return '${months[date.month - 1]} ${date.year}';
   }
 
   @override
@@ -177,17 +240,41 @@ class _MomentsCollectionScreenState extends State<MomentsCollectionScreen> {
             child: _buildMonthHeader(month, month == currentMonthKey, colors),
           ),
 
-          // Current or expanded month → full entry list
-          if (month == currentMonthKey || _expandedMonths.contains(month))
+          // Current or expanded month → entry list (capped for current month)
+          if (month == currentMonthKey || _expandedMonths.contains(month)) ...[
             SliverList(
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
-                  final moment = _grouped[month]![index];
-                  return _MomentRow(moment: moment);
+                  final entry = _grouped[month]![index];
+                  if (entry.isReflection) {
+                    return _ReflectionRow(
+                      reflection: entry.reflection!,
+                      isExpanded: _expandedReflections.contains(entry.reflection!.weekRange),
+                      onTap: () {
+                        setState(() {
+                          final key = entry.reflection!.weekRange;
+                          if (_expandedReflections.contains(key)) {
+                            _expandedReflections.remove(key);
+                          } else {
+                            _expandedReflections.add(key);
+                          }
+                        });
+                      },
+                    );
+                  }
+                  return _MomentRow(moment: entry.moment!);
                 },
-                childCount: _grouped[month]!.length,
+                childCount: (month == currentMonthKey && !_currentMonthShowAll && _grouped[month]!.length > _initialVisibleCount)
+                    ? _initialVisibleCount
+                    : _grouped[month]!.length,
               ),
-            )
+            ),
+            // "Show all" button when current month is capped
+            if (month == currentMonthKey && !_currentMonthShowAll && _grouped[month]!.length > _initialVisibleCount)
+              SliverToBoxAdapter(
+                child: _buildShowAllButton(_grouped[month]!.length, colors, l10n),
+              ),
+          ]
           // Past collapsed month → summary card
           else
             SliverToBoxAdapter(
@@ -235,15 +322,54 @@ class _MomentsCollectionScreenState extends State<MomentsCollectionScreen> {
     );
   }
 
+  Widget _buildShowAllButton(int totalCount, AppColorScheme colors, AppLocalizations l10n) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _currentMonthShowAll = true;
+        });
+      },
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 4, 24, 12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          decoration: BoxDecoration(
+            color: colors.cardBackground.withOpacity(colors.cardBackgroundOpacity * 0.5),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: colors.borderCard.withOpacity(colors.borderCardOpacity),
+              width: 0.5,
+            ),
+          ),
+          child: Center(
+            child: Text(
+              l10n.momentsShowAll(totalCount),
+              style: TextStyle(
+                fontFamily: AppTextStyles.bodyFont(context),
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: colors.ctaPrimary,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildSummaryCard(
     String month,
-    List<Moment> moments,
+    List<_TimelineEntry> entries,
     AppColorScheme colors,
     AppLocalizations l10n,
   ) {
+    final isDark = context.watch<ThemeProvider>().theme.isDark;
+    final moments = entries.where((e) => !e.isReflection).toList();
     final momentCount = moments.length;
-    final intentionCount = moments.map((m) => m.habitName).toSet().length;
-    final topIntention = _mostFrequentIntention(moments);
+    final intentionCount = moments.map((m) => m.moment!.habitName).toSet().length;
+    final topIntention = momentCount > 0
+        ? _mostFrequentIntention(moments.map((e) => e.moment!).toList())
+        : '';
 
     return GestureDetector(
       onTap: () => _toggleMonth(month),
@@ -256,10 +382,14 @@ class _MomentsCollectionScreenState extends State<MomentsCollectionScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               decoration: BoxDecoration(
-                color: const Color(0xFFFFFFFF).withOpacity(0.30),
+                color: isDark
+                    ? colors.momentsCard.withOpacity(colors.momentsCardOpacity)
+                    : const Color(0xFFFFFFFF).withOpacity(0.30),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: const Color(0xFFFFFFFF).withOpacity(0.35),
+                  color: isDark
+                      ? colors.borderCard.withOpacity(colors.borderCardOpacity)
+                      : const Color(0xFFFFFFFF).withOpacity(0.35),
                   width: 1,
                 ),
               ),
@@ -323,10 +453,10 @@ class _MomentsCollectionScreenState extends State<MomentsCollectionScreen> {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFFFFF).withOpacity(0.35),
+                        color: colors.cardBackground.withOpacity(0.35),
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: const Color(0xFFFFFFFF).withOpacity(0.3),
+                          color: colors.borderCard.withOpacity(0.3),
                         ),
                       ),
                       child: Icon(
@@ -412,16 +542,22 @@ class _MomentsHeaderDelegate extends SliverPersistentHeaderDelegate {
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     final colors = context.watch<ThemeProvider>().colors;
     final l10n = AppLocalizations.of(context);
-    final double progress = (shrinkOffset / 50.0).clamp(0.0, 1.0);
-
     return ClipRect(
       child: BackdropFilter(
-        filter: ImageFilter.blur(
-          sigmaX: 20 * progress,
-          sigmaY: 20 * progress,
-        ),
+        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
         child: Container(
-          color: colors.modalBg2.withOpacity(0.85 * progress),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                colors.bgGradientTop.withOpacity(colors.bgGradientTopOpacity * 0.7),
+                colors.bgGradientTop.withOpacity(colors.bgGradientTopOpacity * 0.4),
+                colors.bgGradientTop.withOpacity(0.0),
+              ],
+              stops: const [0.0, 0.7, 1.0],
+            ),
+          ),
           padding: EdgeInsets.fromLTRB(24, topPadding + 16, 24, 8),
           child: Row(
             children: [
@@ -435,10 +571,10 @@ class _MomentsHeaderDelegate extends SliverPersistentHeaderDelegate {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFFFFF).withOpacity(0.35),
+                        color: colors.cardBackground.withOpacity(0.35),
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: const Color(0xFFFFFFFF).withOpacity(0.3),
+                          color: colors.borderCard.withOpacity(0.3),
                         ),
                       ),
                       child: Icon(
@@ -496,7 +632,9 @@ class _MomentRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.watch<ThemeProvider>().colors;
+    final themeProvider = context.watch<ThemeProvider>();
+    final colors = themeProvider.colors;
+    final isDark = themeProvider.theme.isDark;
     final l10n = AppLocalizations.of(context);
 
     final now = DateTime.now();
@@ -522,10 +660,14 @@ class _MomentRow extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             decoration: BoxDecoration(
-              color: const Color(0xFFFFFFFF).withOpacity(0.30),
+              color: isDark
+                  ? colors.momentsCard.withOpacity(colors.momentsCardOpacity)
+                  : const Color(0xFFFFFFFF).withOpacity(0.30),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: const Color(0xFFFFFFFF).withOpacity(0.35),
+                color: isDark
+                    ? colors.borderCard.withOpacity(colors.borderCardOpacity)
+                    : const Color(0xFFFFFFFF).withOpacity(0.35),
                 width: 1,
               ),
             ),
@@ -573,5 +715,225 @@ class _MomentRow extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _ReflectionRow extends StatelessWidget {
+  final ReflectionData reflection;
+  final bool isExpanded;
+  final VoidCallback onTap;
+
+  const _ReflectionRow({
+    required this.reflection,
+    required this.isExpanded,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    final colors = themeProvider.colors;
+    final isDark = themeProvider.theme.isDark;
+    final l10n = AppLocalizations.of(context);
+
+    final activity = reflection.dailyActivity ?? List.filled(7, false);
+    final dayLabels = [
+      l10n.dayShortMon, l10n.dayShortTue, l10n.dayShortWed,
+      l10n.dayShortThu, l10n.dayShortFri, l10n.dayShortSat,
+      l10n.dayShortSun,
+    ];
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? colors.momentsCard.withValues(alpha: colors.momentsCardOpacity)
+                    : const Color(0xFFFFFFFF).withValues(alpha: 0.30),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isDark
+                      ? colors.borderCard.withValues(alpha: colors.borderCardOpacity)
+                      : const Color(0xFFFFFFFF).withValues(alpha: 0.35),
+                  width: 1,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header: icon + "Weekly Reflection · Mar 3 – Mar 9"
+                  Row(
+                    children: [
+                      Icon(
+                        CupertinoIcons.sparkles,
+                        size: 18,
+                        color: colors.ctaPrimary.withValues(alpha: 0.7),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          '${l10n.reflectionTitle} · ${reflection.weekRange}',
+                          style: TextStyle(
+                            fontFamily: AppTextStyles.bodyFont(context),
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: colors.textPrimary,
+                          ),
+                        ),
+                      ),
+                      Icon(
+                        isExpanded
+                            ? CupertinoIcons.chevron_up
+                            : CupertinoIcons.chevron_down,
+                        size: 14,
+                        color: colors.textSecondary,
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  // Anchor text (Section 1 copy)
+                  Text(
+                    _anchorText(l10n, reflection),
+                    style: TextStyle(
+                      fontFamily: AppTextStyles.bodyFont(context),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      color: colors.textPrimary,
+                      height: 1.5,
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // Day dots row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: List.generate(7, (i) {
+                      final active = i < activity.length && activity[i];
+                      return Column(
+                        children: [
+                          Container(
+                            width: active ? 10 : 6,
+                            height: active ? 10 : 6,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: active
+                                  ? colors.ctaAlternative
+                                  : colors.textDisabled.withValues(alpha: 0.4),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            dayLabels[i],
+                            style: TextStyle(
+                              fontFamily: 'DMSans',
+                              fontSize: 10,
+                              fontWeight: FontWeight.w400,
+                              color: active
+                                  ? colors.textSecondary
+                                  : colors.textDisabled,
+                            ),
+                          ),
+                        ],
+                      );
+                    }),
+                  ),
+
+                  // Expanded sections (focus, reframe, pattern)
+                  if (isExpanded) ...[
+                    if (reflection.topFocusArea != null) ...[
+                      const SizedBox(height: 12),
+                      Opacity(
+                        opacity: 0.85,
+                        child: Text(
+                          _focusText(l10n, reflection),
+                          style: TextStyle(
+                            fontFamily: AppTextStyles.bodyFont(context),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                            color: colors.textPrimary,
+                            height: 1.5,
+                          ),
+                        ),
+                      ),
+                    ],
+                    if (reflection.hasPatternData && reflection.bestDay != null) ...[
+                      const SizedBox(height: 10),
+                      Opacity(
+                        opacity: 0.85,
+                        child: Text(
+                          _patternText(l10n, reflection),
+                          style: TextStyle(
+                            fontFamily: AppTextStyles.bodyFont(context),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                            color: colors.textPrimary,
+                            height: 1.5,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _localizedDay(AppLocalizations l10n, String englishDay) {
+    return switch (englishDay) {
+      'Monday' => l10n.dayMonday,
+      'Tuesday' => l10n.dayTuesday,
+      'Wednesday' => l10n.dayWednesday,
+      'Thursday' => l10n.dayThursday,
+      'Friday' => l10n.dayFriday,
+      'Saturday' => l10n.daySaturday,
+      'Sunday' => l10n.daySunday,
+      _ => englishDay,
+    };
+  }
+
+  String _anchorText(AppLocalizations l10n, ReflectionData data) {
+    final n = data.daysActive;
+    if (n == 7) return l10n.reflectionAnchor7;
+    if (n >= 5) return l10n.reflectionAnchor56(n);
+    if (n >= 3) return l10n.reflectionAnchor34(n);
+    if (n >= 1) return l10n.reflectionAnchor12(n);
+    return l10n.reflectionAnchor0;
+  }
+
+  String _focusText(AppLocalizations l10n, ReflectionData data) {
+    if (data.secondFocusArea != null) {
+      return l10n.reflectionFocusBalanced(
+          data.topFocusArea!, data.secondFocusArea!);
+    }
+    return l10n.reflectionFocusDominant(data.topFocusArea!);
+  }
+
+  String _patternText(AppLocalizations l10n, ReflectionData data) {
+    if (data.bestDay != null && data.secondBestDay != null) {
+      return l10n.reflectionPatternTwoDays(
+        _localizedDay(l10n, data.bestDay!),
+        _localizedDay(l10n, data.secondBestDay!),
+      );
+    }
+    if (data.bestDay != null) {
+      return l10n.reflectionPatternOneDay(
+        _localizedDay(l10n, data.bestDay!),
+      );
+    }
+    return l10n.reflectionPatternNone;
   }
 }

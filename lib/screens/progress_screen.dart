@@ -13,9 +13,13 @@ import '../services/week_stats_service.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme_provider.dart';
 import '../utils/text_styles.dart';
-import '../utils/habit_l10n.dart';
+import '../models/share_card_type.dart';
+import '../services/milestone_service.dart';
+import '../state/user_state.dart';
+import '../widgets/weekly_reflection_card.dart';
 import 'moments_collection_screen.dart';
 import 'share_card_picker_screen.dart';
+import 'share_card_screen.dart';
 
 class ProgressScreen extends StatefulWidget {
   final bool isActive;
@@ -26,8 +30,6 @@ class ProgressScreen extends StatefulWidget {
 }
 
 class _ProgressScreenState extends State<ProgressScreen> {
-  bool _showAllHabits = false;
-
   @override
   void initState() {
     super.initState();
@@ -80,7 +82,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
   Widget build(BuildContext context) {
     final onboardingState = context.watch<OnboardingState>();
     final userHabits = onboardingState.userHabits;
-    final colors = context.watch<ThemeProvider>().colors;
+    final themeProvider = context.watch<ThemeProvider>();
+    final colors = themeProvider.colors;
+    final isDark = themeProvider.theme.isDark;
     final l10n = AppLocalizations.of(context);
 
     if (_weekStatsFuture == null) {
@@ -147,24 +151,51 @@ class _ProgressScreenState extends State<ProgressScreen> {
                                     color: colors.textPrimary,
                                   ),
                                 ),
-                                if (stats.completionCount > 0)
+                                if (stats.completionCount >= 3 || stats.dailyActivity.where((d) => d).length >= 2)
                                   CupertinoButton(
                                     padding: EdgeInsets.zero,
-                                    onPressed: () {
-                                      Navigator.of(context, rootNavigator: true).push(
-                                        PageRouteBuilder(
-                                          pageBuilder: (_, __, ___) => ShareCardPickerScreen(stats: stats),
-                                          transitionDuration: const Duration(milliseconds: 280),
-                                          reverseTransitionDuration: const Duration(milliseconds: 200),
-                                          transitionsBuilder: (_, animation, __, child) {
-                                            final curved = CurvedAnimation(
-                                              parent: animation,
-                                              curve: Curves.easeInOut,
-                                            );
-                                            return FadeTransition(opacity: curved, child: child);
-                                          },
-                                        ),
-                                      );
+                                    onPressed: () async {
+                                      final userState = context.read<UserState>();
+                                      final isPremium = userState.hasSubscription || userState.hasBoost;
+
+                                      if (isPremium) {
+                                        Navigator.of(context, rootNavigator: true).push(
+                                          PageRouteBuilder(
+                                            pageBuilder: (_, __, ___) => ShareCardPickerScreen(stats: stats),
+                                            transitionDuration: const Duration(milliseconds: 280),
+                                            reverseTransitionDuration: const Duration(milliseconds: 200),
+                                            transitionsBuilder: (_, animation, __, child) {
+                                              final curved = CurvedAnimation(
+                                                parent: animation,
+                                                curve: Curves.easeInOut,
+                                              );
+                                              return FadeTransition(opacity: curved, child: child);
+                                            },
+                                          ),
+                                        );
+                                      } else {
+                                        // Free users only have weekly check-in — skip picker
+                                        final milestoneData = await MilestoneService.get();
+                                        if (!context.mounted) return;
+                                        Navigator.of(context, rootNavigator: true).push(
+                                          PageRouteBuilder(
+                                            pageBuilder: (_, __, ___) => ShareCardScreen(
+                                              stats: stats,
+                                              selection: ShareCardSelection.weeklyCheckin,
+                                              milestoneData: milestoneData,
+                                            ),
+                                            transitionDuration: const Duration(milliseconds: 280),
+                                            reverseTransitionDuration: const Duration(milliseconds: 200),
+                                            transitionsBuilder: (_, animation, __, child) {
+                                              final curved = CurvedAnimation(
+                                                parent: animation,
+                                                curve: Curves.easeInOut,
+                                              );
+                                              return FadeTransition(opacity: curved, child: child);
+                                            },
+                                          ),
+                                        );
+                                      }
                                     },
                                     child: Icon(
                                       CupertinoIcons.share,
@@ -181,9 +212,11 @@ class _ProgressScreenState extends State<ProgressScreen> {
                             child: ListView(
                               padding: const EdgeInsets.fromLTRB(24, 0, 24, 140),
                               children: [
-                          // 2. Main Unified Card
-                          _buildMainCard(stats, colors, l10n),
-                          const SizedBox(height: 24),
+                          // 1. Weekly Reflection Card (unified)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 24),
+                            child: WeeklyReflectionCard(stats: stats),
+                          ),
 
                           // 3. Motivational Text
                           Padding(
@@ -213,7 +246,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                               final moments = snap.data!;
                               final count = moments.length;
                               final recent = moments.first;
-                              return _buildRecentMoment(count, recent, colors, l10n);
+                              return _buildRecentMoment(count, recent, colors, l10n, isDark: isDark);
                             },
                           ),
                               ],
@@ -228,179 +261,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
     );
   }
 
-  Widget _buildMainCard(WeekStats stats, AppColorScheme colors, AppLocalizations l10n) {
-    final habitsToShow = _showAllHabits
-        ? stats.completedHabits
-        : stats.completedHabits.take(3).toList();
-    final hiddenCount = stats.completedHabits.length - 3;
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: colors.profileCard.withOpacity(colors.profileCardOpacity),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: colors.cardBrowse.withOpacity(colors.cardBrowseOpacity),
-              width: 1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: colors.textPrimary.withOpacity(0.05),
-                blurRadius: 20,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 2a. Section Label
-              Text(
-                l10n.progressWeeklySummary,
-                style: TextStyle(
-                  fontFamily: AppTextStyles.bodyFont(context),
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                  color: colors.ctaPrimary,
-                  letterSpacing: 1,
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // 2b. Main Stat Heading
-              Text(
-                stats.completionCount == 0
-                    ? l10n.progressWeekBeginning
-                    : stats.completionCount == 1
-                        ? l10n.progressShowedUpOnce
-                        : l10n.progressShowedUpCount(stats.completionCount),
-                style: TextStyle(
-                  fontFamily: 'Sora',
-                  fontSize: 24,
-                  fontWeight: FontWeight.w600,
-                  color: colors.textPrimary,
-                  height: 1.3,
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // 2c. Completed Habits List
-              if (stats.completedHabits.isNotEmpty) ...[
-                Column(
-                  children: habitsToShow.map((habit) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(top: 1),
-                            child: Text(
-                              '✓',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: colors.ctaPrimary,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              localizeHabitName(habit, l10n),
-                              style: TextStyle(
-                                fontFamily: 'DMSans',
-                                fontSize: 15,
-                                fontWeight: FontWeight.w400,
-                                color: colors.textPrimary,
-                                height: 1.4,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                ),
-
-                // 2d. "+X more" / "See all" OR 2e. "Show less"
-                if (stats.completedHabits.length > 3) ...[
-                  const SizedBox(height: 2),
-                  if (!_showAllHabits)
-                    GestureDetector(
-                      onTap: () => setState(() => _showAllHabits = true),
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 24),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              l10n.progressMore(hiddenCount),
-                              style: TextStyle(
-                                fontFamily: 'DMSans',
-                                fontSize: 14,
-                                fontWeight: FontWeight.w400,
-                                color: colors.textSecondary,
-                              ),
-                            ),
-                            Text(
-                              l10n.progressSeeAll,
-                              style: TextStyle(
-                                fontFamily: 'DMSans',
-                                fontSize: 14,
-                                fontWeight: FontWeight.w400,
-                                color: colors.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                  else
-                    GestureDetector(
-                      onTap: () => setState(() => _showAllHabits = false),
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 24),
-                        child: Text(
-                          l10n.progressShowLess,
-                          style: TextStyle(
-                            fontFamily: 'DMSans',
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                            color: colors.textSecondary,
-                          ),
-                        ),
-                      ),
-                    ),
-                ] else
-                  const SizedBox(height: 12),
-              ],
-
-              // 2f. Divider
-              if (stats.completedHabits.isNotEmpty)
-                Container(
-                  height: 1,
-                  color: colors.ctaPrimary.withOpacity(0.15),
-                ),
-              if (stats.completedHabits.isNotEmpty)
-                const SizedBox(height: 20),
-
-              // 2g. Week Dots (animated)
-              _AnimatedWeekDots(
-                dailyActivity: stats.dailyActivity,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRecentMoment(int count, Moment recent, AppColorScheme colors, AppLocalizations l10n) {
+  Widget _buildRecentMoment(int count, Moment recent, AppColorScheme colors, AppLocalizations l10n, {required bool isDark}) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final local = recent.completedAt.toLocal();
@@ -450,7 +311,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
                   color: colors.momentsCard.withOpacity(colors.momentsCardOpacity),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: const Color(0xFFFFFFFF).withOpacity(0.25),
+                    color: isDark
+                        ? colors.borderCard.withOpacity(colors.borderCardOpacity)
+                        : const Color(0xFFFFFFFF).withOpacity(0.25),
                     width: 1,
                   ),
                 ),
@@ -493,114 +356,6 @@ class _ProgressScreenState extends State<ProgressScreen> {
           ),
         ),
       ],
-    );
-  }
-}
-
-
-class _AnimatedWeekDots extends StatefulWidget {
-  final List<bool> dailyActivity;
-
-  const _AnimatedWeekDots({
-    required this.dailyActivity,
-  });
-
-  @override
-  State<_AnimatedWeekDots> createState() => _AnimatedWeekDotsState();
-}
-
-class _AnimatedWeekDotsState extends State<_AnimatedWeekDots>
-    with TickerProviderStateMixin {
-  late List<AnimationController> _controllers;
-  late List<Animation<double>> _scaleAnimations;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _controllers = List.generate(
-      7,
-      (index) => AnimationController(
-        vsync: this,
-        duration: const Duration(milliseconds: 200),
-      ),
-    );
-
-    _scaleAnimations = _controllers.map((controller) {
-      return Tween<double>(begin: 0.0, end: 1.0).animate(
-        CurvedAnimation(
-          parent: controller,
-          curve: Curves.easeOutBack,
-        ),
-      );
-    }).toList();
-
-    // Start staggered animations (30ms between each)
-    for (var i = 0; i < 7; i++) {
-      Future.delayed(Duration(milliseconds: i * 30), () {
-        if (mounted) {
-          _controllers[i].forward();
-        }
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    for (var controller in _controllers) {
-      controller.dispose();
-    }
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.watch<ThemeProvider>().colors;
-    final l10n = AppLocalizations.of(context);
-    final dayLabels = [
-      l10n.dayShortMon, l10n.dayShortTue, l10n.dayShortWed,
-      l10n.dayShortThu, l10n.dayShortFri, l10n.dayShortSat,
-      l10n.dayShortSun,
-    ];
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: List.generate(7, (index) {
-          final isCompleted = widget.dailyActivity[index];
-
-          return Column(
-            children: [
-              // Animated Dot
-              ScaleTransition(
-                scale: _scaleAnimations[index],
-                child: Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: isCompleted
-                        ? colors.ctaAlternative
-                        : colors.textDisabled,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              // Day label (no animation needed)
-              Text(
-                dayLabels[index],
-                style: TextStyle(
-                  fontFamily: 'DMSans',
-                  fontSize: 12,
-                  fontWeight: FontWeight.w400,
-                  color: colors.textSecondary,
-                ),
-              ),
-            ],
-          );
-        }),
-      ),
     );
   }
 }

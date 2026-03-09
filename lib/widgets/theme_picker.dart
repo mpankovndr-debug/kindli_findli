@@ -4,17 +4,58 @@ import '../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme_provider.dart';
 
+/// Describes a theme entry for the picker UI.
+typedef _ThemeEntry = ({
+  AppTheme theme,
+  String name,
+  Color swatchColor,
+  Color accentColor,
+});
+
 class ThemePicker extends StatelessWidget {
   final bool isPremium;
+  final bool hasBoost;
   final VoidCallback onPremiumTap;
+  final VoidCallback? onBoostTap;
   final bool compact;
+
+  /// When true, only show the 4 onboarding themes (2 free + 2 locked).
+  final bool onboardingMode;
 
   const ThemePicker({
     super.key,
     required this.isPremium,
     required this.onPremiumTap,
+    this.hasBoost = false,
+    this.onBoostTap,
     this.compact = false,
+    this.onboardingMode = false,
   });
+
+  List<_ThemeEntry> _allThemes(AppLocalizations l10n) => [
+    // Row 1: warm neutrals
+    (theme: AppTheme.warmClay,     name: l10n.themeWarmClay,     swatchColor: const Color(0xFFF2EAE2), accentColor: const Color(0xFF8C6652)),
+    (theme: AppTheme.sandDune,     name: l10n.themeSandDune,     swatchColor: const Color(0xFFF0EBE2), accentColor: const Color(0xFF5C4E3E)),
+    // Row 2: warm colors
+    (theme: AppTheme.softDusk,     name: l10n.themeSoftDusk,     swatchColor: const Color(0xFFF0D4CE), accentColor: const Color(0xFFD4707A)),
+    (theme: AppTheme.goldenHour,   name: l10n.themeGoldenHour,   swatchColor: const Color(0xFFF2DFD0), accentColor: const Color(0xFFC07A42)),
+    // Row 3: cool colors
+    (theme: AppTheme.iris,         name: l10n.themeIris,         swatchColor: const Color(0xFFEAE4F2), accentColor: const Color(0xFF5547A0)),
+    (theme: AppTheme.clearSky,     name: l10n.themeClearSky,     swatchColor: const Color(0xFFE8EFF6), accentColor: const Color(0xFF4A7BAD)),
+    // Row 4: greens
+    (theme: AppTheme.morningSlate, name: l10n.themeMorningSlate, swatchColor: const Color(0xFFE9EEEC), accentColor: const Color(0xFF4E7A75)),
+    (theme: AppTheme.forestFloor,  name: l10n.themeForestFloor,  swatchColor: const Color(0xFFF2F5F0), accentColor: const Color(0xFF5A8A5C)),
+    // Row 5: dark modes
+    (theme: AppTheme.deepFocus,    name: l10n.themeDeepFocus,    swatchColor: const Color(0xFF4A4A50), accentColor: const Color(0xFFC9A96E)),
+    (theme: AppTheme.nightBloom,   name: l10n.themeNightBloom,   swatchColor: const Color(0xFF3A3D5A), accentColor: const Color(0xFFB0A2D8)),
+  ];
+
+  List<_ThemeEntry> _onboardingThemes(AppLocalizations l10n) => [
+    (theme: AppTheme.warmClay,  name: l10n.themeWarmClay,  swatchColor: const Color(0xFFF2EAE2), accentColor: const Color(0xFF8C6652)),
+    (theme: AppTheme.iris,      name: l10n.themeIris,      swatchColor: const Color(0xFFEAE4F2), accentColor: const Color(0xFF5547A0)),
+    (theme: AppTheme.deepFocus, name: l10n.themeDeepFocus, swatchColor: const Color(0xFF4A4A50), accentColor: const Color(0xFFC9A96E)),
+    (theme: AppTheme.softDusk,  name: l10n.themeSoftDusk,  swatchColor: const Color(0xFFF0D4CE), accentColor: const Color(0xFFD4707A)),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -22,39 +63,45 @@ class ThemePicker extends StatelessWidget {
     final currentTheme = themeProvider.theme;
     final l10n = AppLocalizations.of(context);
 
-    final themes = [
-      (AppTheme.warmClay, l10n.themeWarmClay, const Color(0xFFF2EAE2), const Color(0xFF8C6652)),
-      (AppTheme.iris, l10n.themeIris, const Color(0xFFEAE4F2), const Color(0xFF5547A0)),
-      (AppTheme.clearSky, l10n.themeClearSky, const Color(0xFFE8EFF6), const Color(0xFF4A7BAD)),
-      (AppTheme.morningSlate, l10n.themeMorningSlate, const Color(0xFFE9EEEC), const Color(0xFF4E7A75)),
-    ];
+    final themes = onboardingMode ? _onboardingThemes(l10n) : _allThemes(l10n);
 
+    if (onboardingMode) {
+      return _buildOnboardingGrid(context, themes, themeProvider, currentTheme);
+    }
+
+    return _buildFullGrid(context, themes, themeProvider, currentTheme);
+  }
+
+  Widget _buildOnboardingGrid(
+    BuildContext context,
+    List<_ThemeEntry> themes,
+    ThemeProvider themeProvider,
+    AppTheme currentTheme,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Unlocked themes
+        // Free themes (top row, larger)
         Row(
           children: [
             for (var i = 0; i < 2; i++) ...[
               if (i > 0) const SizedBox(width: 12),
               Expanded(
                 child: AspectRatio(
-                  aspectRatio: compact ? 1.2 : 0.75,
-                  child: Builder(builder: (context) {
-                    final (theme, name, swatchColor, accentColor) = themes[i];
-                    final isSelected = currentTheme == theme;
-                    final isLocked = themeProvider.isPremiumTheme(theme) && !isPremium;
-                    return _buildThemeCard(
-                      context, theme, name, swatchColor, accentColor, isSelected, isLocked,
-                    );
-                  }),
+                  aspectRatio: 0.75,
+                  child: _buildCard(
+                    context,
+                    themes[i],
+                    themeProvider,
+                    currentTheme,
+                  ),
                 ),
               ),
             ],
           ],
         ),
         const SizedBox(height: 12),
-        // Locked themes
+        // Locked teaser (bottom row, compact)
         Row(
           children: [
             for (var i = 2; i < 4; i++) ...[
@@ -62,14 +109,12 @@ class ThemePicker extends StatelessWidget {
               Expanded(
                 child: AspectRatio(
                   aspectRatio: 1.2,
-                  child: Builder(builder: (context) {
-                    final (theme, name, swatchColor, accentColor) = themes[i];
-                    final isSelected = currentTheme == theme;
-                    final isLocked = themeProvider.isPremiumTheme(theme) && !isPremium;
-                    return _buildThemeCard(
-                      context, theme, name, swatchColor, accentColor, isSelected, isLocked,
-                    );
-                  }),
+                  child: _buildCard(
+                    context,
+                    themes[i],
+                    themeProvider,
+                    currentTheme,
+                  ),
                 ),
               ),
             ],
@@ -79,21 +124,70 @@ class ThemePicker extends StatelessWidget {
     );
   }
 
-  Widget _buildThemeCard(
+  Widget _buildFullGrid(
     BuildContext context,
-    AppTheme theme,
-    String name,
-    Color swatchColor,
-    Color accentColor,
-    bool isSelected,
-    bool isLocked,
+    List<_ThemeEntry> themes,
+    ThemeProvider themeProvider,
+    AppTheme currentTheme,
   ) {
+    final rows = <Widget>[];
+    for (var i = 0; i < themes.length; i += 2) {
+      if (rows.isNotEmpty) rows.add(const SizedBox(height: 12));
+      rows.add(
+        Row(
+          children: [
+            Expanded(
+              child: AspectRatio(
+                aspectRatio: compact ? 1.4 : 1.1,
+                child: _buildCard(context, themes[i], themeProvider, currentTheme),
+              ),
+            ),
+            const SizedBox(width: 12),
+            if (i + 1 < themes.length)
+              Expanded(
+                child: AspectRatio(
+                  aspectRatio: compact ? 1.4 : 1.1,
+                  child: _buildCard(context, themes[i + 1], themeProvider, currentTheme),
+                ),
+              )
+            else
+              const Expanded(child: SizedBox()),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: rows,
+    );
+  }
+
+  Widget _buildCard(
+    BuildContext context,
+    _ThemeEntry entry,
+    ThemeProvider themeProvider,
+    AppTheme currentTheme,
+  ) {
+    final isSelected = currentTheme == entry.theme;
+    final isLocked = themeProvider.isLocked(
+      entry.theme,
+      hasBoost: hasBoost,
+      isPremium: isPremium,
+    );
+    final isDark = entry.theme.isDark;
+    final tierLabel = themeProvider.tierLabel(entry.theme);
+
     return GestureDetector(
       onTap: () {
         if (isLocked) {
-          onPremiumTap();
+          if (themeProvider.isBoostTheme(entry.theme) && onBoostTap != null) {
+            onBoostTap!();
+          } else {
+            onPremiumTap();
+          }
         } else {
-          context.read<ThemeProvider>().setTheme(theme);
+          context.read<ThemeProvider>().setTheme(entry.theme);
         }
       },
       child: ClipRRect(
@@ -104,96 +198,113 @@ class ThemePicker extends StatelessWidget {
             Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
-                color: swatchColor,
-              border: isSelected
-                  ? Border.all(color: accentColor, width: 2.5)
-                  : Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.08),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+                color: entry.swatchColor,
+                border: isSelected
+                    ? Border.all(color: entry.accentColor, width: 2.5)
+                    : Border.all(
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.15)
+                            : Colors.white.withValues(alpha: 0.3),
+                        width: 1,
+                      ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.08),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 8),
+                  Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: entry.accentColor,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    entry.name,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.75)
+                          : Colors.black.withValues(alpha: 0.65),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                ],
+              ),
             ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const SizedBox(height: 8),
-                Container(
-                  width: 28,
-                  height: 28,
+            if (isSelected)
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Container(
+                  width: 20,
+                  height: 20,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: accentColor,
+                    color: entry.accentColor,
                   ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  name,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black.withValues(alpha: 0.65),
-                  ),
-                ),
-                const SizedBox(height: 8),
-              ],
-            ),
-          ),
-          if (isSelected)
-            Positioned(
-              top: 8,
-              right: 8,
-              child: Container(
-                width: 20,
-                height: 20,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: accentColor,
-                ),
-                child: const Icon(Icons.check_rounded, size: 13, color: Colors.white),
-              ),
-            ),
-          if (isLocked)
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  color: swatchColor,
-                ),
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.lock_rounded,
-                        size: 20,
-                        color: Colors.black.withValues(alpha: 0.3),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        AppLocalizations.of(context).appNameIntendedPlus,
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.black.withValues(alpha: 0.3),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        name,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black.withValues(alpha: 0.45),
-                        ),
-                      ),
-                    ],
+                  child: Icon(
+                    Icons.check_rounded,
+                    size: 13,
+                    color: isDark ? Colors.black : Colors.white,
                   ),
                 ),
               ),
-            ),
+            if (isLocked)
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    color: entry.swatchColor,
+                  ),
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.lock_rounded,
+                          size: 20,
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.35)
+                              : Colors.black.withValues(alpha: 0.3),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          tierLabel ?? AppLocalizations.of(context).appNameIntendedPlus,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.35)
+                                : Colors.black.withValues(alpha: 0.3),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          entry.name,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.50)
+                                : Colors.black.withValues(alpha: 0.45),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),

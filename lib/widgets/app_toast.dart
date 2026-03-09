@@ -27,6 +27,24 @@ class AppToast {
 
     overlay.insert(_current!);
   }
+
+  /// Show toast using a pre-resolved [OverlayState] (safe to call after pop).
+  static void showOnOverlay(OverlayState overlay, String message) {
+    _current?.remove();
+    _current = null;
+
+    _current = OverlayEntry(
+      builder: (_) => _AppToastWidget(
+        message: message,
+        onDismissed: () {
+          _current?.remove();
+          _current = null;
+        },
+      ),
+    );
+
+    overlay.insert(_current!);
+  }
 }
 
 class _AppToastWidget extends StatefulWidget {

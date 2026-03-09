@@ -8,7 +8,9 @@ import '../l10n/app_localizations.dart';
 import '../main.dart';
 import '../utils/habit_l10n.dart';
 import '../models/share_card_type.dart';
+import '../models/reflection_data.dart';
 import '../services/milestone_service.dart';
+import '../services/reflection_service.dart';
 import '../services/share_service.dart';
 import '../services/week_stats_service.dart';
 import '../state/user_state.dart';
@@ -38,6 +40,7 @@ class _ShareCardScreenState extends State<ShareCardScreen>
   final GlobalKey _repaintKey = GlobalKey();
   bool _isSharing = false;
   bool _cardReady = false;
+  String? _topFocusArea;
   late final AnimationController _shimmerController;
 
   @override
@@ -47,12 +50,20 @@ class _ShareCardScreenState extends State<ShareCardScreen>
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     )..repeat();
-    Future.delayed(const Duration(milliseconds: 1500), () {
-      if (mounted) {
-        _shimmerController.stop();
-        setState(() => _cardReady = true);
-      }
-    });
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    // Wait for both data and minimum shimmer time
+    final results = await Future.wait([
+      ReflectionService.getCurrentReflection(),
+      Future.delayed(const Duration(milliseconds: 1500)),
+    ]);
+    if (!mounted) return;
+    final data = results[0] as ReflectionData;
+    _topFocusArea = data.topFocusArea;
+    _shimmerController.stop();
+    setState(() => _cardReady = true);
   }
 
   @override
@@ -193,9 +204,13 @@ class _ShareCardScreenState extends State<ShareCardScreen>
       return IntentionShareCard(
         completionCount: widget.stats.completionCount,
         showedUpPhrase: l10n.shareCardShowedUpPhrase,
-        timesText: l10n.shareCardTimes,
+        timesText: l10n.shareCardTimes(widget.stats.completionCount),
         descriptorText: l10n.shareCardDescriptor,
         userName: userNameNotifier.value,
+        dailyActivity: widget.stats.dailyActivity,
+        focusAreaText: _topFocusArea != null
+            ? l10n.shareCardFocusedOn(localizeCategoryName(_topFocusArea!, l10n))
+            : null,
       );
     }
 

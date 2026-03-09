@@ -37,6 +37,10 @@ import 'services/notification_scheduler.dart';
 import 'services/notification_preferences_service.dart';
 import 'services/revenue_cat_service.dart';
 import 'widgets/boost_offer_sheet.dart';
+import 'widgets/app_toast.dart';
+import 'widgets/tip_banner.dart';
+import 'models/curated_pack.dart';
+import 'services/tips_service.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
 // ✅ ADD THIS HELPER HERE (before the main() function):
@@ -46,7 +50,9 @@ Future<T?> showIntendedModal<T>({
   String? subtitle,
   required List<Widget> actions,
 }) {
-  final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
+  final themeP = Provider.of<ThemeProvider>(context, listen: false);
+  final colors = themeP.colors;
+  final isDark = themeP.theme.isDark;
   return showCupertinoDialog<T>(
     context: context,
     barrierDismissible: true,
@@ -76,29 +82,33 @@ Future<T?> showIntendedModal<T>({
                     ),
                     borderRadius: BorderRadius.circular(32),
                     border: Border.all(
-                      color: const Color(0xFFFFFFFF).withOpacity(0.5),
+                      color: isDark
+                          ? colors.borderCard.withOpacity(colors.borderCardOpacity)
+                          : const Color(0xFFFFFFFF).withOpacity(0.5),
                       width: 1.5,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: colors.modalShadow.withOpacity(0.35),
-                        blurRadius: 70,
-                        offset: const Offset(0, 25),
+                        color: colors.modalShadow.withOpacity(0.2),
+                        blurRadius: 40,
+                        offset: const Offset(0, 16),
                       ),
-                      BoxShadow(
-                        color: const Color(0xFFFFFFFF).withOpacity(0.6),
-                        blurRadius: 0,
-                        offset: const Offset(0, 1),
-                        spreadRadius: 0,
-                        blurStyle: BlurStyle.inner,
-                      ),
-                      BoxShadow(
-                        color: colors.modalInnerShadow.withOpacity(0.15),
-                        blurRadius: 0,
-                        offset: const Offset(0, -1),
-                        spreadRadius: 0,
-                        blurStyle: BlurStyle.inner,
-                      ),
+                      if (!isDark)
+                        BoxShadow(
+                          color: const Color(0xFFFFFFFF).withOpacity(0.25),
+                          blurRadius: 0,
+                          offset: const Offset(0, 1),
+                          spreadRadius: 0,
+                          blurStyle: BlurStyle.inner,
+                        ),
+                      if (!isDark)
+                        BoxShadow(
+                          color: colors.modalInnerShadow.withOpacity(0.1),
+                          blurRadius: 0,
+                          offset: const Offset(0, -1),
+                          spreadRadius: 0,
+                          blurStyle: BlurStyle.inner,
+                        ),
                     ],
                   ),
                   child: SafeArea(
@@ -180,11 +190,12 @@ Future<T?> showStyledPopup<T>({
   required BuildContext context,
   required Widget child,
 }) {
-  final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
+  final themeP2 = Provider.of<ThemeProvider>(context, listen: false);
+  final colors = themeP2.colors;
+  final isDark = themeP2.theme.isDark;
   return showCupertinoModalPopup<T>(
     context: context,
-    barrierColor: Colors.black.withOpacity(0.5),
-    filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+    barrierColor: colors.barrierColor.withOpacity(isDark ? 0.55 : 0.35),
     builder: (context) => GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () => Navigator.pop(context),
@@ -219,16 +230,17 @@ Future<T?> showStyledPopup<T>({
                 borderRadius: BorderRadius.circular(28),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.15),
-                    blurRadius: 30,
-                    offset: const Offset(0, 10),
+                    color: Colors.black.withOpacity(0.12),
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
                   ),
-                  BoxShadow(
-                    color: Colors.white.withOpacity(0.8),
-                    blurRadius: 0,
-                    spreadRadius: 1,
-                    offset: const Offset(0, -1),
-                  ),
+                  if (!isDark)
+                    BoxShadow(
+                      color: Colors.white.withOpacity(0.3),
+                      blurRadius: 0,
+                      spreadRadius: 0,
+                      offset: const Offset(0, -1),
+                    ),
                 ],
               ),
               child: child,
@@ -274,7 +286,9 @@ Widget styledPrimaryButton({
               fontFamily: AppTextStyles.bodyFont(ctx),
               fontSize: 17,
               fontWeight: FontWeight.w600,
-              color: const Color(0xFFFFFFFF),
+              color: Provider.of<ThemeProvider>(ctx, listen: false)
+                  .colors
+                  .buttonText,
             ),
           ),
         ),
@@ -290,13 +304,17 @@ Widget styledSecondaryButton({
 }) {
   return Builder(
     builder: (ctx) {
-      final colors = Provider.of<ThemeProvider>(ctx, listen: false).colors;
+      final themeP = Provider.of<ThemeProvider>(ctx, listen: false);
+      final colors = themeP.colors;
+      final isDark = themeP.theme.isDark;
       return Container(
         width: double.infinity,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.8),
+          color: isDark
+              ? colors.cardBackground.withOpacity(colors.cardBackgroundOpacity)
+              : Colors.white.withOpacity(0.8),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: colors.borderMedium, width: 1),
+          border: Border.all(color: isDark ? colors.borderCard.withOpacity(colors.borderCardOpacity) : colors.borderMedium, width: 1),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.04),
@@ -358,9 +376,9 @@ class AppBackground extends StatelessWidget {
               end: Alignment.bottomCenter,
               stops: const [0.0, 0.45, 1.0],
               colors: [
-                colors.bgGradientTop.withOpacity(0.15),
-                colors.bgGradientMid.withOpacity(0.38),
-                colors.bgGradientBottom.withOpacity(0.55),
+                colors.bgGradientTop.withOpacity(colors.bgGradientTopOpacity),
+                colors.bgGradientMid.withOpacity(colors.bgGradientMidOpacity),
+                colors.bgGradientBottom.withOpacity(colors.bgGradientBottomOpacity),
               ],
             ),
           ),
@@ -1013,7 +1031,9 @@ class _CustomTabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.watch<ThemeProvider>().colors;
+    final themeProvider = context.watch<ThemeProvider>();
+    final colors = themeProvider.colors;
+    final isDark = themeProvider.theme.isDark;
     return ClipRRect(
       borderRadius: BorderRadius.circular(40),
       child: BackdropFilter(
@@ -1021,10 +1041,14 @@ class _CustomTabBar extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
           decoration: BoxDecoration(
-            color: colors.modalBg1.withOpacity(0.85),
+            color: isDark
+                ? colors.surfaceLight.withOpacity(0.96)
+                : colors.modalBg1.withOpacity(0.85),
             borderRadius: BorderRadius.circular(40),
             border: Border.all(
-              color: const Color(0xFFFFFFFF).withOpacity(0.6),
+              color: isDark
+                  ? colors.borderCard.withOpacity(colors.borderCardOpacity)
+                  : const Color(0xFFFFFFFF).withOpacity(0.6),
               width: 1,
             ),
             boxShadow: [
@@ -1113,13 +1137,15 @@ class HabitsScreen extends StatefulWidget {
 }
 
 class _HabitsScreenState extends State<HabitsScreen>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   String? _lastKnownPinned;
   String? _justUnpinnedHabit;
 
-  // "Hold for options" tooltip
-  AnimationController? _tooltipController;
-  Animation<double>? _tooltipOpacity;
+  // Day-change detection — forces all habit cards to rebuild on new day
+  String _currentDateStr = DateTime.now().toIso8601String().substring(0, 10);
+
+  // Tips system
+  int? _currentTipIndex;
 
   // Unified entrance animation (staggered, like welcome screen)
   late AnimationController _entranceController;
@@ -1192,8 +1218,9 @@ class _HabitsScreenState extends State<HabitsScreen>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     AnalyticsService.logScreenView('habits');
-    _checkHoldTip();
+    _loadCurrentTip();
 
     _entranceController = AnimationController(
       vsync: this,
@@ -1227,62 +1254,42 @@ class _HabitsScreenState extends State<HabitsScreen>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _entranceController.dispose();
-    _tooltipController?.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _checkDayChange();
+    }
+  }
+
+  /// Forces all habit cards to rebuild when the calendar date changes.
+  void _checkDayChange() {
+    final today = DateTime.now().toIso8601String().substring(0, 10);
+    if (today != _currentDateStr) {
+      _currentDateStr = today;
+      setState(() {}); // Cascade rebuild to all habit cards
+    }
   }
 
   void _showBrowseHabits(BuildContext context) {
     final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
     showCupertinoModalPopup(
       context: context,
-      barrierColor: colors.textPrimary.withOpacity(0.08),
-      filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+      barrierColor: colors.barrierColor.withOpacity(colors.barrierOpacity),
+      filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
       builder: (context) => const BrowseHabitsSheet(),
     );
   }
 
-  Future<void> _checkHoldTip() async {
-    final prefs = await SharedPreferences.getInstance();
-    final seen = prefs.getBool('has_seen_hold_tip') ?? false;
-    if (seen || !mounted) return;
-
-    final onboardingState = context.read<OnboardingState>();
-    if (onboardingState.userHabits.isEmpty) return;
-
-    // Create tooltip animation
-    _tooltipController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-    );
-    _tooltipOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _tooltipController!, curve: Curves.easeOut),
-    );
-
-    // Fade in after 1 second
-    await Future.delayed(const Duration(seconds: 1));
-    if (!mounted) return;
-    setState(() {});
-    _tooltipController!.forward();
-
-    // Auto-dismiss after 4 seconds
-    await Future.delayed(const Duration(seconds: 4));
-    if (!mounted) return;
-    _dismissHoldTip();
-  }
-
-  Future<void> _dismissHoldTip() async {
-    if (_tooltipController == null ||
-        !_tooltipController!.isAnimating && _tooltipController!.value == 0) {
-      return;
+  Future<void> _loadCurrentTip() async {
+    final index = await TipsService.getCurrentTipIndex();
+    if (mounted && index != _currentTipIndex) {
+      setState(() => _currentTipIndex = index);
     }
-
-    await _tooltipController!.reverse();
-    if (!mounted) return;
-    setState(() {});
-
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('has_seen_hold_tip', true);
   }
 
   void _createCustomHabit(BuildContext context) {
@@ -1316,8 +1323,13 @@ class _HabitsScreenState extends State<HabitsScreen>
 
   @override
   Widget build(BuildContext context) {
+    // Check for day change on every build (catches midnight crossing)
+    _checkDayChange();
+
     Responsive.init(context);
-    final colors = context.watch<ThemeProvider>().colors;
+    final themeProvider = context.watch<ThemeProvider>();
+    final colors = themeProvider.colors;
+    final isDark = themeProvider.theme.isDark;
     final onboardingState = context.watch<OnboardingState>();
     final l10n = AppLocalizations.of(context);
     final allHabits = onboardingState.userHabits;
@@ -1413,6 +1425,19 @@ class _HabitsScreenState extends State<HabitsScreen>
                       ),
                     )
                   else ...[
+                    // Tip banner (above pinned section)
+                    if (_currentTipIndex != null)
+                      FadeTransition(
+                        opacity: _fadeMiddle,
+                        child: TipBanner(
+                          key: ValueKey('tip_$_currentTipIndex'),
+                          tipIndex: _currentTipIndex!,
+                          onDismissed: (nextIndex) {
+                            setState(() => _currentTipIndex = nextIndex);
+                          },
+                        ),
+                      ),
+
                     // Pinned section (stagger 2: fades in second)
                     if (pinned.isNotEmpty)
                       FadeTransition(
@@ -1482,9 +1507,7 @@ class _HabitsScreenState extends State<HabitsScreen>
                         opacity: _fadeContent,
                         child: SlideTransition(
                           position: _slideContent,
-                          child: Listener(
-                            onPointerDown: (_) => _dismissHoldTip(),
-                            child: ListView(
+                          child: ListView(
                               padding: EdgeInsets.fromLTRB(
                                 24,
                                 pinned.isNotEmpty ? 24 : 16,
@@ -1552,15 +1575,14 @@ class _HabitsScreenState extends State<HabitsScreen>
                                   final customCount =
                                       onboardingState.customHabits.length;
                                   final userSt = context.read<UserState>();
+                                  final isDark = context.read<ThemeProvider>().theme.isDark;
                                   final maxCustom =
                                       onboardingState.maxCustomHabits(
                                           hasBoost: userSt.hasBoost);
 
                                   if (customCount < maxCustom ||
                                       userSt.hasSubscription) {
-                                    return Padding(
-                                      padding: const EdgeInsets.only(left: 16),
-                                      child: GestureDetector(
+                                    return GestureDetector(
                                         onTap: () =>
                                             _createCustomHabit(context),
                                         child: ClipRRect(
@@ -1602,9 +1624,9 @@ class _HabitsScreenState extends State<HabitsScreen>
                                                       height: 36,
                                                       decoration: BoxDecoration(
                                                         shape: BoxShape.circle,
-                                                        color: const Color(
-                                                                0xFFFFFFFF)
-                                                            .withOpacity(0.50),
+                                                        color: isDark
+                                                            ? colors.ctaPrimary.withOpacity(0.15)
+                                                            : const Color(0xFFFFFFFF).withOpacity(0.50),
                                                       ),
                                                       child: Icon(
                                                         CupertinoIcons.add,
@@ -1634,14 +1656,11 @@ class _HabitsScreenState extends State<HabitsScreen>
                                             ),
                                           ),
                                         ),
-                                      ),
                                     );
                                   }
 
                                   // Limit reached & not subscribed: show locked slot
-                                  return Padding(
-                                    padding: const EdgeInsets.only(left: 16),
-                                    child: GestureDetector(
+                                  return GestureDetector(
                                       onTap: () {
                                         if (context.read<RevenueCatService>().isPremium) return;
                                         showCupertinoModalPopup(
@@ -1688,8 +1707,9 @@ class _HabitsScreenState extends State<HabitsScreen>
                                                 borderRadius:
                                                     BorderRadius.circular(24),
                                                 border: Border.all(
-                                                  color: const Color(0xFFFFFFFF)
-                                                      .withOpacity(0.6),
+                                                  color: isDark
+                                                      ? colors.borderCard.withOpacity(colors.borderCardOpacity)
+                                                      : const Color(0xFFFFFFFF).withOpacity(0.6),
                                                   width: 1.5,
                                                 ),
                                                 boxShadow: [
@@ -1744,10 +1764,9 @@ class _HabitsScreenState extends State<HabitsScreen>
                                                               BoxDecoration(
                                                             shape:
                                                                 BoxShape.circle,
-                                                            color: const Color(
-                                                                    0xFFFFFFFF)
-                                                                .withOpacity(
-                                                                    0.5),
+                                                            color: isDark
+                                                                ? colors.ctaPrimary.withOpacity(0.15)
+                                                                : const Color(0xFFFFFFFF).withOpacity(0.5),
                                                           ),
                                                           child: Icon(
                                                             CupertinoIcons.lock,
@@ -1783,16 +1802,13 @@ class _HabitsScreenState extends State<HabitsScreen>
                                           ),
                                         ),
                                       ),
-                                    ),
                                   );
                                 }),
 
                                 // BROWSE ALL HABITS CARD
                                 const SizedBox(height: 16),
 
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 16),
-                                  child: GestureDetector(
+                                GestureDetector(
                                     onTap: () => _showBrowseHabits(context),
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(16),
@@ -1808,8 +1824,9 @@ class _HabitsScreenState extends State<HabitsScreen>
                                             borderRadius:
                                                 BorderRadius.circular(16),
                                             border: Border.all(
-                                              color: const Color(0xFFFFFFFF)
-                                                  .withOpacity(0.20),
+                                              color: isDark
+                                                  ? colors.borderCard.withOpacity(colors.borderCardOpacity)
+                                                  : const Color(0xFFFFFFFF).withOpacity(0.20),
                                               width: 1,
                                             ),
                                             boxShadow: [
@@ -1868,72 +1885,15 @@ class _HabitsScreenState extends State<HabitsScreen>
                                       ),
                                     ),
                                   ),
-                                ),
                               ],
                             ),
                           ),
                         ),
                       ),
-                    ),
                   ],
                 ],
               ),
 
-              // "Hold for options" floating tooltip (overlays content, doesn't push layout)
-              if (_tooltipController != null && _tooltipOpacity != null)
-                Positioned(
-                  top: MediaQuery.of(context).padding.top + 100,
-                  left: 32,
-                  right: 32,
-                  child: AnimatedBuilder(
-                    animation: _tooltipOpacity!,
-                    builder: (context, child) {
-                      if (_tooltipOpacity!.value == 0) {
-                        return const SizedBox.shrink();
-                      }
-                      return IgnorePointer(
-                        ignoring: false,
-                        child: GestureDetector(
-                          onTap: _dismissHoldTip,
-                          child: Opacity(
-                            opacity: _tooltipOpacity!.value,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(14),
-                              child: BackdropFilter(
-                                filter:
-                                    ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 18, vertical: 12),
-                                  decoration: BoxDecoration(
-                                    color: colors.modalBg1.withOpacity(0.75),
-                                    borderRadius: BorderRadius.circular(14),
-                                    border: Border.all(
-                                      color: Colors.white.withOpacity(0.35),
-                                      width: 0.8,
-                                    ),
-                                  ),
-                                  child: Text(
-                                    l10n.habitsHoldForOptions,
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontFamily:
-                                          AppTextStyles.bodyFont(context),
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                      color: colors.ctaPrimary,
-                                      letterSpacing: -0.1,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
             ],
           ),
         ),
@@ -2051,7 +2011,9 @@ class _CreateCustomHabitScreenState extends State<_CreateCustomHabitScreen> {
   @override
   Widget build(BuildContext context) {
     Responsive.init(context);
-    final colors = context.watch<ThemeProvider>().colors;
+    final themeProvider = context.watch<ThemeProvider>();
+    final colors = themeProvider.colors;
+    final isDark = themeProvider.theme.isDark;
     final l10n = AppLocalizations.of(context);
 
     return CupertinoPageScaffold(
@@ -2156,10 +2118,14 @@ class _CreateCustomHabitScreenState extends State<_CreateCustomHabitScreen> {
                         ),
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFFFFFF).withOpacity(0.7),
+                          color: isDark
+                              ? colors.cardBackground.withOpacity(colors.cardBackgroundOpacity)
+                              : const Color(0xFFFFFFFF).withOpacity(0.7),
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: colors.buttonDark.withOpacity(0.12),
+                            color: isDark
+                                ? colors.borderCard.withOpacity(colors.borderCardOpacity)
+                                : colors.buttonDark.withOpacity(0.12),
                             width: 1,
                           ),
                         ),
@@ -2194,7 +2160,9 @@ class _CreateCustomHabitScreenState extends State<_CreateCustomHabitScreen> {
                               padding: const EdgeInsets.symmetric(vertical: 18),
                               color: _canSave
                                   ? colors.buttonDark
-                                  : const Color(0xFFFFFFFF).withOpacity(0.4),
+                                  : isDark
+                                      ? colors.cardBackground.withOpacity(0.6)
+                                      : const Color(0xFFFFFFFF).withOpacity(0.4),
                               borderRadius: BorderRadius.circular(16),
                               child: Text(
                                 l10n.customHabitSubmit,
@@ -2240,12 +2208,13 @@ class _HabitCard extends StatefulWidget {
 }
 
 class _HabitCardState extends State<_HabitCard>
-    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
+    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
   @override
   bool get wantKeepAlive => true;
 
   bool _isDoneToday = false;
   bool _isAnimating = false;
+  String _lastCheckedDate = '';
   late AnimationController _scaleController;
   late Animation<double> _scaleAnimation;
 
@@ -2263,6 +2232,7 @@ class _HabitCardState extends State<_HabitCard>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _checkIfDone();
 
     _scaleController = AnimationController(
@@ -2308,20 +2278,34 @@ class _HabitCardState extends State<_HabitCard>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _scaleController.dispose();
     _departureController.dispose();
     _checkmarkController.dispose();
     super.dispose();
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _checkIfDone();
+    }
+  }
+
   Future<void> _checkIfDone() async {
+    final today = DateTime.now().toIso8601String().substring(0, 10);
     final done = await HabitTracker.wasDone(widget.habitTitle, DateTime.now());
     if (mounted) {
-      setState(() {
-        _isDoneToday = done;
-      });
-      if (done) {
-        _checkmarkController.forward();
+      _lastCheckedDate = today;
+      if (done != _isDoneToday) {
+        setState(() {
+          _isDoneToday = done;
+        });
+        if (done) {
+          _checkmarkController.forward();
+        } else {
+          _checkmarkController.reset();
+        }
       }
     }
   }
@@ -2365,12 +2349,14 @@ class _HabitCardState extends State<_HabitCard>
     final isPinned = onboardingState.pinnedHabit == widget.habitTitle;
     final isCustom = onboardingState.isCustomHabit(widget.habitTitle);
     final category = onboardingState.getCategoryForHabit(widget.habitTitle);
-    final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
+    final themeP = Provider.of<ThemeProvider>(context, listen: false);
+    final colors = themeP.colors;
+    final isDark = themeP.theme.isDark;
     final l10n = AppLocalizations.of(context);
 
     showCupertinoModalPopup(
       context: context,
-      barrierColor: colors.barrierColor.withOpacity(0.28),
+      barrierColor: colors.barrierColor.withOpacity(isDark ? 0.45 : 0.28),
       builder: (context) => GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () => Navigator.pop(context),
@@ -2394,15 +2380,17 @@ class _HabitCardState extends State<_HabitCard>
                             begin: const Alignment(-0.3, -0.5),
                             end: const Alignment(0.3, 0.5),
                             colors: [
-                              colors.modalBg1.withOpacity(0.96),
-                              colors.modalBg2.withOpacity(0.93),
-                              colors.modalBg3.withOpacity(0.95),
+                              colors.modalBg1.withOpacity(isDark ? 0.75 : 0.96),
+                              colors.modalBg2.withOpacity(isDark ? 0.70 : 0.93),
+                              colors.modalBg3.withOpacity(isDark ? 0.75 : 0.95),
                             ],
                             stops: const [0.0, 0.5, 1.0],
                           ),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: Colors.white.withOpacity(0.5),
+                            color: isDark
+                                ? colors.borderCard.withOpacity(colors.borderCardOpacity)
+                                : Colors.white.withOpacity(0.5),
                             width: 1.0,
                           ),
                         ),
@@ -2483,13 +2471,15 @@ class _HabitCardState extends State<_HabitCard>
                             begin: const Alignment(-0.3, -0.5),
                             end: const Alignment(0.3, 0.5),
                             colors: [
-                              colors.modalBg1.withOpacity(0.97),
-                              colors.modalBg2.withOpacity(0.95),
+                              colors.modalBg1.withOpacity(isDark ? 0.75 : 0.97),
+                              colors.modalBg2.withOpacity(isDark ? 0.70 : 0.95),
                             ],
                           ),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: Colors.white.withOpacity(0.5),
+                            color: isDark
+                                ? colors.borderCard.withOpacity(colors.borderCardOpacity)
+                                : Colors.white.withOpacity(0.5),
                             width: 1.0,
                           ),
                         ),
@@ -2646,7 +2636,9 @@ class _HabitCardState extends State<_HabitCard>
   Future<void> _showReplacePinConfirmation() async {
     final onboardingState = context.read<OnboardingState>();
     final currentPinned = onboardingState.pinnedHabit;
-    final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
+    final themeP = Provider.of<ThemeProvider>(context, listen: false);
+    final colors = themeP.colors;
+    final isDark = themeP.theme.isDark;
     final l10n = AppLocalizations.of(context);
 
     final confirmed = await showCupertinoModalPopup<bool>(
@@ -2682,22 +2674,25 @@ class _HabitCardState extends State<_HabitCard>
                         ),
                         borderRadius: BorderRadius.circular(32),
                         border: Border.all(
-                          color: const Color(0xFFFFFFFF).withOpacity(0.5),
+                          color: isDark
+                              ? colors.borderCard.withOpacity(colors.borderCardOpacity)
+                              : const Color(0xFFFFFFFF).withOpacity(0.5),
                           width: 1.5,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: colors.modalShadow.withOpacity(0.4),
-                            blurRadius: 70,
-                            offset: const Offset(0, 25),
+                            color: colors.modalShadow.withOpacity(0.2),
+                            blurRadius: 40,
+                            offset: const Offset(0, 16),
                           ),
-                          BoxShadow(
-                            color: const Color(0xFFFFFFFF).withOpacity(0.6),
-                            blurRadius: 0,
-                            offset: const Offset(0, 1),
-                            spreadRadius: 0,
-                            blurStyle: BlurStyle.inner,
-                          ),
+                          if (!isDark)
+                            BoxShadow(
+                              color: const Color(0xFFFFFFFF).withOpacity(0.25),
+                              blurRadius: 0,
+                              offset: const Offset(0, 1),
+                              spreadRadius: 0,
+                              blurStyle: BlurStyle.inner,
+                            ),
                         ],
                       ),
                       child: Column(
@@ -2864,7 +2859,9 @@ class _HabitCardState extends State<_HabitCard>
     final hasBoost = context.read<UserState>().hasBoost;
     final remaining =
         onboardingState.getRemainingSwaps(category, hasBoost: hasBoost);
-    final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
+    final themeP = Provider.of<ThemeProvider>(context, listen: false);
+    final colors = themeP.colors;
+    final isDark = themeP.theme.isDark;
     final l10n = AppLocalizations.of(context);
 
     showCupertinoModalPopup(
@@ -2900,22 +2897,25 @@ class _HabitCardState extends State<_HabitCard>
                         ),
                         borderRadius: BorderRadius.circular(32),
                         border: Border.all(
-                          color: const Color(0xFFFFFFFF).withOpacity(0.5),
+                          color: isDark
+                              ? colors.borderCard.withOpacity(colors.borderCardOpacity)
+                              : const Color(0xFFFFFFFF).withOpacity(0.5),
                           width: 1.5,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: colors.modalShadow.withOpacity(0.4),
-                            blurRadius: 70,
-                            offset: const Offset(0, 25),
+                            color: colors.modalShadow.withOpacity(0.2),
+                            blurRadius: 40,
+                            offset: const Offset(0, 16),
                           ),
-                          BoxShadow(
-                            color: const Color(0xFFFFFFFF).withOpacity(0.6),
-                            blurRadius: 0,
-                            offset: const Offset(0, 1),
-                            spreadRadius: 0,
-                            blurStyle: BlurStyle.inner,
-                          ),
+                          if (!isDark)
+                            BoxShadow(
+                              color: const Color(0xFFFFFFFF).withOpacity(0.25),
+                              blurRadius: 0,
+                              offset: const Offset(0, 1),
+                              spreadRadius: 0,
+                              blurStyle: BlurStyle.inner,
+                            ),
                         ],
                       ),
                       child: Column(
@@ -2980,33 +2980,22 @@ class _HabitCardState extends State<_HabitCard>
                                             gradient: LinearGradient(
                                               begin: Alignment.topLeft,
                                               end: Alignment.bottomRight,
-                                              colors: [
-                                                Colors.white.withOpacity(0.65),
-                                                colors.surfaceLight
-                                                    .withOpacity(0.50),
-                                              ],
+                                              colors: isDark
+                                                  ? [
+                                                      colors.cardBackground.withOpacity(colors.cardBackgroundOpacity),
+                                                      colors.cardBackground.withOpacity(colors.cardBackgroundOpacity * 0.85),
+                                                    ]
+                                                  : [
+                                                      Colors.white.withOpacity(0.65),
+                                                      colors.surfaceLight
+                                                          .withOpacity(0.50),
+                                                    ],
                                             ),
-                                            border: Border(
-                                              top: BorderSide(
-                                                color: Colors.white
-                                                    .withOpacity(0.5),
-                                                width: 1.5,
-                                              ),
-                                              left: BorderSide(
-                                                color: Colors.white
-                                                    .withOpacity(0.4),
-                                                width: 1.5,
-                                              ),
-                                              right: BorderSide(
-                                                color: Colors.white
-                                                    .withOpacity(0.4),
-                                                width: 1.5,
-                                              ),
-                                              bottom: BorderSide(
-                                                color: Colors.white
-                                                    .withOpacity(0.4),
-                                                width: 1.5,
-                                              ),
+                                            border: Border.all(
+                                              color: isDark
+                                                  ? colors.borderCard.withOpacity(colors.borderCardOpacity)
+                                                  : Colors.white.withOpacity(0.45),
+                                              width: 1.5,
                                             ),
                                           ),
                                           child: CupertinoButton(
@@ -3092,7 +3081,9 @@ class _HabitCardState extends State<_HabitCard>
     // Capture context values before await — the card may be deactivated
     // after swapHabit calls notifyListeners() and the parent rebuilds.
     final navigator = Navigator.of(context);
-    final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
+    final themeP = Provider.of<ThemeProvider>(context, listen: false);
+    final colors = themeP.colors;
+    final isDark = themeP.theme.isDark;
     final l10n = AppLocalizations.of(context);
 
     final success = await onboardingState.swapHabit(widget.habitTitle, newHabit,
@@ -3117,9 +3108,9 @@ class _HabitCardState extends State<_HabitCard>
                   borderRadius: BorderRadius.circular(32),
                   boxShadow: [
                     BoxShadow(
-                      color: colors.modalShadow.withOpacity(0.4),
-                      blurRadius: 70,
-                      offset: const Offset(0, 25),
+                      color: colors.modalShadow.withOpacity(0.2),
+                      blurRadius: 40,
+                      offset: const Offset(0, 16),
                     ),
                   ],
                 ),
@@ -3141,7 +3132,9 @@ class _HabitCardState extends State<_HabitCard>
                         ),
                         borderRadius: BorderRadius.circular(32),
                         border: Border.all(
-                          color: Colors.white.withOpacity(0.5),
+                          color: isDark
+                              ? colors.borderCard.withOpacity(colors.borderCardOpacity)
+                              : Colors.white.withOpacity(0.5),
                           width: 1.5,
                         ),
                       ),
@@ -3263,7 +3256,9 @@ class _HabitCardState extends State<_HabitCard>
 
   void _showEditDialog() {
     final onboardingState = context.read<OnboardingState>();
-    final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
+    final themeP = Provider.of<ThemeProvider>(context, listen: false);
+    final colors = themeP.colors;
+    final isDark = themeP.theme.isDark;
     final l10n = AppLocalizations.of(context);
     final editController = TextEditingController(text: widget.habitTitle);
 
@@ -3300,9 +3295,9 @@ class _HabitCardState extends State<_HabitCard>
                       borderRadius: BorderRadius.circular(32),
                       boxShadow: [
                         BoxShadow(
-                          color: colors.modalShadow.withOpacity(0.4),
-                          blurRadius: 70,
-                          offset: const Offset(0, 25),
+                          color: colors.modalShadow.withOpacity(0.2),
+                          blurRadius: 40,
+                          offset: const Offset(0, 16),
                         ),
                       ],
                     ),
@@ -3324,7 +3319,9 @@ class _HabitCardState extends State<_HabitCard>
                             ),
                             borderRadius: BorderRadius.circular(32),
                             border: Border.all(
-                              color: Colors.white.withOpacity(0.5),
+                              color: isDark
+                                  ? colors.borderCard.withOpacity(colors.borderCardOpacity)
+                                  : Colors.white.withOpacity(0.5),
                               width: 1.5,
                             ),
                           ),
@@ -3364,10 +3361,14 @@ class _HabitCardState extends State<_HabitCard>
                                   ),
                                   padding: const EdgeInsets.all(16),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFFFFFFF).withOpacity(0.7),
+                                    color: isDark
+                                        ? colors.cardBackground.withOpacity(colors.cardBackgroundOpacity)
+                                        : const Color(0xFFFFFFFF).withOpacity(0.7),
                                     borderRadius: BorderRadius.circular(16),
                                     border: Border.all(
-                                      color: colors.buttonDark.withOpacity(0.12),
+                                      color: isDark
+                                          ? colors.borderCard.withOpacity(colors.borderCardOpacity)
+                                          : colors.buttonDark.withOpacity(0.12),
                                       width: 1,
                                     ),
                                   ),
@@ -3424,62 +3425,19 @@ class _HabitCardState extends State<_HabitCard>
                                   ),
                                 ),
                                 const SizedBox(height: 14),
-                                GestureDetector(
-                                  onTap: () => Navigator.pop(dialogContext),
-                                  child: Container(
-                                    width: double.infinity,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(20),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: colors.buttonDark.withOpacity(0.12),
-                                          blurRadius: 16,
-                                          offset: const Offset(0, 4),
-                                        ),
-                                      ],
-                                    ),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(20),
-                                      child: BackdropFilter(
-                                        filter: ImageFilter.blur(
-                                            sigmaX: 20, sigmaY: 20),
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(
-                                              vertical: 16),
-                                          decoration: BoxDecoration(
-                                            gradient: LinearGradient(
-                                              begin: Alignment.topLeft,
-                                              end: Alignment.bottomRight,
-                                              colors: [
-                                                Colors.white.withOpacity(0.5),
-                                                colors.surfaceLight
-                                                    .withOpacity(0.35),
-                                              ],
-                                            ),
-                                            borderRadius:
-                                                BorderRadius.circular(20),
-                                            border: Border.all(
-                                              color:
-                                                  Colors.white.withOpacity(0.4),
-                                              width: 1.5,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            l10n.commonCancel,
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              fontFamily:
-                                                  AppTextStyles.bodyFont(dialogContext),
-                                              fontSize: 17,
-                                              fontWeight: FontWeight.w600,
-                                              color: colors.textPrimary,
-                                            ),
-                                          ),
-                                        ),
+                                CupertinoButton(
+                                    onPressed: () => Navigator.pop(dialogContext),
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                    child: Text(
+                                      l10n.commonCancel,
+                                      style: TextStyle(
+                                        fontFamily: AppTextStyles.bodyFont(dialogContext),
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        color: colors.textTertiary,
                                       ),
                                     ),
                                   ),
-                                ),
                               ],
                             ),
                           ),
@@ -3499,7 +3457,9 @@ class _HabitCardState extends State<_HabitCard>
 
   void _showDeleteConfirmation() {
     final onboardingState = context.read<OnboardingState>();
-    final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
+    final themeP = Provider.of<ThemeProvider>(context, listen: false);
+    final colors = themeP.colors;
+    final isDark = themeP.theme.isDark;
     final l10n = AppLocalizations.of(context);
 
     showCupertinoModalPopup(
@@ -3519,9 +3479,9 @@ class _HabitCardState extends State<_HabitCard>
                 borderRadius: BorderRadius.circular(32),
                 boxShadow: [
                   BoxShadow(
-                    color: colors.modalShadow.withOpacity(0.4),
-                    blurRadius: 70,
-                    offset: const Offset(0, 25),
+                    color: colors.modalShadow.withOpacity(0.2),
+                    blurRadius: 40,
+                    offset: const Offset(0, 16),
                   ),
                 ],
               ),
@@ -3543,7 +3503,9 @@ class _HabitCardState extends State<_HabitCard>
                       ),
                       borderRadius: BorderRadius.circular(32),
                       border: Border.all(
-                        color: Colors.white.withOpacity(0.5),
+                        color: isDark
+                            ? colors.borderCard.withOpacity(colors.borderCardOpacity)
+                            : Colors.white.withOpacity(0.5),
                         width: 1.5,
                       ),
                     ),
@@ -3627,57 +3589,17 @@ class _HabitCardState extends State<_HabitCard>
                             ),
                           ),
 
-                          // Cancel button (secondary glassmorphism)
-                          GestureDetector(
-                            onTap: () => Navigator.pop(context),
-                            child: Container(
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: colors.buttonDark.withOpacity(0.12),
-                                    blurRadius: 16,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(20),
-                                child: BackdropFilter(
-                                  filter:
-                                      ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 16),
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                        colors: [
-                                          Colors.white.withOpacity(0.5),
-                                          colors.surfaceLight.withOpacity(0.35),
-                                        ],
-                                      ),
-                                      borderRadius: BorderRadius.circular(20),
-                                      border: Border.all(
-                                        color: Colors.white.withOpacity(0.4),
-                                        width: 1.5,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      l10n.commonCancel,
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontFamily:
-                                            AppTextStyles.bodyFont(context),
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.w600,
-                                        color: colors.textPrimary,
-                                      ),
-                                    ),
-                                  ),
-                                ),
+                          // Cancel button
+                          CupertinoButton(
+                            onPressed: () => Navigator.pop(context),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            child: Text(
+                              l10n.commonCancel,
+                              style: TextStyle(
+                                fontFamily: AppTextStyles.bodyFont(context),
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: colors.textTertiary,
                               ),
                             ),
                           ),
@@ -3697,7 +3619,17 @@ class _HabitCardState extends State<_HabitCard>
   @override
   Widget build(BuildContext context) {
     super.build(context); // Required by AutomaticKeepAliveClientMixin
-    final colors = context.watch<ThemeProvider>().colors;
+
+    // Re-check completion status if the calendar date has changed
+    // (handles midnight crossing while app is open)
+    final today = DateTime.now().toIso8601String().substring(0, 10);
+    if (_lastCheckedDate.isNotEmpty && _lastCheckedDate != today) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _checkIfDone());
+    }
+
+    final themeProvider = context.watch<ThemeProvider>();
+    final colors = themeProvider.colors;
+    final isDark = themeProvider.theme.isDark;
     final l10n = AppLocalizations.of(context);
     final isCustom =
         context.read<OnboardingState>().isCustomHabit(widget.habitTitle);
@@ -3722,10 +3654,12 @@ class _HabitCardState extends State<_HabitCard>
           onLongPress: _handleLongPress,
           child: ScaleTransition(
             scale: _scaleAnimation,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: _isDoneToday ? 64 : 72),
-              child: Row(
-                children: [
+            child: IntrinsicHeight(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: _isDoneToday ? 64 : 72),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
                   // LEFT ACCENT BAR (only show if not completed)
                   if (!_isDoneToday)
                     Container(
@@ -3763,12 +3697,12 @@ class _HabitCardState extends State<_HabitCard>
                                 ? colors.cardDone
                                     .withOpacity(colors.cardDoneOpacity)
                                 : widget.isPinned
-                                    ? colors.cardPinned.withOpacity(0.78)
-                                    : colors.cardBackground.withOpacity(0.82),
+                                    ? colors.cardPinned.withOpacity(colors.cardPinnedOpacity)
+                                    : colors.cardBackground.withOpacity(colors.cardBackgroundOpacity),
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
                               color: _isDoneToday
-                                  ? const Color(0xFFFFFFFF).withOpacity(0.10)
+                                  ? colors.borderCard.withOpacity(0.10)
                                   : colors.borderCard
                                       .withOpacity(colors.borderCardOpacity),
                               width: 0.5,
@@ -3796,21 +3730,13 @@ class _HabitCardState extends State<_HabitCard>
                                             ? 4
                                             : 2),
                               ),
-                              // Top-edge bevel: white highlight
+                              // Top-edge bevel: light highlight for glassmorphism edge
                               if (!_isDoneToday)
                                 BoxShadow(
-                                  color:
-                                      const Color(0xFFFFFFFF).withOpacity(0.70),
-                                  blurRadius: 2,
-                                  offset: const Offset(0, 2),
-                                  blurStyle: BlurStyle.inner,
-                                ),
-                              // Bottom-edge bevel: warm dark lip
-                              if (!_isDoneToday)
-                                BoxShadow(
-                                  color: colors.tabBarFade.withOpacity(0.25),
-                                  blurRadius: 1,
-                                  offset: const Offset(0, -1),
+                                  color: const Color(0xFFFFFFFF)
+                                      .withOpacity(isDark ? 0.18 : 0.25),
+                                  blurRadius: isDark ? 0.5 : 1,
+                                  offset: Offset(0, isDark ? 1 : 1),
                                   blurStyle: BlurStyle.inner,
                                 ),
                             ],
@@ -3880,7 +3806,8 @@ class _HabitCardState extends State<_HabitCard>
                       ),
                     ),
                   ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -4119,7 +4046,9 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
   void _showHabitSelection(String newHabit) {
     final onboardingState = context.read<OnboardingState>();
     final currentHabits = onboardingState.userHabits;
-    final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
+    final themeP = Provider.of<ThemeProvider>(context, listen: false);
+    final colors = themeP.colors;
+    final isDark = themeP.theme.isDark;
     final l10n = AppLocalizations.of(context);
 
     showStyledPopup(
@@ -4153,10 +4082,14 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 14),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFFFFFF).withOpacity(0.45),
+                      color: isDark
+                          ? colors.cardBackground.withOpacity(colors.cardBackgroundOpacity)
+                          : const Color(0xFFFFFFFF).withOpacity(0.45),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: const Color(0xFFFFFFFF).withOpacity(0.3),
+                        color: isDark
+                            ? colors.borderCard.withOpacity(colors.borderCardOpacity)
+                            : const Color(0xFFFFFFFF).withOpacity(0.3),
                         width: 1,
                       ),
                     ),
@@ -4200,7 +4133,9 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
     if (success && mounted) {
       AnalyticsService.logHabitSwapped();
       HapticFeedback.mediumImpact();
-      final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
+      final themeP = Provider.of<ThemeProvider>(context, listen: false);
+      final colors = themeP.colors;
+      final isDark = themeP.theme.isDark;
       final l10n = AppLocalizations.of(context);
 
       showCupertinoDialog(
@@ -4238,17 +4173,18 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: colors.modalShadow.withOpacity(0.4),
-                            blurRadius: 70,
-                            offset: const Offset(0, 25),
+                            color: colors.modalShadow.withOpacity(0.2),
+                            blurRadius: 40,
+                            offset: const Offset(0, 16),
                           ),
-                          BoxShadow(
-                            color: const Color(0xFFFFFFFF).withOpacity(0.6),
-                            blurRadius: 0,
-                            offset: const Offset(0, 1),
-                            spreadRadius: 0,
-                            blurStyle: BlurStyle.inner,
-                          ),
+                          if (!isDark)
+                            BoxShadow(
+                              color: const Color(0xFFFFFFFF).withOpacity(0.25),
+                              blurRadius: 0,
+                              offset: const Offset(0, 1),
+                              spreadRadius: 0,
+                              blurStyle: BlurStyle.inner,
+                            ),
                         ],
                       ),
                       child: Column(
@@ -4384,6 +4320,16 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
     }
   }
 
+  void _showPackDetail(CuratedPack pack) {
+    final colors = Provider.of<ThemeProvider>(context, listen: false).colors;
+    showCupertinoModalPopup(
+      context: context,
+      barrierColor: colors.barrierColor.withOpacity(colors.barrierOpacity),
+      filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+      builder: (context) => _PackDetailSheet(pack: pack),
+    );
+  }
+
   void _performDirectAdd(String habit) {
     final onboardingState = context.read<OnboardingState>();
     onboardingState.addHabitFromBrowse(habit);
@@ -4424,7 +4370,9 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.watch<ThemeProvider>().colors;
+    final themeProvider = context.watch<ThemeProvider>();
+    final colors = themeProvider.colors;
+    final isDark = themeProvider.theme.isDark;
     final onboardingState = context.watch<OnboardingState>();
     final l10n = AppLocalizations.of(context);
 
@@ -4550,10 +4498,14 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: const Color(0xFFFFFFFF).withOpacity(0.7),
+                color: isDark
+                    ? colors.cardBackground.withOpacity(colors.cardBackgroundOpacity)
+                    : const Color(0xFFFFFFFF).withOpacity(0.7),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: colors.buttonDark.withOpacity(0.12),
+                  color: isDark
+                      ? colors.borderCard.withOpacity(colors.borderCardOpacity)
+                      : colors.buttonDark.withOpacity(0.12),
                   width: 1,
                 ),
                 boxShadow: [
@@ -4608,52 +4560,88 @@ class _BrowseHabitsSheetState extends State<BrowseHabitsSheet> {
           // SCROLLABLE CONTENT
           // ============================================================
           Expanded(
-            child: ListView.builder(
+            child: ListView(
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
-              itemCount: filteredCategories.length,
-              itemBuilder: (context, categoryIndex) {
-                final category =
-                    filteredCategories.keys.elementAt(categoryIndex);
-                final habits = filteredCategories[category]!;
-                final accentColor =
-                    categoryColors[category] ?? colors.accentMuted;
-
-                return Padding(
-                  padding: EdgeInsets.only(
-                    bottom:
-                        categoryIndex < filteredCategories.length - 1 ? 32 : 0,
+              children: [
+                // ========================================================
+                // CURATED PACKS SECTION
+                // ========================================================
+                if (_searchQuery.isEmpty) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4, bottom: 14),
+                    child: Text(
+                      'CURATED PACKS',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: colors.buttonDark,
+                        letterSpacing: 0.5,
+                        fontFamily: AppTextStyles.bodyFont(context),
+                      ),
+                    ),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Category header
-                      Padding(
-                        padding: const EdgeInsets.only(left: 4, bottom: 14),
-                        child: Text(
-                          localizeCategoryName(category, l10n).toUpperCase(),
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: colors.buttonDark,
-                            letterSpacing: 0.5,
-                            fontFamily: AppTextStyles.bodyFont(context),
+                  SizedBox(
+                    height: 158,
+                    child: ScrollConfiguration(
+                      behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        padding: EdgeInsets.zero,
+                        itemCount: CuratedPacks.all.length,
+                        separatorBuilder: (_, __) => const SizedBox(width: 12),
+                        itemBuilder: (context, index) {
+                          final pack = CuratedPacks.all[index];
+                          return _CuratedPackCard(
+                            pack: pack,
+                            onTap: () => _showPackDetail(pack),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                ],
+
+                // ========================================================
+                // HABIT CATEGORIES
+                // ========================================================
+                ...filteredCategories.entries.map((entry) {
+                  final category = entry.key;
+                  final habits = entry.value;
+                  final accentColor =
+                      categoryColors[category] ?? colors.accentMuted;
+
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 32),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(left: 4, bottom: 14),
+                          child: Text(
+                            localizeCategoryName(category, l10n).toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: colors.buttonDark,
+                              letterSpacing: 0.5,
+                              fontFamily: AppTextStyles.bodyFont(context),
+                            ),
                           ),
                         ),
-                      ),
-
-                      // Habit cards
-                      ...habits.map((habit) => Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: _BrowseHabitCard(
-                              habitTitle: habit,
-                              accentColor: accentColor,
-                              onAdd: () => _addHabit(habit),
-                            ),
-                          )),
-                    ],
-                  ),
-                );
-              },
+                        ...habits.map((habit) => Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: _BrowseHabitCard(
+                                habitTitle: habit,
+                                accentColor: accentColor,
+                                onAdd: () => _addHabit(habit),
+                              ),
+                            )),
+                      ],
+                    ),
+                  );
+                }),
+              ],
             ),
           ),
         ],
@@ -4704,12 +4692,15 @@ class _BrowseHabitCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.watch<ThemeProvider>().colors;
+    final isDark = context.watch<ThemeProvider>().theme.isDark;
     final l10n = AppLocalizations.of(context);
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFFFFFFFF).withOpacity(0.8),
+          color: isDark
+              ? colors.borderCard.withOpacity(colors.borderCardOpacity)
+              : const Color(0xFFFFFFFF).withOpacity(0.8),
           width: 1,
         ),
         boxShadow: [
@@ -4739,10 +4730,15 @@ class _BrowseHabitCard extends StatelessWidget {
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: [
-                        const Color(0xFFFFFFFF).withOpacity(0.7),
-                        const Color(0xFFFFFFFF).withOpacity(0.5),
-                      ],
+                      colors: isDark
+                          ? [
+                              colors.cardBackground.withOpacity(colors.cardBackgroundOpacity),
+                              colors.cardBackground.withOpacity(colors.cardBackgroundOpacity * 0.85),
+                            ]
+                          : [
+                              const Color(0xFFFFFFFF).withOpacity(0.7),
+                              const Color(0xFFFFFFFF).withOpacity(0.5),
+                            ],
                     ),
                   ),
                   child: Row(
@@ -4795,6 +4791,869 @@ class _BrowseHabitCard extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================================
+// CURATED PACK CARD (for the Browse sheet)
+// ============================================================
+
+class _CuratedPackCard extends StatelessWidget {
+  final CuratedPack pack;
+  final VoidCallback onTap;
+
+  const _CuratedPackCard({
+    required this.pack,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.watch<ThemeProvider>().colors;
+    final isDark = context.watch<ThemeProvider>().theme.isDark;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 180,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isDark
+                ? colors.borderCard.withOpacity(colors.borderCardOpacity)
+                : const Color(0xFFFFFFFF).withOpacity(0.8),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: colors.textPrimary.withOpacity(0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: isDark
+                    ? [
+                        colors.cardBackground.withOpacity(colors.cardBackgroundOpacity),
+                        colors.cardBackground.withOpacity(colors.cardBackgroundOpacity * 0.85),
+                      ]
+                    : [
+                        const Color(0xFFFFFFFF).withOpacity(0.7),
+                        const Color(0xFFFFFFFF).withOpacity(0.5),
+                      ],
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    // Pack icon
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: colors.ctaPrimary.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      alignment: Alignment.center,
+                      child: Icon(
+                        pack.icon,
+                        size: 18,
+                        color: colors.ctaPrimary,
+                      ),
+                    ),
+                    const Spacer(),
+                    Icon(
+                      CupertinoIcons.chevron_right,
+                      size: 14,
+                      color: colors.textSecondary.withOpacity(0.4),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  pack.name,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: colors.textPrimary,
+                    fontFamily: 'Sora',
+                    letterSpacing: -0.2,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${pack.habitIds.length} habits',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: colors.textSecondary,
+                    fontFamily: 'DMSans',
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  pack.subtitle,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: colors.textSecondary.withOpacity(0.7),
+                    fontFamily: 'DMSans',
+                    height: 1.3,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const Spacer(),
+                _PackTierBadge(pack: pack),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================================
+// PACK TIER BADGE
+// ============================================================
+
+class _PackTierBadge extends StatelessWidget {
+  final CuratedPack pack;
+
+  const _PackTierBadge({required this.pack});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.watch<ThemeProvider>().colors;
+    final isFree = pack.isFree;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: isFree
+            ? colors.ctaPrimary.withOpacity(0.10)
+            : colors.ctaPrimary.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isFree
+              ? colors.ctaPrimary.withOpacity(0.20)
+              : colors.ctaPrimary.withOpacity(0.15),
+          width: 1,
+        ),
+      ),
+      child: Text(
+        isFree ? 'Free' : 'Intended+',
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: colors.ctaPrimary,
+          fontFamily: 'DMSans',
+          letterSpacing: 0.1,
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================================
+// PACK DETAIL SHEET
+// ============================================================
+
+class _PackDetailSheet extends StatelessWidget {
+  final CuratedPack pack;
+
+  const _PackDetailSheet({required this.pack});
+
+  @override
+  Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    final colors = themeProvider.colors;
+    final isDark = themeProvider.theme.isDark;
+    final onboardingState = context.watch<OnboardingState>();
+
+    // Count how many habits are already active
+    final alreadyActive =
+        pack.habitIds.where((h) => onboardingState.userHabits.contains(h)).length;
+    final allActive = alreadyActive == pack.habitIds.length;
+
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.7,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            colors.surfaceLight,
+            colors.modalBg2,
+          ],
+        ),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0x1F000000),
+            blurRadius: 40,
+            offset: const Offset(0, -10),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Handle bar
+          Padding(
+            padding: const EdgeInsets.only(top: 16, bottom: 8),
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: colors.buttonDark.withOpacity(0.25),
+                borderRadius: BorderRadius.circular(9999),
+              ),
+            ),
+          ),
+
+          // Content
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
+              children: [
+                // Pack emoji + name
+                Center(
+                  child: Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      color: colors.ctaPrimary.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    alignment: Alignment.center,
+                    child: Icon(
+                      pack.icon,
+                      size: 32,
+                      color: colors.ctaPrimary,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        pack.name,
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w600,
+                          color: colors.textPrimary,
+                          fontFamily: 'Sora',
+                          letterSpacing: -0.4,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      _PackTierBadge(pack: pack),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  pack.subtitle,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: colors.textSecondary,
+                    fontFamily: 'DMSans',
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  pack.description,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    color: colors.textSecondary.withOpacity(0.8),
+                    fontFamily: 'DMSans',
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 28),
+
+                // Habits list header
+                Padding(
+                  padding: const EdgeInsets.only(left: 4, bottom: 14),
+                  child: Text(
+                    'HABITS IN THIS PACK',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: colors.buttonDark,
+                      letterSpacing: 0.5,
+                      fontFamily: AppTextStyles.bodyFont(context),
+                    ),
+                  ),
+                ),
+
+                // Habit list
+                ...pack.habitIds.map((habitId) {
+                  final category =
+                      OnboardingState.habitsByCategory.entries
+                          .where((e) => e.value.contains(habitId))
+                          .map((e) => e.key)
+                          .firstOrNull;
+                  final accentColor = category != null
+                      ? (_BrowseHabitsSheetState.categoryColors[category] ??
+                          colors.accentMuted)
+                      : colors.accentMuted;
+                  final isActive = onboardingState.userHabits.contains(habitId);
+                  final l10n = AppLocalizations.of(context);
+
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: isDark
+                              ? colors.borderCard.withOpacity(colors.borderCardOpacity)
+                              : const Color(0xFFFFFFFF).withOpacity(0.8),
+                          width: 1,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: colors.textPrimary.withOpacity(0.05),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: IntrinsicHeight(
+                          child: Row(
+                            children: [
+                              Container(width: 4, color: accentColor),
+                              Expanded(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 14),
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: isDark
+                                          ? [
+                                              colors.cardBackground.withOpacity(colors.cardBackgroundOpacity),
+                                              colors.cardBackground.withOpacity(colors.cardBackgroundOpacity * 0.85),
+                                            ]
+                                          : [
+                                              const Color(0xFFFFFFFF)
+                                                  .withOpacity(0.7),
+                                              const Color(0xFFFFFFFF)
+                                                  .withOpacity(0.5),
+                                            ],
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          localizeHabitName(habitId, l10n),
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w500,
+                                            color: colors.textPrimary,
+                                            fontFamily: 'DMSans',
+                                            height: 1.4,
+                                          ),
+                                        ),
+                                      ),
+                                      if (isActive)
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 8, vertical: 3),
+                                          decoration: BoxDecoration(
+                                            color: colors.ctaPrimary
+                                                .withOpacity(0.10),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                          child: Text(
+                                            'Active',
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w600,
+                                              color: colors.ctaPrimary,
+                                              fontFamily: 'DMSans',
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+
+          // Bottom button area
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+                24, 12, 24, MediaQuery.of(context).padding.bottom + 16),
+            child: _PackStartButton(
+              pack: pack,
+              allActive: allActive,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ============================================================
+// PACK START BUTTON
+// ============================================================
+
+class _PackStartButton extends StatelessWidget {
+  final CuratedPack pack;
+  final bool allActive;
+
+  const _PackStartButton({
+    required this.pack,
+    required this.allActive,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.watch<ThemeProvider>().colors;
+
+    if (allActive) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(
+          color: colors.ctaPrimary.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: colors.ctaPrimary.withOpacity(0.15),
+            width: 1,
+          ),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          'All habits already active',
+          style: TextStyle(
+            fontFamily: AppTextStyles.bodyFont(context),
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: colors.ctaPrimary.withOpacity(0.6),
+          ),
+        ),
+      );
+    }
+
+    return SizedBox(
+      width: double.infinity,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  colors.ctaPrimary.withOpacity(0.92),
+                  colors.ctaSecondary.withOpacity(0.88),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: colors.ctaPrimary.withOpacity(0.4),
+                width: 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: colors.textPrimary.withOpacity(0.3),
+                  blurRadius: 24,
+                  offset: const Offset(0, 6),
+                ),
+                BoxShadow(
+                  color: const Color(0xFFFFFFFF).withOpacity(0.15),
+                  blurRadius: 0,
+                  offset: const Offset(0, 1),
+                  spreadRadius: 0,
+                  blurStyle: BlurStyle.inner,
+                ),
+              ],
+            ),
+            child: CupertinoButton(
+              onPressed: () => _startPack(context),
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              borderRadius: BorderRadius.circular(20),
+              child: Text(
+                'Start this pack',
+                style: TextStyle(
+                  fontFamily: AppTextStyles.bodyFont(context),
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFFFFFFFF),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _startPack(BuildContext context) async {
+    final userState = context.read<UserState>();
+    final onboardingState = context.read<OnboardingState>();
+
+    // Premium gating — packs are an Intended+ feature
+    if (pack.isPremium && !userState.hasSubscription) {
+      if (!context.mounted) return;
+      Navigator.pop(context); // Close detail sheet
+      showCupertinoModalPopup(
+        context: context,
+        barrierColor: Colors.black.withOpacity(0.5),
+        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+        builder: (_) => PaywallScreen(source: 'curated_pack_${pack.id}'),
+      );
+      return;
+    }
+
+    // Count how many new habits would be added
+    final newHabits = pack.habitIds
+        .where((h) => !onboardingState.userHabits.contains(h))
+        .toList();
+    final totalAfter = onboardingState.userHabits.length + newHabits.length;
+
+    // If adding would push total above 6, show swap flow
+    if (newHabits.isNotEmpty && totalAfter > 6) {
+      if (!context.mounted) return;
+      Navigator.pop(context); // Close detail sheet
+      showCupertinoModalPopup(
+        context: context,
+        barrierColor: Colors.black.withValues(alpha: 0.5),
+        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+        builder: (_) => _PackSwapSheet(
+          pack: pack,
+          newHabitsCount: newHabits.length,
+        ),
+      );
+      return;
+    }
+
+    // Room available — add directly
+    final added = await onboardingState.addHabitsFromPack(pack.habitIds);
+
+    if (!context.mounted) return;
+
+    HapticFeedback.mediumImpact();
+
+    // Grab root overlay before popping, so toast has a valid context
+    final rootOverlay = Overlay.of(context, rootOverlay: true);
+    final alreadyActive = pack.habitIds.length - added;
+    final message = alreadyActive > 0
+        ? '$added new habits added ($alreadyActive already active)'
+        : '${pack.name} added — $added habits ready to go';
+
+    Navigator.pop(context); // Close detail sheet
+    AppToast.showOnOverlay(rootOverlay, message);
+  }
+}
+
+// ============================================================
+// PACK SWAP SHEET — "Make room" flow
+// ============================================================
+
+class _PackSwapSheet extends StatefulWidget {
+  final CuratedPack pack;
+  final int newHabitsCount;
+
+  const _PackSwapSheet({
+    required this.pack,
+    required this.newHabitsCount,
+  });
+
+  @override
+  State<_PackSwapSheet> createState() => _PackSwapSheetState();
+}
+
+class _PackSwapSheetState extends State<_PackSwapSheet> {
+  final Set<String> _selected = {};
+
+  /// Swappable habits: current habits that are NOT in the pack
+  /// and NOT custom habits.
+  List<String> _swappableHabits(OnboardingState state) {
+    return state.userHabits
+        .where((h) => !widget.pack.habitIds.contains(h))
+        .where((h) => !state.customHabits.contains(h))
+        .toList();
+  }
+
+
+  Future<void> _confirm() async {
+    final state = context.read<OnboardingState>();
+    final l10n = AppLocalizations.of(context);
+
+    // Set aside selected habits
+    await state.setAsideHabits(_selected.toList());
+
+    // Add pack habits
+    final added = await state.addHabitsFromPack(widget.pack.habitIds);
+
+    if (!mounted) return;
+
+    HapticFeedback.mediumImpact();
+    Navigator.pop(context);
+
+    final message = added > 0
+        ? '${widget.pack.name} ${l10n.packSwapAdded(added)}'
+        : l10n.packSwapAllActive;
+    AppToast.show(context, message);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.watch<ThemeProvider>().colors;
+    final l10n = AppLocalizations.of(context);
+    final state = context.watch<OnboardingState>();
+    final swappable = _swappableHabits(state);
+
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(24, 14, 24, 0),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: const Alignment(0.0, 2.41),
+              end: const Alignment(0.0, -2.41),
+              colors: [
+                colors.modalBg1.withOpacity(0.96),
+                colors.modalBg2.withOpacity(0.93),
+                colors.modalBg3.withOpacity(0.95),
+              ],
+              stops: const [0.0, 0.5, 1.0],
+            ),
+            borderRadius:
+                const BorderRadius.vertical(top: Radius.circular(32)),
+            border: Border.all(
+              color: const Color(0xFFFFFFFF).withOpacity(0.5),
+              width: 1.5,
+            ),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Drag handle
+                Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: colors.textDisabled.withOpacity(0.6),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Title
+                Text(
+                  l10n.packSwapTitle,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: 'Sora',
+                    fontSize: 22,
+                    fontWeight: FontWeight.w600,
+                    color: colors.textPrimary,
+                    letterSpacing: -0.3,
+                    height: 1.25,
+                  ),
+                ),
+                const SizedBox(height: 8),
+
+                // Subtitle
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Text(
+                    l10n.packSwapSubtitle,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'DM Sans',
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      color: colors.textSecondary,
+                      height: 1.45,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Habit list
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.35,
+                  ),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        for (final habit in swappable)
+                          _buildHabitRow(habit, colors),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Confirm button
+                SizedBox(
+                  width: double.infinity,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              colors.ctaPrimary.withOpacity(
+                                  _selected.isNotEmpty ? 0.92 : 0.4),
+                              colors.ctaSecondary.withOpacity(
+                                  _selected.isNotEmpty ? 0.88 : 0.3),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: CupertinoButton(
+                          onPressed: _selected.isNotEmpty
+                              ? _confirm
+                              : null,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          borderRadius: BorderRadius.circular(20),
+                          child: Text(
+                            l10n.packSwapConfirm(
+                                _selected.length, widget.pack.name),
+                            style: TextStyle(
+                              fontFamily: AppTextStyles.bodyFont(context),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: _selected.isNotEmpty
+                                  ? const Color(0xFFFFFFFF)
+                                  : colors.textDisabled,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHabitRow(String habit, AppColorScheme colors) {
+    final isChecked = _selected.contains(habit);
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          if (isChecked) {
+            _selected.remove(habit);
+          } else {
+            _selected.add(habit);
+          }
+        });
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: isChecked
+              ? colors.ctaPrimary.withOpacity(0.08)
+              : colors.cardBackground.withOpacity(colors.cardBackgroundOpacity * 0.6),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isChecked
+                ? colors.ctaPrimary.withOpacity(0.25)
+                : colors.borderCard.withOpacity(colors.borderCardOpacity * 0.5),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 22,
+              height: 22,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isChecked
+                    ? colors.ctaPrimary
+                    : colors.checkmarkBackground
+                        .withOpacity(colors.checkmarkBackgroundOpacity),
+              ),
+              child: isChecked
+                  ? const Icon(
+                      CupertinoIcons.checkmark,
+                      size: 13,
+                      color: Color(0xFFFFFFFF),
+                    )
+                  : null,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                habit,
+                style: TextStyle(
+                  fontFamily: 'DM Sans',
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  color: isChecked
+                      ? colors.textSecondary
+                      : colors.textPrimary,
+                  decoration:
+                      isChecked ? TextDecoration.lineThrough : null,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

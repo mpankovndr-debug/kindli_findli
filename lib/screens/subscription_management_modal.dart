@@ -71,12 +71,12 @@ class SubscriptionManagementModal extends StatelessWidget {
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: colors.modalShadow.withOpacity(0.4),
-                        blurRadius: 70,
-                        offset: const Offset(0, 25),
+                        color: colors.modalShadow.withOpacity(0.2),
+                        blurRadius: 40,
+                        offset: const Offset(0, 16),
                       ),
                       BoxShadow(
-                        color: const Color(0xFFFFFFFF).withOpacity(0.6),
+                        color: const Color(0xFFFFFFFF).withOpacity(0.25),
                         blurRadius: 0,
                         offset: const Offset(0, 1),
                         spreadRadius: 0,

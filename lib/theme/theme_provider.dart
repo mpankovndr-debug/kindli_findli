@@ -11,12 +11,37 @@ class ThemeProvider extends ChangeNotifier {
 
   static const _key = 'selected_theme';
 
+  static const List<AppTheme> boostThemes = [
+    AppTheme.deepFocus,
+  ];
+
   static const List<AppTheme> premiumThemes = [
     AppTheme.clearSky,
     AppTheme.morningSlate,
+    AppTheme.softDusk,
+    AppTheme.forestFloor,
+    AppTheme.goldenHour,
+    AppTheme.nightBloom,
+    AppTheme.sandDune,
   ];
 
+  bool isBoostTheme(AppTheme t) => boostThemes.contains(t);
   bool isPremiumTheme(AppTheme t) => premiumThemes.contains(t);
+
+  /// Returns true if the theme is locked for the user's current tier.
+  bool isLocked(AppTheme t, {required bool hasBoost, required bool isPremium}) {
+    if (isPremium) return false;
+    if (hasBoost && isBoostTheme(t)) return false;
+    if (!isBoostTheme(t) && !isPremiumTheme(t)) return false;
+    return true;
+  }
+
+  /// Returns the tier label for a locked theme.
+  String? tierLabel(AppTheme t) {
+    if (boostThemes.contains(t)) return 'Boost';
+    if (premiumThemes.contains(t)) return 'Intended+';
+    return null;
+  }
 
   ThemeProvider() {
     _load();

@@ -223,7 +223,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get themeSelectionPremiumHint =>
-      '«Ясное небо» и «Утренний сланец» доступны с Intended+. Попробуй бесплатно 7 дней после настройки.';
+      '«Глубокий фокус» и другие темы доступны с Intended+. Попробуй бесплатно 7 дней после настройки.';
 
   @override
   String get habitRevealTitle => 'Вот, что мы подобрали для тебя';
@@ -1376,30 +1376,34 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get paywallTitle => 'Сделай его полностью своим.';
+  String momentsShowAll(int count) {
+    return 'Показать все $count моментов';
+  }
+
+  @override
+  String get paywallTitle => 'Intended+ растёт вместе с тобой';
 
   @override
   String get paywallDescription =>
-      'Intended бесплатен навсегда.\nIntended+ убирает ограничения, чтобы ты мог настроить всё под свою жизнь.';
+      'Больше способов понять себя — и это только начало.';
 
   @override
-  String get paywallFeature1 =>
-      'Безлимитные свои привычки — потому что жизнь у всех разная';
+  String get paywallFeature1 => 'Все 10 цветовых тем, включая тёмный режим';
 
   @override
-  String get paywallFeature2 => 'Свободно меняй привычки, когда меняется жизнь';
+  String get paywallFeature2 => 'Наборы привычек: заботливо собранные ритуалы';
 
   @override
-  String get paywallFeature3 => 'Делись карточками достижений с близкими';
+  String get paywallFeature3 => 'Еженедельные рефлексии и инсайты';
 
   @override
-  String get paywallFeature4 => 'Меняй направления когда угодно — без ожидания';
+  String get paywallFeature4 => 'Безлимитные привычки, замены и направления';
 
   @override
   String get paywallMonthly => 'Ежемесячно';
 
   @override
-  String get paywallMonthlyPrice => '€6,99';
+  String get paywallMonthlyPrice => '€5,99';
 
   @override
   String get paywallMonthlyPeriod => 'в месяц';
@@ -1408,13 +1412,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get paywallYearly => 'Ежегодно';
 
   @override
-  String get paywallYearlyPrice => '€49,99';
+  String get paywallYearlyPrice => '€39,99';
 
   @override
   String get paywallYearlyPeriod => 'в год';
 
   @override
-  String get paywallYearlySave => 'Экономия 40%';
+  String get paywallYearlySave => 'Экономия 44%';
 
   @override
   String paywallSavePercent(int percent) {
@@ -1425,7 +1429,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get paywallLifetime => 'Навсегда';
 
   @override
-  String get paywallLifetimePrice => '€89,99';
+  String get paywallLifetimePrice => '€69,99';
 
   @override
   String get paywallLifetimePeriod => 'один раз';
@@ -1465,6 +1469,10 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get paywallPrivacy => 'Конфиденциальность';
+
+  @override
+  String get paywallFooter =>
+      'Новые функции добавляются регулярно. Твоя подписка поддерживает независимую разработку.';
 
   @override
   String get subscriptionTitle => 'Intended+';
@@ -1716,6 +1724,24 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get themeMorningSlate => 'Утренний сланец';
+
+  @override
+  String get themeSoftDusk => 'Розовые сумерки';
+
+  @override
+  String get themeDeepFocus => 'Глубокий фокус';
+
+  @override
+  String get themeForestFloor => 'Лесная тропа';
+
+  @override
+  String get themeGoldenHour => 'Золотой час';
+
+  @override
+  String get themeNightBloom => 'Ночное цветение';
+
+  @override
+  String get themeSandDune => 'Песчаная дюна';
 
   @override
   String get browseHabitsTitle => 'Все привычки';
@@ -2081,7 +2107,20 @@ class AppLocalizationsRu extends AppLocalizations {
   String get shareCardShowedUpPhrase => 'На этой неделе — забота о себе';
 
   @override
-  String get shareCardTimes => 'раз';
+  String shareCardTimes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'раз',
+      one: 'раз',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String shareCardFocusedOn(String area) {
+    return 'Фокус: $area';
+  }
 
   @override
   String get shareCardTagline => 'намерение важнее совершенства';
@@ -2164,7 +2203,8 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get boostCardSubtitle => 'Немного больше пространства для роста.';
+  String get boostCardSubtitle =>
+      'Тёмный режим + 1 дополнительная привычка и направление.';
 
   @override
   String get boostOrDivider => 'или';
@@ -2177,25 +2217,25 @@ class AppLocalizationsRu extends AppLocalizations {
       'Что-то пошло не так с покупкой. Попробуй ещё раз.';
 
   @override
-  String get boostBenefit1 => '3 свои привычки';
+  String get boostBenefit1 => 'Тема «Глубокий фокус»';
 
   @override
-  String get boostBenefit1Detail => 'вместо 2';
+  String get boostBenefit1Detail => '';
 
   @override
-  String get boostBenefit2 => '3 направления';
+  String get boostBenefit2 => '+1 своя привычка';
 
   @override
-  String get boostBenefit2Detail => 'вместо 2';
+  String get boostBenefit2Detail => 'всего 3';
 
   @override
-  String get boostBenefit3 => '3 замены/месяц';
+  String get boostBenefit3 => '+1 направление';
 
   @override
-  String get boostBenefit3Detail => 'вместо 2';
+  String get boostBenefit3Detail => 'всего 3';
 
   @override
-  String get boostBenefit4 => 'Карточка «Я иду своим путём»';
+  String get boostBenefit4 => '+1 замена привычки в месяц';
 
   @override
   String get boostOfferHabitTitle => 'Хочешь ещё одну привычку?';
@@ -2283,4 +2323,147 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get onboardingPhilosophyCta => 'Понятно';
+
+  @override
+  String get reflectionTitle => 'Твоя неделя';
+
+  @override
+  String get reflectionAnchor7 =>
+      'Ты был(а) здесь каждый день на этой неделе. Не идеально — но по-настоящему.';
+
+  @override
+  String reflectionAnchor56(int days) {
+    return 'Ты заглянул(а) $days из 7 дней на этой неделе. Это $days дней, когда ты решил(а) попробовать.';
+  }
+
+  @override
+  String reflectionAnchor34(int days) {
+    return 'Ты был(а) здесь $days дня на этой неделе. Это $days дня, когда ты решил(а) попробовать.';
+  }
+
+  @override
+  String reflectionAnchor12(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days раз',
+      few: '$days раза',
+      one: '1 раз',
+    );
+    return 'Ты заглянул(а) $_temp0 на этой неделе. Даже один день считается — ты не исчез(ла).';
+  }
+
+  @override
+  String get reflectionAnchor0 =>
+      'Тихая неделя. Ничего страшного. Ты здесь сейчас, и это главное.';
+
+  @override
+  String reflectionPatternOneDay(String dayName) {
+    return 'Похоже, $dayName — это твой день. Уже три недели подряд.';
+  }
+
+  @override
+  String reflectionPatternTwoDays(String dayName1, String dayName2) {
+    return '$dayName1 и $dayName2 — похоже, это твои дни.';
+  }
+
+  @override
+  String get reflectionPatternNone =>
+      'Твой ритм всё ещё формируется. Это нормально — продолжай.';
+
+  @override
+  String reflectionFocusDominant(String area) {
+    return 'В последнее время тебя тянет к привычкам из категории «$area». Кажется, сейчас это для тебя важно.';
+  }
+
+  @override
+  String reflectionFocusBalanced(String area1, String area2) {
+    return 'На этой неделе ты распределил(а) энергию между «$area1» и «$area2». Сбалансированная неделя.';
+  }
+
+  @override
+  String get reflectionReframeComeback =>
+      'Прошлая неделя была тише. На этой ты вернулся(-ась). В этом и смысл.';
+
+  @override
+  String reflectionReframeRefresh(int count) {
+    return 'Ты обновил(а) привычки $count раз(а) на этой неделе — это не отказ, это адаптация.';
+  }
+
+  @override
+  String get reflectionReframeSwap =>
+      'Ты заменил(а) привычку на этой неделе. Понять, что не подходит — тоже прогресс.';
+
+  @override
+  String get reflectionShare => 'Поделиться';
+
+  @override
+  String get reflectionTeaser => 'Это ещё не всё о твоей неделе';
+
+  @override
+  String get reflectionSectionThisWeek => 'НА ЭТОЙ НЕДЕЛЕ';
+
+  @override
+  String get reflectionSectionYourRhythm => 'ТВОЙ РИТМ';
+
+  @override
+  String get reflectionSectionYourFocus => 'ТВОЙ ФОКУС';
+
+  @override
+  String get reflectionSectionNotice => 'НА ЗАМЕТКУ';
+
+  @override
+  String get tipPinHabit => 'Удерживайте привычку, чтобы закрепить её сверху';
+
+  @override
+  String get tipCuratedPack =>
+      'Попробуйте готовый набор привычек — найдите его в «Все привычки»';
+
+  @override
+  String get tipGotIt => 'Понятно';
+
+  @override
+  String get tipSkipAll => 'Пропустить подсказки';
+
+  @override
+  String get packSwapTitle => 'Освободите место для нового набора';
+
+  @override
+  String get packSwapSubtitle =>
+      'Чтобы сохранить порядок, выберите привычки, которые хотите убрать. Ваши собственные привычки всегда останутся.';
+
+  @override
+  String packSwapConfirm(int count, String packName) {
+    return 'Убрать $count и добавить $packName';
+  }
+
+  @override
+  String packSwapAdded(int count) {
+    return 'добавлен — $count новых привычек готовы';
+  }
+
+  @override
+  String get packSwapAllActive => 'Все привычки из этого набора уже активны';
+
+  @override
+  String get packCreativeSparkName => 'Творческая искра';
+
+  @override
+  String get packCreativeSparkSubtitle =>
+      'Маленькие творческие шаги. Талант не нужен.';
+
+  @override
+  String get packCreativeSparkDescription =>
+      'Три крошечные творческие привычки, которые помогут выйти из головы и начать делать. Не про мастерство — про игру.';
+
+  @override
+  String get packStayConnectedName => 'Оставайся на связи';
+
+  @override
+  String get packStayConnectedSubtitle =>
+      'Те, кто важен — одним маленьким жестом за раз.';
+
+  @override
+  String get packStayConnectedDescription =>
+      'Четыре микро-привычки, чтобы оставаться ближе к своим людям. Не грандиозные жесты — просто быть рядом.';
 }

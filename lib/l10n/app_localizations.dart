@@ -491,7 +491,7 @@ abstract class AppLocalizations {
   /// No description provided for @themeSelectionPremiumHint.
   ///
   /// In en, this message translates to:
-  /// **'Clear Sky and Morning Slate are available with Intended+. Try it free for 7 days after setup.'**
+  /// **'Deep Focus and more themes are available with Intended+. Try it free for 7 days after setup.'**
   String get themeSelectionPremiumHint;
 
   /// No description provided for @habitRevealTitle.
@@ -2492,40 +2492,46 @@ abstract class AppLocalizations {
   /// **'Your most frequent intention: {intention}'**
   String monthSummaryTopIntention(String intention);
 
+  /// No description provided for @momentsShowAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all {count} moments'**
+  String momentsShowAll(int count);
+
   /// No description provided for @paywallTitle.
   ///
   /// In en, this message translates to:
-  /// **'Make it fully yours.'**
+  /// **'Intended+ grows with you'**
   String get paywallTitle;
 
   /// No description provided for @paywallDescription.
   ///
   /// In en, this message translates to:
-  /// **'Intended is free forever.\nIntended+ removes the limits so you can shape it around your life.'**
+  /// **'More ways to understand yourself — with more on the way.'**
   String get paywallDescription;
 
   /// No description provided for @paywallFeature1.
   ///
   /// In en, this message translates to:
-  /// **'Unlimited custom habits — because your life isn\'t one-size-fits-all'**
+  /// **'All 10 color themes including dark mode'**
   String get paywallFeature1;
 
   /// No description provided for @paywallFeature2.
   ///
   /// In en, this message translates to:
-  /// **'Swap habits freely when life changes'**
+  /// **'Curated habit packs: thoughtfully assembled routines'**
   String get paywallFeature2;
 
   /// No description provided for @paywallFeature3.
   ///
   /// In en, this message translates to:
-  /// **'Share milestone cards with people you care about'**
+  /// **'Weekly reflections & insights'**
   String get paywallFeature3;
 
   /// No description provided for @paywallFeature4.
   ///
   /// In en, this message translates to:
-  /// **'Change focus areas whenever you need — no waiting'**
+  /// **'Unlimited custom habits, swaps, and focus areas'**
   String get paywallFeature4;
 
   /// No description provided for @paywallMonthly.
@@ -2537,7 +2543,7 @@ abstract class AppLocalizations {
   /// No description provided for @paywallMonthlyPrice.
   ///
   /// In en, this message translates to:
-  /// **'€6.99'**
+  /// **'€5.99'**
   String get paywallMonthlyPrice;
 
   /// No description provided for @paywallMonthlyPeriod.
@@ -2555,7 +2561,7 @@ abstract class AppLocalizations {
   /// No description provided for @paywallYearlyPrice.
   ///
   /// In en, this message translates to:
-  /// **'€49.99'**
+  /// **'€39.99'**
   String get paywallYearlyPrice;
 
   /// No description provided for @paywallYearlyPeriod.
@@ -2567,7 +2573,7 @@ abstract class AppLocalizations {
   /// No description provided for @paywallYearlySave.
   ///
   /// In en, this message translates to:
-  /// **'Save 40%'**
+  /// **'Save 44%'**
   String get paywallYearlySave;
 
   /// No description provided for @paywallSavePercent.
@@ -2585,7 +2591,7 @@ abstract class AppLocalizations {
   /// No description provided for @paywallLifetimePrice.
   ///
   /// In en, this message translates to:
-  /// **'€89.99'**
+  /// **'€69.99'**
   String get paywallLifetimePrice;
 
   /// No description provided for @paywallLifetimePeriod.
@@ -2659,6 +2665,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Privacy'**
   String get paywallPrivacy;
+
+  /// No description provided for @paywallFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'New features added regularly. Your subscription supports independent development.'**
+  String get paywallFooter;
 
   /// No description provided for @subscriptionTitle.
   ///
@@ -3115,6 +3127,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Morning Slate'**
   String get themeMorningSlate;
+
+  /// No description provided for @themeSoftDusk.
+  ///
+  /// In en, this message translates to:
+  /// **'Soft Dusk'**
+  String get themeSoftDusk;
+
+  /// No description provided for @themeDeepFocus.
+  ///
+  /// In en, this message translates to:
+  /// **'Deep Focus'**
+  String get themeDeepFocus;
+
+  /// No description provided for @themeForestFloor.
+  ///
+  /// In en, this message translates to:
+  /// **'Forest Floor'**
+  String get themeForestFloor;
+
+  /// No description provided for @themeGoldenHour.
+  ///
+  /// In en, this message translates to:
+  /// **'Golden Hour'**
+  String get themeGoldenHour;
+
+  /// No description provided for @themeNightBloom.
+  ///
+  /// In en, this message translates to:
+  /// **'Night Bloom'**
+  String get themeNightBloom;
+
+  /// No description provided for @themeSandDune.
+  ///
+  /// In en, this message translates to:
+  /// **'Sand Dune'**
+  String get themeSandDune;
 
   /// No description provided for @browseHabitsTitle.
   ///
@@ -3803,8 +3851,14 @@ abstract class AppLocalizations {
   /// No description provided for @shareCardTimes.
   ///
   /// In en, this message translates to:
-  /// **'times'**
-  String get shareCardTimes;
+  /// **'{count, plural, =1{time} other{times}}'**
+  String shareCardTimes(int count);
+
+  /// No description provided for @shareCardFocusedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Focused on: {area}'**
+  String shareCardFocusedOn(String area);
 
   /// No description provided for @shareCardTagline.
   ///
@@ -3935,7 +3989,7 @@ abstract class AppLocalizations {
   /// No description provided for @boostCardSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'A little extra room to grow.'**
+  /// **'Unlock dark mode + 1 extra custom habit and focus area.'**
   String get boostCardSubtitle;
 
   /// No description provided for @boostOrDivider.
@@ -3959,43 +4013,43 @@ abstract class AppLocalizations {
   /// No description provided for @boostBenefit1.
   ///
   /// In en, this message translates to:
-  /// **'3 custom habits'**
+  /// **'Deep Focus dark theme'**
   String get boostBenefit1;
 
   /// No description provided for @boostBenefit1Detail.
   ///
   /// In en, this message translates to:
-  /// **'up from 2'**
+  /// **''**
   String get boostBenefit1Detail;
 
   /// No description provided for @boostBenefit2.
   ///
   /// In en, this message translates to:
-  /// **'3 focus areas'**
+  /// **'+1 custom habit'**
   String get boostBenefit2;
 
   /// No description provided for @boostBenefit2Detail.
   ///
   /// In en, this message translates to:
-  /// **'up from 2'**
+  /// **'3 total'**
   String get boostBenefit2Detail;
 
   /// No description provided for @boostBenefit3.
   ///
   /// In en, this message translates to:
-  /// **'3 habit swaps/month'**
+  /// **'+1 focus area'**
   String get boostBenefit3;
 
   /// No description provided for @boostBenefit3Detail.
   ///
   /// In en, this message translates to:
-  /// **'up from 2'**
+  /// **'3 total'**
   String get boostBenefit3Detail;
 
   /// No description provided for @boostBenefit4.
   ///
   /// In en, this message translates to:
-  /// **'\'Showing up\' milestone card'**
+  /// **'+1 habit swap per month'**
   String get boostBenefit4;
 
   /// No description provided for @boostOfferHabitTitle.
@@ -4153,6 +4207,216 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Got it'**
   String get onboardingPhilosophyCta;
+
+  /// No description provided for @reflectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your week'**
+  String get reflectionTitle;
+
+  /// No description provided for @reflectionAnchor7.
+  ///
+  /// In en, this message translates to:
+  /// **'You showed up every single day this week. Not perfect — present.'**
+  String get reflectionAnchor7;
+
+  /// No description provided for @reflectionAnchor56.
+  ///
+  /// In en, this message translates to:
+  /// **'You showed up {days} out of 7 days this week. That\'s {days} days you chose to try.'**
+  String reflectionAnchor56(int days);
+
+  /// No description provided for @reflectionAnchor34.
+  ///
+  /// In en, this message translates to:
+  /// **'You showed up {days} days this week. That\'s {days} days you chose to try.'**
+  String reflectionAnchor34(int days);
+
+  /// No description provided for @reflectionAnchor12.
+  ///
+  /// In en, this message translates to:
+  /// **'You checked in {days, plural, =1{1 time} other{{days} times}} this week. Even one day counts — you didn\'t disappear.'**
+  String reflectionAnchor12(int days);
+
+  /// No description provided for @reflectionAnchor0.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiet week. That\'s okay. You\'re here now, and that\'s what matters.'**
+  String get reflectionAnchor0;
+
+  /// No description provided for @reflectionPatternOneDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Looks like {dayName} is when you really show up. Three weeks in a row now.'**
+  String reflectionPatternOneDay(String dayName);
+
+  /// No description provided for @reflectionPatternTwoDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{dayName1} and {dayName2} seem to be your days.'**
+  String reflectionPatternTwoDays(String dayName1, String dayName2);
+
+  /// No description provided for @reflectionPatternNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Your rhythm is still finding its shape. That\'s normal — keep going.'**
+  String get reflectionPatternNone;
+
+  /// No description provided for @reflectionFocusDominant.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve been drawn to {area} habits lately. That seems important to you right now.'**
+  String reflectionFocusDominant(String area);
+
+  /// No description provided for @reflectionFocusBalanced.
+  ///
+  /// In en, this message translates to:
+  /// **'You spread your energy across {area1} and {area2} this week. A balanced week.'**
+  String reflectionFocusBalanced(String area1, String area2);
+
+  /// No description provided for @reflectionReframeComeback.
+  ///
+  /// In en, this message translates to:
+  /// **'Last week was quieter. This week you came back. That\'s the whole point.'**
+  String get reflectionReframeComeback;
+
+  /// No description provided for @reflectionReframeRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'You refreshed your habits {count} time(s) this week — that\'s not quitting, that\'s adapting.'**
+  String reflectionReframeRefresh(int count);
+
+  /// No description provided for @reflectionReframeSwap.
+  ///
+  /// In en, this message translates to:
+  /// **'You swapped out a habit this week. Knowing what doesn\'t work is progress too.'**
+  String get reflectionReframeSwap;
+
+  /// No description provided for @reflectionShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get reflectionShare;
+
+  /// No description provided for @reflectionTeaser.
+  ///
+  /// In en, this message translates to:
+  /// **'There\'s more to your week'**
+  String get reflectionTeaser;
+
+  /// No description provided for @reflectionSectionThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'THIS WEEK'**
+  String get reflectionSectionThisWeek;
+
+  /// No description provided for @reflectionSectionYourRhythm.
+  ///
+  /// In en, this message translates to:
+  /// **'YOUR RHYTHM'**
+  String get reflectionSectionYourRhythm;
+
+  /// No description provided for @reflectionSectionYourFocus.
+  ///
+  /// In en, this message translates to:
+  /// **'YOUR FOCUS'**
+  String get reflectionSectionYourFocus;
+
+  /// No description provided for @reflectionSectionNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'SOMETHING TO NOTICE'**
+  String get reflectionSectionNotice;
+
+  /// No description provided for @tipPinHabit.
+  ///
+  /// In en, this message translates to:
+  /// **'Long press on a habit to pin it to the top'**
+  String get tipPinHabit;
+
+  /// No description provided for @tipCuratedPack.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a curated pack — find them in Browse all habits'**
+  String get tipCuratedPack;
+
+  /// No description provided for @tipGotIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get tipGotIt;
+
+  /// No description provided for @tipSkipAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip tips'**
+  String get tipSkipAll;
+
+  /// No description provided for @packSwapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Make room for your new pack'**
+  String get packSwapTitle;
+
+  /// No description provided for @packSwapSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'To keep your space focused, pick which habits to set aside. Your custom habits will always stay.'**
+  String get packSwapSubtitle;
+
+  /// No description provided for @packSwapConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Set aside {count} and add {packName}'**
+  String packSwapConfirm(int count, String packName);
+
+  /// No description provided for @packSwapAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'added — {count} new habits ready to go'**
+  String packSwapAdded(int count);
+
+  /// No description provided for @packSwapAllActive.
+  ///
+  /// In en, this message translates to:
+  /// **'All habits from this pack are already active'**
+  String get packSwapAllActive;
+
+  /// No description provided for @packCreativeSparkName.
+  ///
+  /// In en, this message translates to:
+  /// **'Creative Spark'**
+  String get packCreativeSparkName;
+
+  /// No description provided for @packCreativeSparkSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Small acts of making. No talent required.'**
+  String get packCreativeSparkSubtitle;
+
+  /// No description provided for @packCreativeSparkDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Three tiny creative habits that get you out of your head and into your hands. Not about being good — about being playful.'**
+  String get packCreativeSparkDescription;
+
+  /// No description provided for @packStayConnectedName.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay Connected'**
+  String get packStayConnectedName;
+
+  /// No description provided for @packStayConnectedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The people who matter, one small gesture at a time.'**
+  String get packStayConnectedSubtitle;
+
+  /// No description provided for @packStayConnectedDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Four micro-habits for staying close to the people in your life. Not grand gestures — just showing up.'**
+  String get packStayConnectedDescription;
 }
 
 class _AppLocalizationsDelegate
