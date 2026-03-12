@@ -28,6 +28,14 @@
 		AA00000100000000000000B6 /* AppIconForest60x60@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = AA00000100000000000000A6 /* AppIconForest60x60@3x.png */; };
 		AA00000100000000000000B7 /* AppIconSky60x60@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = AA00000100000000000000A7 /* AppIconSky60x60@2x.png */; };
 		AA00000100000000000000B8 /* AppIconSky60x60@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = AA00000100000000000000A8 /* AppIconSky60x60@3x.png */; };
+		AA00000100000000000000D1 /* AppIconMidnight76x76@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = AA00000100000000000000C1 /* AppIconMidnight76x76@2x.png */; };
+		AA00000100000000000000D2 /* AppIconMidnight83.5x83.5@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = AA00000100000000000000C2 /* AppIconMidnight83.5x83.5@2x.png */; };
+		AA00000100000000000000D3 /* AppIconRose76x76@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = AA00000100000000000000C3 /* AppIconRose76x76@2x.png */; };
+		AA00000100000000000000D4 /* AppIconRose83.5x83.5@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = AA00000100000000000000C4 /* AppIconRose83.5x83.5@2x.png */; };
+		AA00000100000000000000D5 /* AppIconForest76x76@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = AA00000100000000000000C5 /* AppIconForest76x76@2x.png */; };
+		AA00000100000000000000D6 /* AppIconForest83.5x83.5@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = AA00000100000000000000C6 /* AppIconForest83.5x83.5@2x.png */; };
+		AA00000100000000000000D7 /* AppIconSky76x76@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = AA00000100000000000000C7 /* AppIconSky76x76@2x.png */; };
+		AA00000100000000000000D8 /* AppIconSky83.5x83.5@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = AA00000100000000000000C8 /* AppIconSky83.5x83.5@2x.png */; };
 		CF8B1A042D0A000000000004 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = CF8B1A042D0A000000000003 /* InfoPlist.strings */; };
 		D4E8B1A12D0B000000000002 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D4E8B1A12D0B000000000001 /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
@@ -108,6 +116,14 @@
 		AA00000100000000000000A6 /* AppIconForest60x60@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "AppIconForest60x60@3x.png"; sourceTree = "<group>"; };
 		AA00000100000000000000A7 /* AppIconSky60x60@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "AppIconSky60x60@2x.png"; sourceTree = "<group>"; };
 		AA00000100000000000000A8 /* AppIconSky60x60@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "AppIconSky60x60@3x.png"; sourceTree = "<group>"; };
+		AA00000100000000000000C1 /* AppIconMidnight76x76@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "AppIconMidnight76x76@2x.png"; sourceTree = "<group>"; };
+		AA00000100000000000000C2 /* AppIconMidnight83.5x83.5@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "AppIconMidnight83.5x83.5@2x.png"; sourceTree = "<group>"; };
+		AA00000100000000000000C3 /* AppIconRose76x76@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "AppIconRose76x76@2x.png"; sourceTree = "<group>"; };
+		AA00000100000000000000C4 /* AppIconRose83.5x83.5@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "AppIconRose83.5x83.5@2x.png"; sourceTree = "<group>"; };
+		AA00000100000000000000C5 /* AppIconForest76x76@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "AppIconForest76x76@2x.png"; sourceTree = "<group>"; };
+		AA00000100000000000000C6 /* AppIconForest83.5x83.5@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "AppIconForest83.5x83.5@2x.png"; sourceTree = "<group>"; };
+		AA00000100000000000000C7 /* AppIconSky76x76@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "AppIconSky76x76@2x.png"; sourceTree = "<group>"; };
+		AA00000100000000000000C8 /* AppIconSky83.5x83.5@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "AppIconSky83.5x83.5@2x.png"; sourceTree = "<group>"; };
 		B23AF6B96936D2A00189A4A5 /* Pods-RunnerTests.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.profile.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.profile.xcconfig"; sourceTree = "<group>"; };
 		C7C1D696A55CA3155303B4D2 /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
 		CF8B1A042D0A000000000001 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -245,6 +261,14 @@
 				AA00000100000000000000A6 /* AppIconForest60x60@3x.png */,
 				AA00000100000000000000A7 /* AppIconSky60x60@2x.png */,
 				AA00000100000000000000A8 /* AppIconSky60x60@3x.png */,
+				AA00000100000000000000C1 /* AppIconMidnight76x76@2x.png */,
+				AA00000100000000000000C2 /* AppIconMidnight83.5x83.5@2x.png */,
+				AA00000100000000000000C3 /* AppIconRose76x76@2x.png */,
+				AA00000100000000000000C4 /* AppIconRose83.5x83.5@2x.png */,
+				AA00000100000000000000C5 /* AppIconForest76x76@2x.png */,
+				AA00000100000000000000C6 /* AppIconForest83.5x83.5@2x.png */,
+				AA00000100000000000000C7 /* AppIconSky76x76@2x.png */,
+				AA00000100000000000000C8 /* AppIconSky83.5x83.5@2x.png */,
 			);
 			path = Runner;
 			sourceTree = "<group>";
@@ -408,6 +432,14 @@
 				AA00000100000000000000B6 /* AppIconForest60x60@3x.png in Resources */,
 				AA00000100000000000000B7 /* AppIconSky60x60@2x.png in Resources */,
 				AA00000100000000000000B8 /* AppIconSky60x60@3x.png in Resources */,
+				AA00000100000000000000D1 /* AppIconMidnight76x76@2x.png in Resources */,
+				AA00000100000000000000D2 /* AppIconMidnight83.5x83.5@2x.png in Resources */,
+				AA00000100000000000000D3 /* AppIconRose76x76@2x.png in Resources */,
+				AA00000100000000000000D4 /* AppIconRose83.5x83.5@2x.png in Resources */,
+				AA00000100000000000000D5 /* AppIconForest76x76@2x.png in Resources */,
+				AA00000100000000000000D6 /* AppIconForest83.5x83.5@2x.png in Resources */,
+				AA00000100000000000000D7 /* AppIconSky76x76@2x.png in Resources */,
+				AA00000100000000000000D8 /* AppIconSky83.5x83.5@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
