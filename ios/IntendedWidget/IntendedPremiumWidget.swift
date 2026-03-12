@@ -123,17 +123,15 @@ struct PremiumMediumView: View {
     private let maxHabits = 3
 
     var body: some View {
-        let bgTop = Color(argbHex: theme.bgTop)
-        let bgBottom = Color(argbHex: theme.bgBottom)
         let textPrimary = Color(argbHex: theme.textPrimary)
         let textSecondary = Color(argbHex: theme.textSecondary)
         let accent = Color(argbHex: theme.accent)
 
         ZStack {
             LinearGradient(
-                colors: [bgTop, bgBottom],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
+                colors: theme.backgroundColors,
+                startPoint: UnitPoint(x: 0.3, y: 0),
+                endPoint: UnitPoint(x: 0.7, y: 1)
             )
 
             if showUpgrade {
@@ -245,7 +243,7 @@ struct PremiumMediumView: View {
 
                 Spacer(minLength: 4)
 
-                Text(strings.upgrade)
+                Text(strings.upgrade(habitCount: content.totalCount))
                     .font(.system(size: 12, weight: .medium))
                     .foregroundColor(accent)
             }
@@ -277,17 +275,15 @@ struct PremiumLargeView: View {
     private let maxHabits = 5
 
     var body: some View {
-        let bgTop = Color(argbHex: theme.bgTop)
-        let bgBottom = Color(argbHex: theme.bgBottom)
         let textPrimary = Color(argbHex: theme.textPrimary)
         let textSecondary = Color(argbHex: theme.textSecondary)
         let accent = Color(argbHex: theme.accent)
 
         ZStack {
             LinearGradient(
-                colors: [bgTop, bgBottom],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
+                colors: theme.backgroundColors,
+                startPoint: UnitPoint(x: 0.3, y: 0),
+                endPoint: UnitPoint(x: 0.7, y: 1)
             )
 
             if showUpgrade {
@@ -456,7 +452,7 @@ struct PremiumLargeView: View {
             Spacer()
 
             // Upgrade CTA at bottom
-            Text(strings.upgrade)
+            Text(strings.upgrade(habitCount: content.totalCount))
                 .font(.system(size: 13, weight: .medium))
                 .foregroundColor(accent)
         }
@@ -480,7 +476,13 @@ struct IntendedPremiumWidget: Widget {
         StaticConfiguration(kind: kind, provider: PremiumProvider()) { entry in
             if #available(iOS 17.0, *) {
                 PremiumWidgetEntryView(entry: entry)
-                    .containerBackground(.clear, for: .widget)
+                    .containerBackground(for: .widget) {
+                        LinearGradient(
+                            colors: entry.content.theme.backgroundColors,
+                            startPoint: UnitPoint(x: 0.3, y: 0),
+                            endPoint: UnitPoint(x: 0.7, y: 1)
+                        )
+                    }
             } else {
                 PremiumWidgetEntryView(entry: entry)
             }

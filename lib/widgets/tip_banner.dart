@@ -10,6 +10,7 @@ import '../utils/text_styles.dart';
 
 class TipBanner extends StatefulWidget {
   final int tipIndex;
+
   /// Called with the next tip index (or null if tips are done).
   final ValueChanged<int?> onDismissed;
 
@@ -179,7 +180,6 @@ class _TipBannerState extends State<TipBanner>
   Widget _buildGotItButton(AppColorScheme colors, AppLocalizations l10n) {
     return CupertinoButton(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      minSize: 0,
       borderRadius: BorderRadius.circular(10),
       color: colors.ctaPrimary.withOpacity(0.15),
       onPressed: _handleGotIt,
@@ -192,13 +192,13 @@ class _TipBannerState extends State<TipBanner>
           color: colors.ctaPrimary,
         ),
       ),
+      minimumSize: Size(0, 0),
     );
   }
 
   Widget _buildSkipButton(AppColorScheme colors, AppLocalizations l10n) {
     return CupertinoButton(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-      minSize: 0,
       onPressed: _handleSkip,
       child: Text(
         l10n.tipSkipAll,
@@ -209,6 +209,7 @@ class _TipBannerState extends State<TipBanner>
           color: colors.textTertiary,
         ),
       ),
+      minimumSize: Size(0, 0),
     );
   }
 }

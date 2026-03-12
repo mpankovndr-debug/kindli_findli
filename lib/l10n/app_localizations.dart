@@ -1166,23 +1166,11 @@ abstract class AppLocalizations {
   /// **'Lovely'**
   String get celebrationLovely;
 
-  /// No description provided for @celebrationThatCounts.
-  ///
-  /// In en, this message translates to:
-  /// **'That counts'**
-  String get celebrationThatCounts;
-
   /// No description provided for @completionMsg1.
   ///
   /// In en, this message translates to:
   /// **'Small steps like this matter.'**
   String get completionMsg1;
-
-  /// No description provided for @completionMsg2.
-  ///
-  /// In en, this message translates to:
-  /// **'You showed up today.'**
-  String get completionMsg2;
 
   /// No description provided for @completionMsg3.
   ///
@@ -1196,18 +1184,6 @@ abstract class AppLocalizations {
   /// **'One step closer.'**
   String get completionMsg4;
 
-  /// No description provided for @completionMsg5.
-  ///
-  /// In en, this message translates to:
-  /// **'You did what you said you would.'**
-  String get completionMsg5;
-
-  /// No description provided for @completionMsg6.
-  ///
-  /// In en, this message translates to:
-  /// **'That took effort. Good.'**
-  String get completionMsg6;
-
   /// No description provided for @completionMsg7.
   ///
   /// In en, this message translates to:
@@ -1219,18 +1195,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You made it happen.'**
   String get completionMsg8;
-
-  /// No description provided for @completionMsg9.
-  ///
-  /// In en, this message translates to:
-  /// **'Progress is progress.'**
-  String get completionMsg9;
-
-  /// No description provided for @completionMsg10.
-  ///
-  /// In en, this message translates to:
-  /// **'You followed through.'**
-  String get completionMsg10;
 
   /// No description provided for @completionMsg11.
   ///
@@ -1256,12 +1220,6 @@ abstract class AppLocalizations {
   /// **'You made time for this.'**
   String get completionMsg14;
 
-  /// No description provided for @completionMsg15.
-  ///
-  /// In en, this message translates to:
-  /// **'That\'s growth right there.'**
-  String get completionMsg15;
-
   /// No description provided for @completionMsg16.
   ///
   /// In en, this message translates to:
@@ -1279,12 +1237,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You committed and you did it.'**
   String get completionMsg18;
-
-  /// No description provided for @completionMsg19.
-  ///
-  /// In en, this message translates to:
-  /// **'This adds up.'**
-  String get completionMsg19;
 
   /// No description provided for @completionMsg20.
   ///
@@ -1682,23 +1634,11 @@ abstract class AppLocalizations {
   /// **'Rest counts too.'**
   String get warmthMsg2;
 
-  /// No description provided for @warmthMsg3.
-  ///
-  /// In en, this message translates to:
-  /// **'You don\'t have to every day. Just sometimes.'**
-  String get warmthMsg3;
-
   /// No description provided for @warmthMsg4.
   ///
   /// In en, this message translates to:
   /// **'Not today — and that\'s allowed.'**
   String get warmthMsg4;
-
-  /// No description provided for @warmthMsg5.
-  ///
-  /// In en, this message translates to:
-  /// **'Be as kind to yourself as you\'d be to a friend.'**
-  String get warmthMsg5;
 
   /// No description provided for @warmthMsg6.
   ///
@@ -1736,23 +1676,11 @@ abstract class AppLocalizations {
   /// **'No streak to break. No score to lose. Just you.'**
   String get warmthMsg11;
 
-  /// No description provided for @warmthMsg12.
-  ///
-  /// In en, this message translates to:
-  /// **'The gentlest days matter too.'**
-  String get warmthMsg12;
-
   /// No description provided for @warmthMsg13.
   ///
   /// In en, this message translates to:
   /// **'You showed up enough today just by being here.'**
   String get warmthMsg13;
-
-  /// No description provided for @warmthMsg14.
-  ///
-  /// In en, this message translates to:
-  /// **'It\'s okay to let this one go.'**
-  String get warmthMsg14;
 
   /// No description provided for @warmthMsg15.
   ///
@@ -1775,32 +1703,20 @@ abstract class AppLocalizations {
   /// No description provided for @notifMsg3.
   ///
   /// In en, this message translates to:
-  /// **'Just checking in. Whatever you do today is enough.'**
+  /// **'Whatever you do today is enough.'**
   String get notifMsg3;
 
   /// No description provided for @notifMsg4.
   ///
   /// In en, this message translates to:
-  /// **'One small habit. That\'s all.'**
+  /// **'One small action. That\'s all.'**
   String get notifMsg4;
-
-  /// No description provided for @notifMsg5.
-  ///
-  /// In en, this message translates to:
-  /// **'You showed up yesterday. That already matters.'**
-  String get notifMsg5;
 
   /// No description provided for @notifMsg6.
   ///
   /// In en, this message translates to:
   /// **'Today doesn\'t have to be perfect to be good.'**
   String get notifMsg6;
-
-  /// No description provided for @notifMsg7.
-  ///
-  /// In en, this message translates to:
-  /// **'Be as gentle with yourself as you\'d be with a friend.'**
-  String get notifMsg7;
 
   /// No description provided for @notifMsg8.
   ///
@@ -1826,12 +1742,6 @@ abstract class AppLocalizations {
   /// **'Progress doesn\'t always look like progress.'**
   String get notifMsg11;
 
-  /// No description provided for @notifMsg12.
-  ///
-  /// In en, this message translates to:
-  /// **'One thing at a time. No pressure.'**
-  String get notifMsg12;
-
   /// No description provided for @notifMsg13.
   ///
   /// In en, this message translates to:
@@ -1853,7 +1763,7 @@ abstract class AppLocalizations {
   /// No description provided for @notifMsg16.
   ///
   /// In en, this message translates to:
-  /// **'Even a little is more than nothing.'**
+  /// **'Even a little is better than nothing.'**
   String get notifMsg16;
 
   /// No description provided for @notifMsg17.
@@ -1952,16 +1862,10 @@ abstract class AppLocalizations {
   /// **'Growth is quietest when it\'s most real. Trust the process.'**
   String get notifMsg32;
 
-  /// No description provided for @notifMsg33.
-  ///
-  /// In en, this message translates to:
-  /// **'You\'ve been showing up. That consistency is rare.'**
-  String get notifMsg33;
-
   /// No description provided for @notifMsg34.
   ///
   /// In en, this message translates to:
-  /// **'Small rituals become the shape of a life.'**
+  /// **'Small rituals become the shape of a big life.'**
   String get notifMsg34;
 
   /// No description provided for @notifMsg35.
@@ -1969,12 +1873,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You\'re not behind. You\'re exactly where you are.'**
   String get notifMsg35;
-
-  /// No description provided for @notifMsg36.
-  ///
-  /// In en, this message translates to:
-  /// **'The gentlest habits are often the most lasting.'**
-  String get notifMsg36;
 
   /// No description provided for @notifMsg37.
   ///
@@ -1994,12 +1892,6 @@ abstract class AppLocalizations {
   /// **'Habits aren\'t about willpower. They\'re about care.'**
   String get notifMsg39;
 
-  /// No description provided for @notifMsg40.
-  ///
-  /// In en, this message translates to:
-  /// **'You know yourself better than any app does. Trust that.'**
-  String get notifMsg40;
-
   /// No description provided for @notifMsg41.
   ///
   /// In en, this message translates to:
@@ -2011,12 +1903,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Some days the habit is just being kind to yourself.'**
   String get notifMsg42;
-
-  /// No description provided for @notifMsg43.
-  ///
-  /// In en, this message translates to:
-  /// **'You\'ve made it through harder days than this.'**
-  String get notifMsg43;
 
   /// No description provided for @notifMsg44.
   ///
@@ -2066,12 +1952,6 @@ abstract class AppLocalizations {
   /// **'Today is a good day to be gentle with yourself.'**
   String get notifMsg51;
 
-  /// No description provided for @notifMsg52.
-  ///
-  /// In en, this message translates to:
-  /// **'You showed up. That\'s the whole thing.'**
-  String get notifMsg52;
-
   /// No description provided for @notifMsg53.
   ///
   /// In en, this message translates to:
@@ -2096,23 +1976,11 @@ abstract class AppLocalizations {
   /// **'Nothing is lost. You can always begin again.'**
   String get notifMsg56;
 
-  /// No description provided for @notifMsg57.
-  ///
-  /// In en, this message translates to:
-  /// **'You\'re in this for the long run. Slow is fine.'**
-  String get notifMsg57;
-
   /// No description provided for @notifMsg58.
   ///
   /// In en, this message translates to:
   /// **'Today\'s effort is invisible now and undeniable later.'**
   String get notifMsg58;
-
-  /// No description provided for @notifMsg59.
-  ///
-  /// In en, this message translates to:
-  /// **'You are allowed to be a work in progress.'**
-  String get notifMsg59;
 
   /// No description provided for @notifMsg60.
   ///

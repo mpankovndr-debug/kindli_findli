@@ -589,13 +589,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get celebrationLovely => 'Lovely';
 
   @override
-  String get celebrationThatCounts => 'That counts';
-
-  @override
   String get completionMsg1 => 'Small steps like this matter.';
-
-  @override
-  String get completionMsg2 => 'You showed up today.';
 
   @override
   String get completionMsg3 => 'This is how change happens.';
@@ -604,22 +598,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get completionMsg4 => 'One step closer.';
 
   @override
-  String get completionMsg5 => 'You did what you said you would.';
-
-  @override
-  String get completionMsg6 => 'That took effort. Good.';
-
-  @override
   String get completionMsg7 => 'Another small victory.';
 
   @override
   String get completionMsg8 => 'You made it happen.';
-
-  @override
-  String get completionMsg9 => 'Progress is progress.';
-
-  @override
-  String get completionMsg10 => 'You followed through.';
 
   @override
   String get completionMsg11 => 'This counts.';
@@ -634,9 +616,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get completionMsg14 => 'You made time for this.';
 
   @override
-  String get completionMsg15 => 'That\'s growth right there.';
-
-  @override
   String get completionMsg16 => 'You pushed through.';
 
   @override
@@ -644,9 +623,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get completionMsg18 => 'You committed and you did it.';
-
-  @override
-  String get completionMsg19 => 'This adds up.';
 
   @override
   String get completionMsg20 => 'You honored your intention.';
@@ -908,13 +884,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get warmthMsg2 => 'Rest counts too.';
 
   @override
-  String get warmthMsg3 => 'You don\'t have to every day. Just sometimes.';
-
-  @override
   String get warmthMsg4 => 'Not today — and that\'s allowed.';
-
-  @override
-  String get warmthMsg5 => 'Be as kind to yourself as you\'d be to a friend.';
 
   @override
   String get warmthMsg6 => 'The habit will be here when you\'re ready.';
@@ -937,13 +907,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get warmthMsg11 => 'No streak to break. No score to lose. Just you.';
 
   @override
-  String get warmthMsg12 => 'The gentlest days matter too.';
-
-  @override
   String get warmthMsg13 => 'You showed up enough today just by being here.';
-
-  @override
-  String get warmthMsg14 => 'It\'s okay to let this one go.';
 
   @override
   String get warmthMsg15 =>
@@ -956,20 +920,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notifMsg2 => 'You don\'t have to be productive to deserve rest.';
 
   @override
-  String get notifMsg3 => 'Just checking in. Whatever you do today is enough.';
+  String get notifMsg3 => 'Whatever you do today is enough.';
 
   @override
-  String get notifMsg4 => 'One small habit. That\'s all.';
-
-  @override
-  String get notifMsg5 => 'You showed up yesterday. That already matters.';
+  String get notifMsg4 => 'One small action. That\'s all.';
 
   @override
   String get notifMsg6 => 'Today doesn\'t have to be perfect to be good.';
-
-  @override
-  String get notifMsg7 =>
-      'Be as gentle with yourself as you\'d be with a friend.';
 
   @override
   String get notifMsg8 => 'Small steps still move you forward.';
@@ -984,9 +941,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notifMsg11 => 'Progress doesn\'t always look like progress.';
 
   @override
-  String get notifMsg12 => 'One thing at a time. No pressure.';
-
-  @override
   String get notifMsg13 => 'You don\'t have to earn rest.';
 
   @override
@@ -996,7 +950,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notifMsg15 => 'Today is a new chance, not a test.';
 
   @override
-  String get notifMsg16 => 'Even a little is more than nothing.';
+  String get notifMsg16 => 'Even a little is better than nothing.';
 
   @override
   String get notifMsg17 => 'You\'re still here. That\'s something.';
@@ -1050,16 +1004,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Growth is quietest when it\'s most real. Trust the process.';
 
   @override
-  String get notifMsg33 => 'You\'ve been showing up. That consistency is rare.';
-
-  @override
-  String get notifMsg34 => 'Small rituals become the shape of a life.';
+  String get notifMsg34 => 'Small rituals become the shape of a big life.';
 
   @override
   String get notifMsg35 => 'You\'re not behind. You\'re exactly where you are.';
-
-  @override
-  String get notifMsg36 => 'The gentlest habits are often the most lasting.';
 
   @override
   String get notifMsg37 =>
@@ -1073,18 +1021,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Habits aren\'t about willpower. They\'re about care.';
 
   @override
-  String get notifMsg40 =>
-      'You know yourself better than any app does. Trust that.';
-
-  @override
   String get notifMsg41 => 'The goal was never perfection. It was showing up.';
 
   @override
   String get notifMsg42 =>
       'Some days the habit is just being kind to yourself.';
-
-  @override
-  String get notifMsg43 => 'You\'ve made it through harder days than this.';
 
   @override
   String get notifMsg44 => 'Every gentle choice adds up.';
@@ -1112,9 +1053,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notifMsg51 => 'Today is a good day to be gentle with yourself.';
 
   @override
-  String get notifMsg52 => 'You showed up. That\'s the whole thing.';
-
-  @override
   String get notifMsg53 => 'Small doesn\'t mean insignificant.';
 
   @override
@@ -1127,14 +1065,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notifMsg56 => 'Nothing is lost. You can always begin again.';
 
   @override
-  String get notifMsg57 => 'You\'re in this for the long run. Slow is fine.';
-
-  @override
   String get notifMsg58 =>
       'Today\'s effort is invisible now and undeniable later.';
-
-  @override
-  String get notifMsg59 => 'You are allowed to be a work in progress.';
 
   @override
   String get notifMsg60 => 'This is what taking care of yourself looks like.';

@@ -324,8 +324,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final userState = context.read<UserState>();
 
     // Subscription users bypass the monthly focus area change limit
-    if (!userState.hasSubscription &&
-        !onboardingState.canChangeFocusAreas()) {
+    if (!userState.hasSubscription && !onboardingState.canChangeFocusAreas()) {
       AnalyticsService.logFocusAreaChangeLimitShown();
       _showFocusAreaLimitDialog();
       return;
@@ -371,7 +370,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       borderRadius: BorderRadius.circular(32),
                       border: Border.all(
                         color: isDarkDialog
-                            ? colors.borderCard.withOpacity(colors.borderCardOpacity)
+                            ? colors.borderCard
+                                .withOpacity(colors.borderCardOpacity)
                             : const Color(0xFFFFFFFF).withOpacity(0.5),
                         width: 1.5,
                       ),
@@ -571,8 +571,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         builder: (context, themeProvider, _) {
           final colors = themeProvider.colors;
           return ClipRRect(
-            borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(32)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
             child: Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -641,7 +640,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             if (!mounted) return;
                             if (result == 'paywall') {
                               _showUpgradeScreen().then((_) {
-                                if (mounted) _showAppearancePicker(this.context);
+                                if (mounted)
+                                  _showAppearancePicker(this.context);
                               });
                             } else {
                               _showAppearancePicker(this.context);
@@ -1961,7 +1961,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         l10n.profileAppearance,
@@ -1975,7 +1976,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       ),
                                       const SizedBox(height: 2),
                                       Text(
-                                        _localizedThemeName(context.watch<ThemeProvider>().theme, l10n),
+                                        _localizedThemeName(
+                                            context
+                                                .watch<ThemeProvider>()
+                                                .theme,
+                                            l10n),
                                         style: TextStyle(
                                           fontFamily:
                                               AppTextStyles.bodyFont(context),
@@ -2024,7 +2029,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: isDark
-                              ? colors.borderCard.withOpacity(colors.borderCardOpacity)
+                              ? colors.borderCard
+                                  .withOpacity(colors.borderCardOpacity)
                               : const Color(0xFFFFFFFF).withOpacity(0.6),
                           width: 1,
                         ),
@@ -2177,7 +2183,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: isDark
-                              ? colors.borderCard.withOpacity(colors.borderCardOpacity)
+                              ? colors.borderCard
+                                  .withOpacity(colors.borderCardOpacity)
                               : const Color(0xFFFFFFFF).withOpacity(0.6),
                           width: 1,
                         ),
@@ -2414,7 +2421,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               borderRadius: BorderRadius.circular(100),
                               border: Border.all(
                                 color: isDark
-                                    ? colors.borderCard.withOpacity(colors.borderCardOpacity)
+                                    ? colors.borderCard
+                                        .withOpacity(colors.borderCardOpacity)
                                     : const Color(0xFFFFFFFF).withOpacity(0.6),
                                 width: 1,
                               ),
@@ -2623,8 +2631,8 @@ class _ProfileButton extends StatelessWidget {
   const _ProfileButton({
     required this.iconContainer,
     required this.title,
-    this.subtitle,
     required this.onTap,
+    this.subtitle,
   });
 
   @override
@@ -2700,9 +2708,7 @@ class _FocusAreaChangeScreenState extends State<_FocusAreaChangeScreen> {
   int _getMaxAreas() {
     final userState = context.read<UserState>();
     final onboardingState = context.read<OnboardingState>();
-    return userState.hasSubscription
-        ? 8
-        : onboardingState.maxFocusAreas();
+    return userState.hasSubscription ? 8 : onboardingState.maxFocusAreas();
   }
 
   void _toggleArea(String area) {
@@ -3029,8 +3035,9 @@ class _FocusAreaChangeScreenState extends State<_FocusAreaChangeScreen> {
                               child: FocusAreaCard(
                                 label: FocusAreasScreen.localizedAreaName(
                                     l10n, area),
-                                subtitle: FocusAreasScreen.localizedAreaSubtitle(
-                                    l10n, area),
+                                subtitle:
+                                    FocusAreasScreen.localizedAreaSubtitle(
+                                        l10n, area),
                                 icon: FocusAreasScreen.areaIcons[area]!,
                                 selected: selected,
                                 onTap: () => _toggleArea(area),

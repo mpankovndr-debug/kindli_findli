@@ -40,17 +40,15 @@ struct BasicSmallView: View {
     private var allDone: Bool { content.totalCount > 0 && content.completedCount == content.totalCount }
 
     var body: some View {
-        let bgTop = Color(argbHex: theme.bgTop)
-        let bgBottom = Color(argbHex: theme.bgBottom)
         let textPrimary = Color(argbHex: theme.textPrimary)
         let textSecondary = Color(argbHex: theme.textSecondary)
         let accent = Color(argbHex: theme.accent)
 
         ZStack {
             LinearGradient(
-                colors: [bgTop, bgBottom],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
+                colors: theme.backgroundColors,
+                startPoint: UnitPoint(x: 0.3, y: 0),
+                endPoint: UnitPoint(x: 0.7, y: 1)
             )
 
             if isEmpty {
@@ -116,17 +114,15 @@ struct BasicMediumView: View {
     private var allDone: Bool { content.totalCount > 0 && content.completedCount == content.totalCount }
 
     var body: some View {
-        let bgTop = Color(argbHex: theme.bgTop)
-        let bgBottom = Color(argbHex: theme.bgBottom)
         let textPrimary = Color(argbHex: theme.textPrimary)
         let textSecondary = Color(argbHex: theme.textSecondary)
         let accent = Color(argbHex: theme.accent)
 
         ZStack {
             LinearGradient(
-                colors: [bgTop, bgBottom],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
+                colors: theme.backgroundColors,
+                startPoint: UnitPoint(x: 0.3, y: 0),
+                endPoint: UnitPoint(x: 0.7, y: 1)
             )
 
             if isEmpty {
@@ -232,7 +228,13 @@ struct IntendedBasicWidget: Widget {
         StaticConfiguration(kind: kind, provider: BasicProvider()) { entry in
             if #available(iOS 17.0, *) {
                 BasicWidgetEntryView(entry: entry)
-                    .containerBackground(.clear, for: .widget)
+                    .containerBackground(for: .widget) {
+                        LinearGradient(
+                            colors: entry.content.theme.backgroundColors,
+                            startPoint: UnitPoint(x: 0.3, y: 0),
+                            endPoint: UnitPoint(x: 0.7, y: 1)
+                        )
+                    }
             } else {
                 BasicWidgetEntryView(entry: entry)
             }

@@ -14,6 +14,9 @@ struct ThemeData: Codable {
     let isDark: Bool
     let bgTop: String
     let bgBottom: String
+    let bg1: String?
+    let bg2: String?
+    let bg3: String?
     let textPrimary: String
     let textSecondary: String
     let textTertiary: String
@@ -21,6 +24,14 @@ struct ThemeData: Codable {
     let cardBg: String
     let cardBgOpacity: Double
     let checkmark: String
+
+    /// 3-color gradient matching share cards, falls back to bgTop/bgBottom.
+    var backgroundColors: [Color] {
+        if let b1 = bg1, let b2 = bg2, let b3 = bg3 {
+            return [Color(argbHex: b1), Color(argbHex: b2), Color(argbHex: b3)]
+        }
+        return [Color(argbHex: bgTop), Color(argbHex: bgBottom)]
+    }
 }
 
 struct WidgetContent {
@@ -34,9 +45,9 @@ struct WidgetContent {
 
     static let placeholder = WidgetContent(
         habits: [
-            HabitEntry(name: "Take 3 slow breaths", done: true, colorHex: "FFD96766"),
-            HabitEntry(name: "Set one priority", done: false, colorHex: "FF8B9A6B"),
-            HabitEntry(name: "Drink a glass of water", done: true, colorHex: "FFD96766"),
+            HabitEntry(name: "Drink water", done: true, colorHex: "FF6B9BD2"),
+            HabitEntry(name: "Read 10 pages", done: false, colorHex: "FF8B9A6B"),
+            HabitEntry(name: "Take a walk", done: true, colorHex: "FFD96766"),
         ],
         completedCount: 2,
         totalCount: 4,
@@ -47,6 +58,9 @@ struct WidgetContent {
             isDark: false,
             bgTop: "FFF2D4B0",
             bgBottom: "FFD49A70",
+            bg1: "FFF5EDE0",
+            bg2: "FFE8DCC8",
+            bg3: "FFDDD1C0",
             textPrimary: "FF3C342A",
             textSecondary: "FF9A8A78",
             textTertiary: "FF9B8A7A",
@@ -103,10 +117,16 @@ func loadWidgetContent() -> WidgetContent {
 
 extension Color {
     /// Parse "AARRGGBB" hex string to SwiftUI Color.
+    /// Falls back to a neutral gray if the string is malformed.
     init(argbHex: String) {
         let hex = argbHex.trimmingCharacters(in: .alphanumerics.inverted)
         var int: UInt64 = 0
-        Scanner(string: hex).scanHexInt64(&int)
+        let scanned = Scanner(string: hex).scanHexInt64(&int)
+
+        guard scanned, hex.count >= 6 else {
+            self.init(.sRGB, red: 0.5, green: 0.5, blue: 0.5, opacity: 1)
+            return
+        }
 
         let a, r, g, b: UInt64
         if hex.count == 8 {
@@ -144,8 +164,14 @@ struct WidgetStrings {
         locale == "ru" ? "ещё \(n)" : "+\(n) more"
     }
 
-    var upgrade: String {
-        locale == "ru" ? "Обновите для подробностей" : "Upgrade to see more"
+    func upgrade(habitCount: Int) -> String {
+        if habitCount > 0 {
+            if locale == "ru" {
+                return "Intended+ — покажет \(habitCount) привычек"
+            }
+            return "Intended+ — see your \(habitCount) habits"
+        }
+        return locale == "ru" ? "Intended+ — покажет привычки" : "Intended+ — see your habits"
     }
 
     var noHabits: String {

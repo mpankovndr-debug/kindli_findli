@@ -576,7 +576,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get celebrationWellDone => 'Молодец';
 
   @override
-  String get celebrationYouDidIt => 'Получилось';
+  String get celebrationYouDidIt => 'У тебя получилось';
 
   @override
   String get celebrationGreat => 'Здорово';
@@ -591,13 +591,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get celebrationLovely => 'Чудесно';
 
   @override
-  String get celebrationThatCounts => 'Это считается';
-
-  @override
-  String get completionMsg1 => 'Такие маленькие шаги важны.';
-
-  @override
-  String get completionMsg2 => 'Ты пришёл сегодня.';
+  String get completionMsg1 => 'Маленькие шаги, как этот, важны.';
 
   @override
   String get completionMsg3 => 'Вот так и происходят перемены.';
@@ -606,49 +600,31 @@ class AppLocalizationsRu extends AppLocalizations {
   String get completionMsg4 => 'Ещё на шаг ближе.';
 
   @override
-  String get completionMsg5 => 'Ты сделал то, что задумал.';
-
-  @override
-  String get completionMsg6 => 'Это потребовало усилий. Молодец.';
-
-  @override
   String get completionMsg7 => 'Ещё одна маленькая победа.';
 
   @override
   String get completionMsg8 => 'У тебя получилось.';
 
   @override
-  String get completionMsg9 => 'Прогресс — это прогресс.';
-
-  @override
-  String get completionMsg10 => 'Ты довёл дело до конца.';
-
-  @override
   String get completionMsg11 => 'Это считается.';
 
   @override
-  String get completionMsg12 => 'Ты сдержал слово перед собой.';
+  String get completionMsg12 => 'Обещание себе выполнено.';
 
   @override
-  String get completionMsg13 => 'Молодец.';
+  String get completionMsg13 => 'Поздравляю!';
 
   @override
-  String get completionMsg14 => 'Ты нашёл на это время.';
+  String get completionMsg14 => 'На это нашлось время.';
 
   @override
-  String get completionMsg15 => 'Вот он — рост.';
-
-  @override
-  String get completionMsg16 => 'Ты не сдался.';
+  String get completionMsg16 => 'Ни шагу назад.';
 
   @override
   String get completionMsg17 => 'Ещё одна привычка укрепилась.';
 
   @override
-  String get completionMsg18 => 'Ты решил — и сделал.';
-
-  @override
-  String get completionMsg19 => 'Всё складывается.';
+  String get completionMsg18 => 'Задумано — сделано.';
 
   @override
   String get completionMsg20 => 'Ты следуешь своему намерению.';
@@ -819,7 +795,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get insightBreakfast2 =>
-      'Утренняя еда запускает обмен веществ на весь день.';
+      'Завтрак запускает обмен веществ на весь день.';
 
   @override
   String get insightBreakfast3 =>
@@ -827,7 +803,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get insightPhone1 =>
-      'Меньше экранов перед сном улучшает качество сна на 30%.';
+      'Меньше экранного времени перед сном улучшает качество сна на 30%.';
 
   @override
   String get insightPhone2 => 'Синий свет подавляет мелатонин до 3 часов.';
@@ -846,7 +822,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get insightScreen3 =>
-      'Перерывы от экранов помогают регулировать дофамин.';
+      'Перерывы от экрана помогают регулировать дофамин.';
 
   @override
   String get insightClean1 =>
@@ -901,13 +877,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get warmthMsg2 => 'Отдых тоже считается.';
 
   @override
-  String get warmthMsg3 => 'Не каждый день. Просто иногда.';
-
-  @override
   String get warmthMsg4 => 'Не сегодня — и это нормально.';
-
-  @override
-  String get warmthMsg5 => 'Будь к себе так же добр, как был бы к другу.';
 
   @override
   String get warmthMsg6 => 'Привычка никуда не денется. Она подождёт.';
@@ -927,47 +897,34 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get warmthMsg11 =>
-      'Нет стрика, который можно прервать. Нет оценок, которые можно потерять. Просто ты.';
+      'Нет стрика, который можно прервать. Нет оценок, которые можно потерять. Просто ты. Здесь.';
 
   @override
-  String get warmthMsg12 => 'Самые мягкие дни тоже важны.';
-
-  @override
-  String get warmthMsg13 =>
-      'Ты уже сделал достаточно сегодня — просто тем, что ты здесь.';
-
-  @override
-  String get warmthMsg14 => 'Можно отпустить эту.';
+  String get warmthMsg13 => 'Просто знай, что тебя достаточно.';
 
   @override
   String get warmthMsg15 =>
-      'Прогресс не всегда видим. Иногда это просто — выстоять.';
+      'Прогресс не всегда видим. Иногда это просто выстоять.';
 
   @override
   String get notifMsg1 => 'Не спеши сегодня. Даже одна мелочь имеет значение.';
 
   @override
-  String get notifMsg2 => 'Не нужно быть продуктивным, чтобы заслужить отдых.';
+  String get notifMsg2 => 'Продуктивность — не условие для отдыха.';
 
   @override
-  String get notifMsg3 =>
-      'Просто заглянул. Что бы ты ни сделал сегодня — этого достаточно.';
+  String get notifMsg3 => 'Всё, что ты делаешь сегодня — уже достаточно.';
 
   @override
-  String get notifMsg4 => 'Одна маленькая привычка. Вот и всё.';
-
-  @override
-  String get notifMsg5 => 'Ты пришёл вчера. Это уже важно.';
+  String get notifMsg4 => 'Одно небольшое действие. Этого достаточно.';
 
   @override
   String get notifMsg6 =>
-      'Сегодня не должен быть идеальным, чтобы быть хорошим.';
+      'Чтобы день был хороший, ему не нужно быть идеальным.';
 
   @override
-  String get notifMsg7 => 'Будь к себе так же мягок, как был бы к другу.';
-
-  @override
-  String get notifMsg8 => 'Маленькие шаги всё равно двигают вперёд.';
+  String get notifMsg8 =>
+      'Маленькие шаги всё равно обозначают движение вперед.';
 
   @override
   String get notifMsg9 => 'Начинать медленно — это нормально.';
@@ -979,9 +936,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get notifMsg11 => 'Прогресс не всегда похож на прогресс.';
 
   @override
-  String get notifMsg12 => 'По одному делу. Без давления.';
-
-  @override
   String get notifMsg13 => 'Не нужно заслуживать отдых.';
 
   @override
@@ -991,32 +945,31 @@ class AppLocalizationsRu extends AppLocalizations {
   String get notifMsg15 => 'Сегодня — новый шанс, а не экзамен.';
 
   @override
-  String get notifMsg16 => 'Даже чуть-чуть — это больше, чем ничего.';
+  String get notifMsg16 => 'Даже чуть-чуть — это лучше, чем ничего.';
 
   @override
-  String get notifMsg17 => 'Ты всё ещё здесь. Это уже кое-что.';
+  String get notifMsg17 => 'Ты всё ещё здесь. Это важно.';
 
   @override
-  String get notifMsg18 => 'Нет неправильного способа провести мягкий день.';
+  String get notifMsg18 => 'Нет неправильного способа провести хорошо день.';
 
   @override
-  String get notifMsg19 =>
-      'Что бы ни принёс сегодняшний день — ты справишься мягко.';
+  String get notifMsg19 => 'Что бы ни принёс сегодняшний день — ты справишься.';
 
   @override
   String get notifMsg20 => 'Отдых — тоже часть работы.';
 
   @override
-  String get notifMsg21 => 'Не нужно делать всё. Просто одно дело.';
+  String get notifMsg21 => 'Не нужно делать всё. Выбери что-то одно.';
 
   @override
   String get notifMsg22 => 'Сегодняшние привычки — завтрашний фундамент.';
 
   @override
-  String get notifMsg23 => 'Будь терпелив с собой сегодня.';
+  String get notifMsg23 => 'Терпение к себе — тоже сила.';
 
   @override
-  String get notifMsg24 => 'Рост происходит тихо. Доверяй ему.';
+  String get notifMsg24 => 'Рост происходит тихо. Доверься миру.';
 
   @override
   String get notifMsg25 => 'Ты строишь что-то настоящее, не торопясь.';
@@ -1028,33 +981,27 @@ class AppLocalizationsRu extends AppLocalizations {
   String get notifMsg27 => 'Как ты на самом деле сегодня?';
 
   @override
-  String get notifMsg28 =>
-      'Ты уже справлялся с трудным. Сегодня может быть мягко.';
+  String get notifMsg28 => 'Ты сильнее, чем кажется!';
 
   @override
-  String get notifMsg29 => 'Не нужно совершенство, чтобы стоило делать.';
+  String get notifMsg29 =>
+      'Не обязательно делать идеально, чтобы это имело смысл.';
 
   @override
   String get notifMsg30 => 'Ты имеешь право идти шаг за шагом.';
 
   @override
-  String get notifMsg31 => 'Тот ты, что начал этот путь, гордился бы тобой.';
+  String get notifMsg31 => 'Вчерашняя версия тебя гордится тобой сегодня.';
 
   @override
   String get notifMsg32 =>
       'Рост тише всего, когда он настоящий. Доверяй процессу.';
 
   @override
-  String get notifMsg33 => 'Ты приходишь раз за разом. Это редкость.';
+  String get notifMsg34 => 'Маленькие ритуалы складываются в большую жизнь.';
 
   @override
-  String get notifMsg34 => 'Маленькие ритуалы складываются в жизнь.';
-
-  @override
-  String get notifMsg35 => 'Ты не отстаёшь. Ты именно там, где есть.';
-
-  @override
-  String get notifMsg36 => 'Самые мягкие привычки — часто самые стойкие.';
+  String get notifMsg35 => 'Ты не отстаёшь. Ты именно там, где должен быть.';
 
   @override
   String get notifMsg37 => 'Ты строишь отношения с собой. Не торопись.';
@@ -1067,18 +1014,11 @@ class AppLocalizationsRu extends AppLocalizations {
   String get notifMsg39 => 'Привычки — не про силу воли. Они про заботу.';
 
   @override
-  String get notifMsg40 =>
-      'Ты знаешь себя лучше любого приложения. Доверяй себе.';
-
-  @override
   String get notifMsg41 =>
-      'Цель никогда не была совершенством. Цель — приходить.';
+      'Цель никогда не была совершенством. Цель — продолжать пробовать.';
 
   @override
   String get notifMsg42 => 'Иногда привычка дня — просто быть добрее к себе.';
-
-  @override
-  String get notifMsg43 => 'Ты переживал дни и потруднее.';
 
   @override
   String get notifMsg44 => 'Каждый мягкий выбор складывается.';
@@ -1100,19 +1040,17 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get notifMsg50 =>
-      'По одной привычке — вот как на самом деле меняются жизни.';
+      'По одной привычке — вот как на самом деле меняется жизнь.';
 
   @override
   String get notifMsg51 => 'Сегодня хороший день, чтобы быть мягче к себе.';
 
   @override
-  String get notifMsg52 => 'Ты пришёл. В этом и суть.';
-
-  @override
   String get notifMsg53 => 'Маленький — не значит незначительный.';
 
   @override
-  String get notifMsg54 => 'Что бы ты ни делал сегодня — делай с заботой.';
+  String get notifMsg54 =>
+      'Что бы ни происходило сегодня — относись к себе с заботой.';
 
   @override
   String get notifMsg55 => 'Твои привычки — это форма уважения к себе.';
@@ -1121,14 +1059,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get notifMsg56 => 'Ничего не потеряно. Всегда можно начать снова.';
 
   @override
-  String get notifMsg57 => 'Ты в этом надолго. Медленно — нормально.';
-
-  @override
   String get notifMsg58 =>
       'Сегодняшнее усилие незаметно сейчас и неоспоримо потом.';
-
-  @override
-  String get notifMsg59 => 'Ты имеешь право быть в процессе.';
 
   @override
   String get notifMsg60 => 'Вот так и выглядит забота о себе.';
@@ -2454,11 +2386,11 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get tipCuratedPack =>
-      'Попробуйте готовый набор привычек — найдите его в «Все привычки»';
+      'Попробуйте готовый набор привычек, который можно найти в «Все привычки»';
 
   @override
   String get tipWidget =>
-      'Добавь Intended на главный экран — удерживай обои и добавь виджет';
+      'Добавь Intended на главный экран — удерживай экран и добавь виджет';
 
   @override
   String get tipGotIt => 'Понятно';

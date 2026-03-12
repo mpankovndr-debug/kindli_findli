@@ -829,15 +829,30 @@ class MainTabs extends StatefulWidget {
 
 class _MainTabsState extends State<MainTabs> with WidgetsBindingObserver {
   int _currentIndex = 0;
+  bool? _lastPremiumStatus;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userState = context.read<UserState>();
+      _lastPremiumStatus = userState.hasSubscription;
+      userState.addListener(_onSubscriptionChanged);
+    });
+  }
+
+  void _onSubscriptionChanged() {
+    final isPremium = context.read<UserState>().hasSubscription;
+    if (_lastPremiumStatus != isPremium) {
+      _lastPremiumStatus = isPremium;
+      refreshHomeWidget(context);
+    }
   }
 
   @override
   void dispose() {
+    context.read<UserState>().removeListener(_onSubscriptionChanged);
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }

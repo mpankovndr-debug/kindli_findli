@@ -9,24 +9,17 @@ class CompletionMessages {
   // General supportive messages (used ~75% of the time)
   static List<String> _generalMessages(AppLocalizations l10n) => [
     l10n.completionMsg1,
-    l10n.completionMsg2,
     l10n.completionMsg3,
     l10n.completionMsg4,
-    l10n.completionMsg5,
-    l10n.completionMsg6,
     l10n.completionMsg7,
     l10n.completionMsg8,
-    l10n.completionMsg9,
-    l10n.completionMsg10,
     l10n.completionMsg11,
     l10n.completionMsg12,
     l10n.completionMsg13,
     l10n.completionMsg14,
-    l10n.completionMsg15,
     l10n.completionMsg16,
     l10n.completionMsg17,
     l10n.completionMsg18,
-    l10n.completionMsg19,
     l10n.completionMsg20,
   ];
 
@@ -99,7 +92,6 @@ class CompletionMessages {
       l10n.celebrationWayToGo,
       l10n.celebrationGoodJob,
       l10n.celebrationLovely,
-      l10n.celebrationThatCounts,
     ];
     return titles[_random.nextInt(titles.length)];
   }

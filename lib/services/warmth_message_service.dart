@@ -7,18 +7,14 @@ class WarmthMessageService {
   static List<String> _messages(AppLocalizations l10n) => [
     l10n.warmthMsg1,
     l10n.warmthMsg2,
-    l10n.warmthMsg3,
     l10n.warmthMsg4,
-    l10n.warmthMsg5,
     l10n.warmthMsg6,
     l10n.warmthMsg7,
     l10n.warmthMsg8,
     l10n.warmthMsg9,
     l10n.warmthMsg10,
     l10n.warmthMsg11,
-    l10n.warmthMsg12,
     l10n.warmthMsg13,
-    l10n.warmthMsg14,
     l10n.warmthMsg15,
   ];
 

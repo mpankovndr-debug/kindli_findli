@@ -95,7 +95,8 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
     super.dispose();
   }
 
-  void _showSignInSheet(BuildContext context, AppColorScheme colors, AppLocalizations l10n) {
+  void _showSignInSheet(
+      BuildContext context, AppColorScheme colors, AppLocalizations l10n) {
     showCupertinoModalPopup(
       context: context,
       barrierColor: const Color(0xFF000000).withValues(alpha: 0.4),
@@ -417,13 +418,17 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
                                                 l10n.onboardingNamePrompt,
                                             textAlign: TextAlign.center,
                                             style: TextStyle(
-                                              fontFamily: AppTextStyles.bodyFont(context),
+                                              fontFamily:
+                                                  AppTextStyles.bodyFont(
+                                                      context),
                                               fontSize: 16,
                                               fontWeight: FontWeight.w500,
                                               color: colors.textPrimary,
                                             ),
                                             placeholderStyle: TextStyle(
-                                              fontFamily: AppTextStyles.bodyFont(context),
+                                              fontFamily:
+                                                  AppTextStyles.bodyFont(
+                                                      context),
                                               fontSize: 16,
                                               fontWeight: FontWeight.w500,
                                               color: colors.textPrimary
@@ -495,7 +500,9 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
                                               child: Text(
                                                 l10n.commonContinue,
                                                 style: TextStyle(
-                                                  fontFamily: AppTextStyles.bodyFont(context),
+                                                  fontFamily:
+                                                      AppTextStyles.bodyFont(
+                                                          context),
                                                   fontSize: 17,
                                                   fontWeight: FontWeight.w600,
                                                   color: Color(0xFFFFFFFF),
@@ -517,44 +524,51 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
                                       CupertinoButton(
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 4, vertical: 12),
-                                        minSize: 0,
-                                        onPressed: () => _navigateToFocusAreas(),
+                                        onPressed: () =>
+                                            _navigateToFocusAreas(),
                                         child: Text(
                                           l10n.onboardingSkipForNow,
                                           style: TextStyle(
-                                            fontFamily: AppTextStyles.bodyFont(context),
+                                            fontFamily:
+                                                AppTextStyles.bodyFont(context),
                                             fontSize: 15,
                                             fontWeight: FontWeight.w500,
                                             color: colors.textTertiary,
                                           ),
                                         ),
+                                        minimumSize: Size(0, 0),
                                       ),
                                       Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 6),
                                         child: Text(
                                           '\u00B7',
                                           style: TextStyle(
-                                            fontFamily: AppTextStyles.bodyFont(context),
+                                            fontFamily:
+                                                AppTextStyles.bodyFont(context),
                                             fontSize: 15,
                                             fontWeight: FontWeight.w500,
-                                            color: colors.textTertiary.withOpacity(0.5),
+                                            color: colors.textTertiary
+                                                .withOpacity(0.5),
                                           ),
                                         ),
                                       ),
                                       CupertinoButton(
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 4, vertical: 12),
-                                        minSize: 0,
-                                        onPressed: () => _showSignInSheet(context, colors, l10n),
+                                        onPressed: () => _showSignInSheet(
+                                            context, colors, l10n),
                                         child: Text(
                                           l10n.onboardingAlreadyHaveAccount,
                                           style: TextStyle(
-                                            fontFamily: AppTextStyles.bodyFont(context),
+                                            fontFamily:
+                                                AppTextStyles.bodyFont(context),
                                             fontSize: 15,
                                             fontWeight: FontWeight.w500,
                                             color: colors.textTertiary,
                                           ),
                                         ),
+                                        minimumSize: Size(0, 0),
                                       ),
                                     ],
                                   ),
@@ -742,8 +756,7 @@ class _SignInSheetState extends State<_SignInSheet> {
               ],
               stops: const [0.0, 0.5, 1.0],
             ),
-            borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(32)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
             border: Border.all(
               color: const Color(0xFFFFFFFF).withOpacity(0.5),
               width: 1.5,
@@ -895,9 +908,8 @@ class _SignInSheetState extends State<_SignInSheet> {
           borderRadius: BorderRadius.circular(20),
           child: _isSigningIn
               ? CupertinoActivityIndicator(
-                  color: isPrimary
-                      ? const Color(0xFFFFFFFF)
-                      : colors.ctaPrimary,
+                  color:
+                      isPrimary ? const Color(0xFFFFFFFF) : colors.ctaPrimary,
                 )
               : Row(
                   mainAxisAlignment: MainAxisAlignment.center,
