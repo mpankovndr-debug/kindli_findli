@@ -3,10 +3,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 
+import '../l10n/app_localizations.dart';
 import '../main.dart';
 import '../onboarding_v2/onboarding_state.dart';
 import '../services/reflection_service.dart';
 import '../theme/app_colors.dart';
+import '../utils/habit_l10n.dart';
 
 /// Pushes habit & theme data to the iOS home screen widget via App Groups.
 class WidgetService {
@@ -31,6 +33,7 @@ class WidgetService {
     required AppTheme theme,
     required String greeting,
     String locale = 'en',
+    AppLocalizations? l10n,
   }) async {
     await initialize();
 
@@ -47,8 +50,9 @@ class WidgetService {
           ? AppColors.categoryColors[category]
           : null;
 
+      final displayName = l10n != null ? localizeHabitName(habit, l10n) : habit;
       habitDataList.add({
-        'name': habit,
+        'name': displayName,
         'done': done,
         'colorHex': color != null ? _colorToHex(color) : null,
       });

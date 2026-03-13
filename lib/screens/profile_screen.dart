@@ -570,9 +570,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       builder: (context) => Consumer<ThemeProvider>(
         builder: (context, themeProvider, _) {
           final colors = themeProvider.colors;
-          return ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-            child: Container(
+          final screenHeight = MediaQuery.of(context).size.height;
+          return ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: screenHeight * 0.7,
+            ),
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+              child: Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
@@ -592,80 +597,83 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 top: false,
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Drag handle
-                      Container(
-                        width: 36,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(2),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Drag handle
+                        Container(
+                          width: 36,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(2),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      // Title
-                      Text(
-                        l10n.profileChangeSpace,
-                        style: TextStyle(
-                          fontFamily: AppTextStyles.bodyFont(context),
-                          fontSize: 17,
-                          fontWeight: FontWeight.w600,
-                          color: colors.textPrimary,
+                        const SizedBox(height: 12),
+                        // Title
+                        Text(
+                          l10n.profileChangeSpace,
+                          style: TextStyle(
+                            fontFamily: AppTextStyles.bodyFont(context),
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
+                            color: colors.textPrimary,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      // Theme picker
-                      ThemePicker(
-                        isPremium: userState.hasSubscription,
-                        hasBoost: userState.hasBoost,
-                        compact: true,
-                        onPremiumTap: () {
-                          Navigator.pop(context);
-                          _showUpgradeScreen().then((_) {
-                            if (mounted) _showAppearancePicker(this.context);
-                          });
-                        },
-                        onBoostTap: () {
-                          Navigator.pop(context);
-                          final l10n = AppLocalizations.of(this.context);
-                          showBoostOfferSheet(
-                            context: this.context,
-                            title: l10n.boostOfferThemeTitle,
-                            description: l10n.boostOfferThemeDesc,
-                            showBoostOption: true,
-                            source: 'theme_picker',
-                          ).then((result) {
-                            if (!mounted) return;
-                            if (result == 'paywall') {
-                              _showUpgradeScreen().then((_) {
-                                if (mounted)
-                                  _showAppearancePicker(this.context);
-                              });
-                            } else {
-                              _showAppearancePicker(this.context);
-                            }
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 20),
-                      // App icon picker
-                      AppIconPicker(
-                        isPremium: userState.hasSubscription,
-                        labelColor: colors.textPrimary,
-                        onPremiumTap: () {
-                          Navigator.pop(context);
-                          _showUpgradeScreen().then((_) {
-                            if (mounted) _showAppearancePicker(this.context);
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                    ],
+                        const SizedBox(height: 16),
+                        // Theme picker
+                        ThemePicker(
+                          isPremium: userState.hasSubscription,
+                          hasBoost: userState.hasBoost,
+                          compact: true,
+                          onPremiumTap: () {
+                            Navigator.pop(context);
+                            _showUpgradeScreen().then((_) {
+                              if (mounted) _showAppearancePicker(this.context);
+                            });
+                          },
+                          onBoostTap: () {
+                            Navigator.pop(context);
+                            final l10n = AppLocalizations.of(this.context);
+                            showBoostOfferSheet(
+                              context: this.context,
+                              title: l10n.boostOfferThemeTitle,
+                              description: l10n.boostOfferThemeDesc,
+                              showBoostOption: true,
+                              source: 'theme_picker',
+                            ).then((result) {
+                              if (!mounted) return;
+                              if (result == 'paywall') {
+                                _showUpgradeScreen().then((_) {
+                                  if (mounted)
+                                    _showAppearancePicker(this.context);
+                                });
+                              } else {
+                                _showAppearancePicker(this.context);
+                              }
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 20),
+                        // App icon picker
+                        AppIconPicker(
+                          isPremium: userState.hasSubscription,
+                          labelColor: colors.textPrimary,
+                          onPremiumTap: () {
+                            Navigator.pop(context);
+                            _showUpgradeScreen().then((_) {
+                              if (mounted) _showAppearancePicker(this.context);
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
                   ),
                 ),
               ),
+            ),
             ),
           );
         },

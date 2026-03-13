@@ -516,6 +516,7 @@ Future<void> refreshHomeWidget(BuildContext context) async {
       theme: themeProvider.theme,
       greeting: greeting,
       locale: locale.languageCode,
+      l10n: l10n,
     );
   } catch (_) {
     // Widget update is non-critical — never crash the app for it.
@@ -860,7 +861,9 @@ class _MainTabsState extends State<MainTabs> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      NotificationScheduler.refreshTimezone(AppLocalizations.of(context));
+      if (mounted) {
+        NotificationScheduler.refreshTimezone(AppLocalizations.of(context));
+      }
       context.read<RevenueCatService>().refreshPurchaseStatus();
       refreshHomeWidget(context);
     }
@@ -2146,8 +2149,12 @@ class _CreateCustomHabitScreenState extends State<_CreateCustomHabitScreen> {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
                       // Title
                       Text(
                         l10n.customHabitPrompt,
@@ -2329,8 +2336,12 @@ class _CreateCustomHabitScreenState extends State<_CreateCustomHabitScreen> {
                           ],
                         );
                       }),
+                            ],
+                          ),
+                        ),
+                      ),
 
-                      const Spacer(),
+                      const SizedBox(height: 16),
 
                       // ============================================================
                       // SUBMIT BUTTON

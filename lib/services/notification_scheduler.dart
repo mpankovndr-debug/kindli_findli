@@ -174,7 +174,8 @@ class NotificationScheduler {
     return pending.where((n) => n.id >= 0 && n.id <= 6).length;
   }
 
-  static Future<void> refreshTimezone(AppLocalizations l10n) async {
+  static Future<void> refreshTimezone(AppLocalizations? l10n) async {
+    if (l10n == null) return;
     final tzInfo = await FlutterTimezone.getLocalTimezone();
     final newLocation = tz.getLocation(tzInfo.identifier);
     if (newLocation != tz.local) {

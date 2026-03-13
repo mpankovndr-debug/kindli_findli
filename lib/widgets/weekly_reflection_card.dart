@@ -682,9 +682,11 @@ class _WeeklyReflectionCardState extends State<WeeklyReflectionCard>
   String _focusText(AppLocalizations l10n, ReflectionData data) {
     if (data.secondFocusArea != null) {
       return l10n.reflectionFocusBalanced(
-          data.topFocusArea!, data.secondFocusArea!);
+          localizeCategoryName(data.topFocusArea!, l10n),
+          localizeCategoryName(data.secondFocusArea!, l10n));
     }
-    return l10n.reflectionFocusDominant(data.topFocusArea!);
+    return l10n.reflectionFocusDominant(
+        localizeCategoryName(data.topFocusArea!, l10n));
   }
 
   String? _reframeText(AppLocalizations l10n, ReflectionData data) {

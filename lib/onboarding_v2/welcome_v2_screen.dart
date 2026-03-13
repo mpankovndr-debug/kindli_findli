@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../l10n/app_localizations.dart';
 import '../main.dart';
@@ -104,8 +105,29 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
       builder: (_) => _SignInSheet(
         onSignInComplete: (credential) {
           if (credential == null || !mounted) return;
+
+          // Extract first name from the signed-in account
+          final displayName =
+              FirebaseAuth.instance.currentUser?.displayName;
+          String? firstName;
+          if (displayName != null && displayName.isNotEmpty) {
+            firstName = displayName.split(' ').first;
+            if (firstName.length > _maxNameLength ||
+                ProfanityFilter.containsProfanity(firstName)) {
+              firstName = null;
+            }
+          }
+
           final onboarding = context.read<OnboardingState>();
           if (onboarding.onboardingComplete) {
+            // Returning user — backfill name if missing
+            if (firstName != null && userNameNotifier.value == null) {
+              userNameNotifier.value = firstName;
+              onboarding.setName(firstName);
+              SharedPreferences.getInstance().then((prefs) {
+                prefs.setString('user_name', firstName!);
+              });
+            }
             Navigator.pushReplacement(
               context,
               PageRouteBuilder(
@@ -117,7 +139,7 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
               ),
             );
           } else {
-            _navigateToFocusAreas();
+            _navigateToFocusAreas(name: firstName);
           }
         },
       ),
@@ -132,6 +154,9 @@ class _WelcomeV2ScreenState extends State<WelcomeV2Screen>
     if (name != null && name.isNotEmpty) {
       state.setName(name);
       userNameNotifier.value = name;
+      SharedPreferences.getInstance().then((prefs) {
+        prefs.setString('user_name', name);
+      });
     }
 
     state.markWelcomeSeen();
