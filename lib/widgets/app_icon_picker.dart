@@ -19,11 +19,13 @@ typedef _IconEntry = ({
 class AppIconPicker extends StatefulWidget {
   final bool isPremium;
   final VoidCallback onPremiumTap;
+  final Color? labelColor;
 
   const AppIconPicker({
     super.key,
     required this.isPremium,
     required this.onPremiumTap,
+    this.labelColor,
   });
 
   @override
@@ -113,7 +115,7 @@ class _AppIconPickerState extends State<AppIconPicker> {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: Colors.black.withValues(alpha: 0.35),
+              color: (widget.labelColor ?? Colors.black).withValues(alpha: 0.35),
               letterSpacing: 0.8,
             ),
           ),
@@ -217,8 +219,8 @@ class _AppIconPickerState extends State<AppIconPicker> {
                 fontSize: 11,
                 fontWeight: FontWeight.w500,
                 color: isLocked
-                    ? Colors.black.withValues(alpha: 0.3)
-                    : Colors.black.withValues(alpha: 0.55),
+                    ? (widget.labelColor ?? Colors.black).withValues(alpha: 0.3)
+                    : (widget.labelColor ?? Colors.black).withValues(alpha: 0.55),
               ),
               textAlign: TextAlign.center,
               maxLines: 1,

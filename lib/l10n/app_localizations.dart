@@ -2441,7 +2441,7 @@ abstract class AppLocalizations {
   /// No description provided for @paywallYearlyPrice.
   ///
   /// In en, this message translates to:
-  /// **'€39.99'**
+  /// **'€44.99'**
   String get paywallYearlyPrice;
 
   /// No description provided for @paywallYearlyPeriod.
@@ -2453,7 +2453,7 @@ abstract class AppLocalizations {
   /// No description provided for @paywallYearlySave.
   ///
   /// In en, this message translates to:
-  /// **'Save 44%'**
+  /// **'Save 37%'**
   String get paywallYearlySave;
 
   /// No description provided for @paywallSavePercent.

@@ -44,13 +44,7 @@ struct BasicSmallView: View {
         let textSecondary = Color(argbHex: theme.textSecondary)
         let accent = Color(argbHex: theme.accent)
 
-        ZStack {
-            LinearGradient(
-                colors: theme.backgroundColors,
-                startPoint: UnitPoint(x: 0.3, y: 0),
-                endPoint: UnitPoint(x: 0.7, y: 1)
-            )
-
+        Group {
             if isEmpty {
                 // Empty state
                 VStack(spacing: 6) {
@@ -62,7 +56,6 @@ struct BasicSmallView: View {
                         .foregroundColor(textSecondary)
                         .multilineTextAlignment(.center)
                 }
-                .padding(16)
             } else if allDone {
                 // All done celebration
                 VStack(spacing: 6) {
@@ -80,7 +73,6 @@ struct BasicSmallView: View {
                         .multilineTextAlignment(.center)
                         .lineLimit(2)
                 }
-                .padding(16)
             } else {
                 // Normal state: centered progress arc
                 VStack(spacing: 6) {
@@ -96,9 +88,9 @@ struct BasicSmallView: View {
                         .font(.system(size: 12, weight: .medium))
                         .foregroundColor(textSecondary)
                 }
-                .padding(16)
             }
         }
+        .widgetBackground(theme: theme)
     }
 }
 
@@ -118,13 +110,7 @@ struct BasicMediumView: View {
         let textSecondary = Color(argbHex: theme.textSecondary)
         let accent = Color(argbHex: theme.accent)
 
-        ZStack {
-            LinearGradient(
-                colors: theme.backgroundColors,
-                startPoint: UnitPoint(x: 0.3, y: 0),
-                endPoint: UnitPoint(x: 0.7, y: 1)
-            )
-
+        Group {
             if isEmpty {
                 HStack(spacing: 0) {
                     VStack(alignment: .leading, spacing: 0) {
@@ -144,7 +130,6 @@ struct BasicMediumView: View {
                         .foregroundColor(accent.opacity(0.5))
                         .padding(.leading, 12)
                 }
-                .padding(16)
             } else if allDone {
                 HStack(spacing: 0) {
                     VStack(alignment: .leading, spacing: 0) {
@@ -174,7 +159,6 @@ struct BasicMediumView: View {
                     }
                     .padding(.leading, 12)
                 }
-                .padding(16)
             } else {
                 HStack(spacing: 0) {
                     VStack(alignment: .leading, spacing: 0) {
@@ -206,9 +190,9 @@ struct BasicMediumView: View {
                     }
                     .padding(.leading, 12)
                 }
-                .padding(16)
             }
         }
+        .widgetBackground(theme: theme)
     }
 
     private func formattedDate() -> String {

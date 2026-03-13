@@ -182,3 +182,26 @@ struct WidgetStrings {
         locale == "ru" ? "Всё сделано!" : "All done for today!"
     }
 }
+
+// MARK: - Widget background helper
+
+/// On iOS 17+ the gradient is provided by `.containerBackground(for: .widget)` in
+/// the widget configuration, so views only need padding. On older iOS, views render
+/// their own full-bleed gradient via ZStack.
+extension View {
+    @ViewBuilder
+    func widgetBackground(theme: ThemeData) -> some View {
+        if #available(iOS 17.0, *) {
+            self.padding(16)
+        } else {
+            ZStack {
+                LinearGradient(
+                    colors: theme.backgroundColors,
+                    startPoint: UnitPoint(x: 0.3, y: 0),
+                    endPoint: UnitPoint(x: 0.7, y: 1)
+                )
+                self.padding(16)
+            }
+        }
+    }
+}

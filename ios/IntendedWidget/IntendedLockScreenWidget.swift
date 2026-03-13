@@ -3,7 +3,6 @@ import SwiftUI
 
 // MARK: - Lock Screen Widgets (Free for all users) — iOS 16+
 
-@available(iOS 16.0, *)
 struct LockScreenProvider: TimelineProvider {
     func placeholder(in context: Context) -> LockScreenEntry {
         LockScreenEntry(date: Date(), content: .placeholder)
@@ -23,7 +22,6 @@ struct LockScreenProvider: TimelineProvider {
     }
 }
 
-@available(iOS 16.0, *)
 struct LockScreenEntry: TimelineEntry {
     let date: Date
     let content: WidgetContent
@@ -31,7 +29,6 @@ struct LockScreenEntry: TimelineEntry {
 
 // MARK: - Accessory Circular
 
-@available(iOS 16.0, *)
 struct AccessoryCircularView: View {
     let entry: LockScreenEntry
 
@@ -76,7 +73,6 @@ struct AccessoryCircularView: View {
 
 // MARK: - Accessory Inline
 
-@available(iOS 16.0, *)
 struct AccessoryInlineView: View {
     let entry: LockScreenEntry
 
@@ -97,7 +93,6 @@ struct AccessoryInlineView: View {
 
 // MARK: - Accessory Rectangular
 
-@available(iOS 16.0, *)
 struct AccessoryRectangularView: View {
     let entry: LockScreenEntry
 
@@ -156,7 +151,6 @@ struct AccessoryRectangularView: View {
 
 // MARK: - Widget configuration
 
-@available(iOS 16.0, *)
 struct IntendedLockScreenWidget: Widget {
     let kind: String = "IntendedLockScreenWidget"
 
@@ -170,7 +164,6 @@ struct IntendedLockScreenWidget: Widget {
     }
 }
 
-@available(iOS 16.0, *)
 struct LockScreenEntryView: View {
     @Environment(\.widgetFamily) var family
     let entry: LockScreenEntry

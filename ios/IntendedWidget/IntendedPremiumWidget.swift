@@ -127,19 +127,14 @@ struct PremiumMediumView: View {
         let textSecondary = Color(argbHex: theme.textSecondary)
         let accent = Color(argbHex: theme.accent)
 
-        ZStack {
-            LinearGradient(
-                colors: theme.backgroundColors,
-                startPoint: UnitPoint(x: 0.3, y: 0),
-                endPoint: UnitPoint(x: 0.7, y: 1)
-            )
-
+        Group {
             if showUpgrade {
                 degradedView(textPrimary: textPrimary, textSecondary: textSecondary, accent: accent)
             } else {
                 premiumMediumContent(textPrimary: textPrimary, textSecondary: textSecondary, accent: accent)
             }
         }
+        .widgetBackground(theme: theme)
     }
 
     private var isEmpty: Bool { content.totalCount == 0 }
@@ -164,7 +159,6 @@ struct PremiumMediumView: View {
                     .font(.system(size: 28))
                     .foregroundColor(accent.opacity(0.5))
             }
-            .padding(16)
         } else if allDone {
             HStack(alignment: .center, spacing: 12) {
                 VStack(alignment: .leading, spacing: 0) {
@@ -187,7 +181,6 @@ struct PremiumMediumView: View {
                         .foregroundColor(accent)
                 }
             }
-            .padding(16)
         } else {
             HStack(alignment: .center, spacing: 12) {
                 VStack(alignment: .leading, spacing: 0) {
@@ -223,7 +216,6 @@ struct PremiumMediumView: View {
                     size: 56
                 )
             }
-            .padding(16)
         }
     }
 
@@ -258,7 +250,6 @@ struct PremiumMediumView: View {
                 size: 56
             )
         }
-        .padding(16)
     }
 }
 
@@ -279,19 +270,14 @@ struct PremiumLargeView: View {
         let textSecondary = Color(argbHex: theme.textSecondary)
         let accent = Color(argbHex: theme.accent)
 
-        ZStack {
-            LinearGradient(
-                colors: theme.backgroundColors,
-                startPoint: UnitPoint(x: 0.3, y: 0),
-                endPoint: UnitPoint(x: 0.7, y: 1)
-            )
-
+        Group {
             if showUpgrade {
                 degradedLargeView(textPrimary: textPrimary, textSecondary: textSecondary, accent: accent)
             } else {
                 premiumLargeContent(textPrimary: textPrimary, textSecondary: textSecondary, accent: accent)
             }
         }
+        .widgetBackground(theme: theme)
     }
 
     private var isEmpty: Bool { content.totalCount == 0 }
@@ -323,7 +309,6 @@ struct PremiumLargeView: View {
                     .padding(.top, 8)
                 Spacer()
             }
-            .padding(16)
         } else if allDone {
             VStack(spacing: 0) {
                 HStack(alignment: .top) {
@@ -356,7 +341,6 @@ struct PremiumLargeView: View {
                     .font(.system(size: 12, weight: .medium))
                     .foregroundColor(textSecondary)
             }
-            .padding(16)
         } else {
             VStack(alignment: .leading, spacing: 0) {
                 HStack(alignment: .top) {
@@ -406,13 +390,12 @@ struct PremiumLargeView: View {
                         .padding(.top, 4)
                 }
 
-                Spacer(minLength: 4)
+                Spacer(minLength: 10)
 
                 Text(formattedDate())
                     .font(.system(size: 12, weight: .medium))
                     .foregroundColor(textSecondary)
             }
-            .padding(16)
         }
     }
 
@@ -456,7 +439,6 @@ struct PremiumLargeView: View {
                 .font(.system(size: 13, weight: .medium))
                 .foregroundColor(accent)
         }
-        .padding(16)
     }
 
     private func formattedDate() -> String {

@@ -1356,13 +1356,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get paywallYearly => 'Ежегодно';
 
   @override
-  String get paywallYearlyPrice => '€39,99';
+  String get paywallYearlyPrice => '€44,99';
 
   @override
   String get paywallYearlyPeriod => 'в год';
 
   @override
-  String get paywallYearlySave => 'Экономия 44%';
+  String get paywallYearlySave => 'Экономия 37%';
 
   @override
   String paywallSavePercent(int percent) {

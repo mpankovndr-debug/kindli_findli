@@ -2513,7 +2513,7 @@ class _HabitCardState extends State<_HabitCard>
       ),
     );
 
-    // If completed, animate checkmark
+    // If completed, animate checkmark and refresh widget
     if (completed == true && mounted) {
       setState(() {
         _isDoneToday = true;
@@ -2521,6 +2521,9 @@ class _HabitCardState extends State<_HabitCard>
 
       // Trigger checkmark animation
       _checkmarkController.forward();
+
+      // Update home screen widget with new completion state
+      refreshHomeWidget(context);
 
       // Premium "all done" haptic — heavy thud when last habit is completed
       if (isPremium) {

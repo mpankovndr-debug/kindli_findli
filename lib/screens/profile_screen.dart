@@ -653,6 +653,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       // App icon picker
                       AppIconPicker(
                         isPremium: userState.hasSubscription,
+                        labelColor: colors.textPrimary,
                         onPremiumTap: () {
                           Navigator.pop(context);
                           _showUpgradeScreen().then((_) {
@@ -1464,14 +1465,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ),
                                   CupertinoButton(
                                     padding: EdgeInsets.zero,
-                                    onPressed: () {
-                                      Navigator.push(
+                                    onPressed: () async {
+                                      await Navigator.push(
                                         context,
                                         CupertinoPageRoute(
                                           builder: (_) =>
                                               const MomentsCollectionScreen(),
                                         ),
                                       );
+                                      if (mounted) setState(() {});
                                     },
                                     child: Icon(
                                       CupertinoIcons.chevron_right,
