@@ -38,9 +38,11 @@ class _HabitRevealScreenState extends State<HabitRevealScreen>
 
     // Generate habits first
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
       final state = context.read<OnboardingState>();
       await state.generateUserHabits();
 
+      if (!mounted) return;
       // Initialize animations after habits are generated
       _initializeAnimations();
     });

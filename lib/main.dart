@@ -832,21 +832,22 @@ class MainTabs extends StatefulWidget {
 class _MainTabsState extends State<MainTabs> with WidgetsBindingObserver {
   int _currentIndex = 0;
   bool? _lastPremiumStatus;
+  UserState? _userState;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final userState = context.read<UserState>();
-      _lastPremiumStatus = userState.hasSubscription;
-      userState.addListener(_onSubscriptionChanged);
+      _userState = context.read<UserState>();
+      _lastPremiumStatus = _userState!.hasSubscription;
+      _userState!.addListener(_onSubscriptionChanged);
     });
   }
 
   void _onSubscriptionChanged() {
-    final userState = context.read<UserState>();
-    final isPremium = userState.hasSubscription;
+    if (!mounted) return;
+    final isPremium = _userState!.hasSubscription;
     if (_lastPremiumStatus != isPremium) {
       _lastPremiumStatus = isPremium;
       refreshHomeWidget(context);
@@ -854,7 +855,7 @@ class _MainTabsState extends State<MainTabs> with WidgetsBindingObserver {
       // Revert premium-only features when subscription lapses.
       if (!isPremium) {
         context.read<ThemeProvider>().revertIfLocked(
-              hasBoost: userState.hasBoost,
+              hasBoost: _userState!.hasBoost,
               isPremium: false,
             );
         AppIconService.resetIfPremium();
@@ -864,17 +865,15 @@ class _MainTabsState extends State<MainTabs> with WidgetsBindingObserver {
 
   @override
   void dispose() {
-    context.read<UserState>().removeListener(_onSubscriptionChanged);
+    _userState?.removeListener(_onSubscriptionChanged);
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      if (mounted) {
-        NotificationScheduler.refreshTimezone(AppLocalizations.of(context));
-      }
+    if (state == AppLifecycleState.resumed && mounted) {
+      NotificationScheduler.refreshTimezone(AppLocalizations.of(context));
       context.read<RevenueCatService>().refreshPurchaseStatus();
       refreshHomeWidget(context);
     }

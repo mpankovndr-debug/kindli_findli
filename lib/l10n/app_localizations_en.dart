@@ -1564,7 +1564,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileDeleteData => 'Delete profile data';
 
   @override
-  String get profileVersion => 'Intended v1.1.0';
+  String get profileVersion => 'Intended v1.0.1';
 
   @override
   String get profileCannotOpenEmail => 'Cannot open email';
